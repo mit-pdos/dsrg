@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-05-30T18:27:36-04:00</updated>
+  <updated>2013-05-30T18:39:54-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[PDOS]]></name>
@@ -18,7 +18,21 @@
     <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/"/>
     <updated>2013-05-30T18:05:00-04:00</updated>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner</id>
-    <content type="html"><![CDATA[
+    <content type="html"><![CDATA[<h2>What is Spanner?</h2>
+
+<p>Spanner is a highly distributed, externally consistent database.</p>
+
+<h2>Interesting ideas</h2>
+
+<p>TT.now().latest()</p>
+
+<h2>Subtleties</h2>
+
+<h2>Questions</h2>
+
+<p>Why is the write throughput so low??</p>
+
+<p><a href="http://pdos.csail.mit.edu/6.824/notes/l07.txt">6.824 notes</a></p>
 ]]></content>
   </entry>
   

@@ -6,3 +6,20 @@ comments: true
 categories: 
 published: false
 ---
+
+##What is Spanner?
+
+Spanner is a highly distributed, externally consistent database.
+
+##Interesting ideas
+
+TT.now().latest()
+
+##Subtleties
+
+##Questions
+
+Why is the write throughput so low??
+
+
+[6.824 notes](http://pdos.csail.mit.edu/6.824/notes/l07.txt)
