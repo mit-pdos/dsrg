@@ -4,7 +4,7 @@ title: "spanner"
 date: 2013-05-30 18:05
 comments: true
 categories: 
-published: false
+published: true
 ---
 
 ##What is Spanner?
@@ -13,9 +13,17 @@ Spanner is a highly distributed, externally consistent database.
 
 ##Interesting ideas
 
-TT.now().latest()
+Spanner uses clocks with bounded uncertainty to provide synchrony between
+servers. It also shards an application's data into little bits to provide
+fine-grained load distribution. Transactions are also provided to Spanner-using
+applications in order to deal with independent shards.
 
 ##Subtleties
+
+TrueTime guarantees one thing: that the "absolute" time is within the interval.
+Since Spanner commits only when TT.now.after(timestamp) is true, we are
+guaranteed that from now on TT.now.latest() will always be larger than the
+commited timestamp on all servers.
 
 ##Questions
 
