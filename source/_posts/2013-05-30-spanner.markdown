@@ -15,8 +15,8 @@ Spanner is a highly distributed, externally consistent database.
 
 Spanner uses clocks with bounded uncertainty to provide synchrony between
 servers. It also shards an application's data into little bits to provide
-fine-grained load distribution. Transactions are also provided to Spanner-using
-applications in order to deal with independent shards.
+fine-grained load distribution. Transactions are also provided to applications
+in order to deal with independently managed shards.
 
 ##Subtleties
 
@@ -28,6 +28,7 @@ commited timestamp on all servers.
 ##Questions
 
 Why is the write throughput so low??
+Why is the throughput experiment CPU bound??
 
 
 [6.824 notes](http://pdos.csail.mit.edu/6.824/notes/l07.txt)
