@@ -9,7 +9,7 @@
   <meta name="author" content="PDOS">
 
   
-  <meta name="description" content="What is Spanner? Spanner is a highly distributed, externally consistent database. Interesting ideas TT.now().latest() Subtleties Questions Why is the &hellip;">
+  <meta name="description" content="What is Spanner? Spanner is a highly distributed, externally consistent database. Interesting ideas Spanner uses clocks with bounded uncertainty to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,13 +101,22 @@
 
 <h2>Interesting ideas</h2>
 
-<p>TT.now().latest()</p>
+<p>Spanner uses clocks with bounded uncertainty to provide synchrony between
+servers. It also shards an application&rsquo;s data into little bits to provide
+fine-grained load distribution. Transactions are also provided to applications
+in order to deal with independently managed shards.</p>
 
 <h2>Subtleties</h2>
 
+<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the interval.
+Since Spanner commits only when TT.now.after(timestamp) is true, we are
+guaranteed that from now on TT.now.latest() will always be larger than the
+commited timestamp on all servers.</p>
+
 <h2>Questions</h2>
 
-<p>Why is the write throughput so low??</p>
+<p>Why is the write throughput so low??
+Why is the throughput experiment CPU bound??</p>
 
 <p><a href="http://pdos.csail.mit.edu/6.824/notes/l07.txt">6.824 notes</a></p>
 </div>
