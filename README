@@ -1,0 +1,30 @@
+Setup
+-----
+
+Requirements:
+- Ruby 1.9.3
+
+gem install bundler
+bundle install
+
+
+New post
+--------
+
+rake new_post["title"]
+
+
+Generate and Preview
+--------------------
+
+rake generate
+rake preview
+
+visit http://localhost:4000/dsrg
+
+
+Deploy
+------
+
+rake generate
+rake deploy
