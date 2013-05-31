@@ -14,20 +14,6 @@ developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
 Paxos, and two-phase commit.
 
-Spanner is unique due to its external consistency, which is the strongest
-consistent model one can get. External consistency guarantees that events
-happen at real time order, a stronger model than the "strong/sequential
-consistency" model. Here is an sequence of events that is possible in
-sequential consistency but not external consistency.
-
-<pre>
-            t0             t1           t2           t3
-client0:  write(x, 1),               read(y) = 0,
-client1:               write(y, 1),                read(x) = 1
-</pre>
-
-In Spanner, read(y) must return 1 because it is executed after write(y,1).
-
 ##Interesting ideas
 
 Spanner uses clocks with bounded uncertainty to provide synchrony between
