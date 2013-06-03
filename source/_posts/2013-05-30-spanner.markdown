@@ -12,7 +12,7 @@ published: true
 Spanner is a highly distributed, externally consistent database
 developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit.
+Paxos, and two-phase commit to ensure external consistency.
 
 ##Interesting ideas
 
@@ -23,17 +23,23 @@ in order to deal with independently managed shards.
 
 ##Subtleties
 
-TrueTime guarantees one thing: that the "absolute" time is within the interval.
+TrueTime guarantees one thing: that the "absolute" time is within the specified interval.
 Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we are
 guaranteed that from now on <code>TT.now.latest()</code> will always be larger than the
 commited timestamp on all servers.
+
+Because of TrueTime, clients can read a consistent snapshot of data
+without engaging in two-phase commit.
+
+Spanner very carefully chooses timestamps for RW transactions to
+ensure when they are safely visible.  They call this the *commit-wait rule*.
 
 ##Questions
 
 * **Why is the write throughput so low?**  4K ops/sec for one server not running Paxos and not waiting for any
   other commit times seems very low.
 
-* **Why is the throughput experiment CPU bound?**
+* **Why is the throughput experiment in 5.1 CPU bound?**
 
 * **What happens if we use logical time(which preserves causality) rather than the true time?** Maybe external
 consistency breaks, but the system is still sequentially consistent.
