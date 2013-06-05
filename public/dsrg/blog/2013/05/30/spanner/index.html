@@ -102,45 +102,31 @@ Paxos, and two-phase commit to ensure external consistency.</p>
 
 <h2>Interesting Ideas</h2>
 
-<p>Spanner shows the power of the TrueTime API (TT). A call to TT.now() provides a
-range of time to an application.  The actual time is guaranteed to lie
-somewhere within that range. This simple idea allows for some nice properties.</p>
+<p>Spanner uses clocks with bounded uncertainty to provide synchrony between
+servers. It also shards an application&rsquo;s data to provide fine-grained load
+distribution.</p>
 
-<p>Read locks can be avoided. Spanner has two kind of reads, essentially a
-&lsquo;current value read&rsquo; which it calls a read-only transaction, and a snapshot
-read which is a read in the past. The two read types are closely related. In
-both cases the read can be performed at any replica that is sufficiently up to
-date (spanner replicas keep a variable called <code>t<sub>safe</sub></code>
-that is known to have passed and therefore all writes prior have been
-included). The difference is that since snapshot read incudes some notion of
-staleness, it should succeed at more replicas (i.e. more replicas should be
-sufficiently up to date).</p>
+<p>Spanner uses the TrueTime API (TT) to synchronize time between
+servers. A call to <code>TT.now()</code> gives a range guaranteed to
+contain the actual time.</p>
 
-<p>Paxos leader leases can be maintained. The Paxos leader maintain lease votes
-and when it has a quorum, knows it has a valid lease. TT allows these leases to
-remain disjoint without requiring additional Paxos logging.</p>
+<p>Spanner has two kind of reads.  The first reads the most recent value
+of a key or set of keys, called a read-only transaction.  The second
+is a snapshot read which is executed at a specific timestamp in the
+past.  Using a combination of Paxos leases and TrueTime guarantees to
+agree on a timestamp, Spanner can execute snapshot reads and read-only
+transactions without locks or two-phase commit.</p>
 
-<p>Schema changes can be performed atomically without blocking. Spanner picks a
-future time for the change to occur. Since operations have a bounded error on
-the real time, each replica knows if the operation is safe to perform (it
-either occurs wholly before or after the schema change or it blocks until the
-schema change time has passed).</p>
-
-<!-- Spanner uses clocks with bounded uncertainty to provide synchrony between
-servers. It also shards an application's data to provide fine-grained load
-distribution. Transactions are also provided to applications in order to deal
-with independently managed shards.  -->
-
+<p>Spanner peforms schema changes atomically without blocking, by picking
+a future time for the change to occur. Other read and write operations
+choose a timestamp so that at each replica, the operation performs
+either before or after the schema change.</p>
 
 <h2>Subtleties</h2>
 
-<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the specified
-interval.  Since Spanner commits only when <code>TT.now.after(timestamp)</code>
+<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code>
 is true, we are guaranteed that from now on <code>TT.now.latest()</code> will
 always be larger than the commited timestamp on all servers.</p>
-
-<p>Because of TrueTime, clients can read a consistent snapshot of data without
-engaging in two-phase commit.</p>
 
 <p>Spanner very carefully chooses timestamps for RW transactions to ensure when
 they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
@@ -149,12 +135,11 @@ they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
 
 <ul>
 <li><p><strong>Why is the write throughput so low?</strong>  4K ops/sec for one server not
-running Paxos and not waiting for anyother commit times seems very low.</p></li>
+running Paxos and not waiting for any other commit times seems very low.</p></li>
 <li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
-<li><p><strong>How far appart do the servers need to be for TT to be &lsquo;worth it&rsquo;</strong> Would it
-make sense for servers in the same rack? data center? city?</p></li>
-<li><p><strong>What happens if we use logical time(which preserves causality) rather than the true time?</strong> Maybe external
-consistency breaks, but the system is still sequentially consistent.</p></li>
+<li><p><strong>What happens if we use logical time(which preserves causality)
+rather than the true time?</strong> Maybe external consistency breaks, but
+the system is still sequentially consistent.</p></li>
 </ul>
 
 
