@@ -134,8 +134,9 @@ they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
 <h2>Questions</h2>
 
 <ul>
-<li><p><strong>Why is the write throughput so low?</strong>  4K ops/sec for one server not
-running Paxos and not waiting for any other commit times seems very low.</p></li>
+<li><p><strong>Why is the write throughput so low?</strong> 4K ops/sec for 50 paxos
+servers of one replica each (so not running Paxos), not waiting for
+any other commit times, seems very low.</p></li>
 <li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
 <li><p><strong>What happens if we use logical time(which preserves causality)
 rather than the true time?</strong> Maybe external consistency breaks, but

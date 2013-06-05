@@ -47,8 +47,9 @@ they are safely visible.  They call this the *commit-wait rule*.
 
 ##Questions
 
-* **Why is the write throughput so low?**  4K ops/sec for one server not
- running Paxos and not waiting for any other commit times seems very low.
+* **Why is the write throughput so low?** 4K ops/sec for 50 paxos
+ servers of one replica each (so not running Paxos), not waiting for
+ any other commit times, seems very low.
 
 * **Why is the throughput experiment in 5.1 CPU bound?**
 
