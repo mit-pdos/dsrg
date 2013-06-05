@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-05-31T14:10:33-04:00</updated>
+  <updated>2013-06-03T14:10:43-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[PDOS]]></name>
@@ -23,7 +23,7 @@
 <p>Spanner is a highly distributed, externally consistent database
 developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit.</p>
+Paxos, and two-phase commit to ensure external consistency.</p>
 
 <h2>Interesting ideas</h2>
 
@@ -34,17 +34,25 @@ in order to deal with independently managed shards.</p>
 
 <h2>Subtleties</h2>
 
-<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the interval.
+<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the specified interval.
 Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we are
 guaranteed that from now on <code>TT.now.latest()</code> will always be larger than the
 commited timestamp on all servers.</p>
+
+<p>Because of TrueTime, clients can read a consistent snapshot of data
+without engaging in two-phase commit.</p>
+
+<p>Spanner very carefully chooses timestamps for RW transactions to
+ensure when they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
 
 <h2>Questions</h2>
 
 <ul>
 <li><p><strong>Why is the write throughput so low?</strong>  4K ops/sec for one server not running Paxos and not waiting for any
 other commit times seems very low.</p></li>
-<li><p><strong>Why is the throughput experiment CPU bound?</strong></p></li>
+<li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
+<li><p><strong>What happens if we use logical time(which preserves causality) rather than the true time?</strong> Maybe external
+consistency breaks, but the system is still sequentially consistent.</p></li>
 </ul>
 
 
@@ -67,9 +75,6 @@ more understandable than Paxos, which, for many practitioners, is
 difficult to implement correctly.  Viewstamped Replication is more
 similar to Raft, however it is far less popular than Paxos, so it is
 unfortunately not focused on in the paper.</p>
-
-<!-- more -->
-
 
 <p>All of these consensus algorithms operate as long as a majority of
 servers are functioning.  So you would require 2f+1 servers to

@@ -1,0 +1,44 @@
+---
+layout: post
+title: "spanner"
+date: 2013-05-30 18:05
+comments: true
+categories: 
+published: true
+---
+
+##What is Spanner?
+
+Spanner is a highly distributed, externally consistent database
+developed by Google.  It provides replication and transactions over a
+geographically distributed set of servers.  Spanner uses time bounds,
+Paxos, and two-phase commit.
+
+##Interesting ideas
+
+Spanner is one of the first globally distributed databses which
+supports transactions and external consistency.
+
+Spanner uses clocks with bounded uncertainty to provide synchrony between
+servers. It also shards an application's data into little bits to provide
+fine-grained load distribution. Transactions are also provided to applications
+in order to deal with independently managed shards.
+
+##Subtleties
+
+TrueTime guarantees one thing: that the "absolute" time is within the interval.
+Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we are
+guaranteed that from now on <code>TT.now.latest()</code> will always be larger than the
+commited timestamp on all servers.
+
+##Questions
+
+* **Why is the write throughput so low?**  4K ops/sec for one server not running Paxos and not waiting for any
+  other commit times seems very low.
+
+* **Why is the throughput experiment CPU bound?**
+
+* **What happens if we use logical time(which preserves causality) rather than the true time?** Maybe external
+consistency breaks, but the system is still sequentially consistent.
+
+[6.824 notes](http://pdos.csail.mit.edu/6.824/notes/l07.txt)

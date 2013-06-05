@@ -98,7 +98,7 @@ developed by Google. It provides replication and transactions over a &hellip;">
 <p>Spanner is a highly distributed, externally consistent database
 developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit.</p>
+Paxos, and two-phase commit to ensure external consistency.</p>
 
 <h2>Interesting ideas</h2>
 
@@ -109,17 +109,25 @@ in order to deal with independently managed shards.</p>
 
 <h2>Subtleties</h2>
 
-<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the interval.
+<p>TrueTime guarantees one thing: that the &ldquo;absolute&rdquo; time is within the specified interval.
 Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we are
 guaranteed that from now on <code>TT.now.latest()</code> will always be larger than the
 commited timestamp on all servers.</p>
+
+<p>Because of TrueTime, clients can read a consistent snapshot of data
+without engaging in two-phase commit.</p>
+
+<p>Spanner very carefully chooses timestamps for RW transactions to
+ensure when they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
 
 <h2>Questions</h2>
 
 <ul>
 <li><p><strong>Why is the write throughput so low?</strong>  4K ops/sec for one server not running Paxos and not waiting for any
 other commit times seems very low.</p></li>
-<li><p><strong>Why is the throughput experiment CPU bound?</strong></p></li>
+<li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
+<li><p><strong>What happens if we use logical time(which preserves causality) rather than the true time?</strong> Maybe external
+consistency breaks, but the system is still sequentially consistent.</p></li>
 </ul>
 
 
