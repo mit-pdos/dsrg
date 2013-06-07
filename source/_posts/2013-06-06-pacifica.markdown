@@ -1,0 +1,66 @@
+---
+layout: post
+title: "pacifica"
+date: 2013-06-06 18:00
+comments: true
+categories: 
+published: false
+---
+
+## Why are we reading PacificA?
+
+At RICON East 2013, Kyle Kingsbury presented a performance evaluation of several commercial datastores. This evaluation is specifically geared toward assessing the correctness of distributed systems in the face of network partitions. Kyle has turned his talk into a <a href="http://aphyr.com/tags/jepsen">series of blog posts</a> describing the not-so-encouraging results.
+
+In previous weeks we have discussed consensus protocols like Paxos and Raft that provide strong consistency to clients and are provably safe in the event of a network partition. However, many commercial datastores use some variation of primary/backup replication, and according to the above mentioned evaluation, do not behave as one would hope when the network misbehaves. So is there a (provably) correct way to implement primary/backup replication? PacificA proposes such an algorithm and presents an evaluation of a distributed log built atop this protocol.
+
+## The Protocol
+
+### Configuration and Data Management
+
+The PacificA protocol separates the responsibility for data storage from the task of configuration management. From the perspective of the servers participating in the primary/backup protocol, the configuration of the storage cluster is handled by an authoritative 3rd party (a separate Paxos cluster in their implementation). 
+
+### Replicating Data
+
+The server designated as the current primary is responsible for interacting with clients. It handles all reads (from its committed state) and writes. When a write is requested, the primary assigns a sequence number to the operation and sends a <code>prepare</code> message all replicas. When a replica receives a <code>prepare</code> message, it adds the operation to its log and acknowledges the primary. When the primary receives an acknowledgement from all replicas it commits the operation and responds to the client. The commit point on the replicas is advanced in a subsequent message from the primary. This protocol preserves the Commit Invariant, which guarantees the following properties of the logs on the primary <code>P</code> and replicas <code>R</code>:
+
+<code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube; prepared<sub>P,R</sub></code>
+
+Because of this invariant, during failover recovery it is possible for a new primary (which is always a previous replica) to bring its commit point up to (and possibly past) the commit point of the previous primary while guaranteeing that the operations in the log are consistent with the previous primary's state. 
+
+### Detecting Failures
+
+The PacificA protocol uses a lease mechanism to detect failures in the system. The primary and replicas all track how long it has been since communicating with the other (using normal message traffic or with heartbeat messages injected during idle periods) and assume a failure has occurred if no communication occurs within a given timeout period. When a server realizes a failure, it stops processing messages and requests a configuration change from the 3rd party configuration manager. To prevent a situation where two servers believe they are the primary, the timeout periods differ depending on the server's current role. The primary will timeout if it has not heard from one of its replicas in a "lease period" of <code>T<sub>L</sub></code> seconds, whereas a replica will timeout if it has not heard from the primary in a "grace period" of <code>T<sub>G</sub></code> seconds. If <code>T<sub>L</sub> < T<sub>G</sub></code> then the current primary will always realize the failure first (if it is still alive) and stop processing messages. It will also propose a new configuration first, allowing it to continue as the primary, which may mitigate disruptions to the service. Should the primary fail, the grace period will expire and one of the replicas will request to be the new primary. 
+
+The appeal of this approach is its simplicity. It is very easy to implement, assuming that it is implemented correctly. For a short period of time during our discussion we were convinced that this scheme could result in a situation where two servers believed they were the primary and could serve (possibly stale) reads, violating the strong consistency guarantee. The scenario involved a heartbeat ack that was delayed by the network, extending the primary's lease but not the replica's grace period. It turns out we were wrong. A careful reading of the paper specifies that the lease period is measured from the *sending time* of the last acknowledged heartbeat. We had mistakenly used the reception time in our example, and had convinced ourselves that the protocol was flawed. While this is clearly our fault, it is a caution that even simple schemes can be implemented incorrectly, and would probably work under normal conditions before eventually causing big problems. 
+
+### Changing Configurations
+
+When a new primary is selected it must reconcile the state of the system using its log. It does so by sending new prepare messages for any operations that were prepared by the previous primary but not (to its knowledge) committed. This will bring its commit point up to or past that of the previous primary before responding to clients, preserving strong consistency. In addition, the other replicas must truncate their logs to purge any prepared operations that extend beyond the log of the new primary. 
+
+When a new replica is brought online it must obtain the current state from another server before it can participate in replication. If starting cold, this could halt progress in the system for a long time, so replicas are allowed to join as candidates (their acks are not required for committing at the primary) while they catch up.
+
+As far as configuration changes go, this strategy appears to be fairly straightforward (especially after working through some of the subtleties in Raft). 
+
+## Implementing a Distributed Log
+
+The paper shifts focus and includes an explanation of how to implement three variations of a distributed log with features similar to Bigtable. We find this portion of the paper to be somewhat superfluous in the context of the primary/backup protocol.
+
+## Evaluation
+
+The most interesting part of the evaluation is Figure 5. There are two portions of this graph that sparked discussion, from time 60-90 and 160-300. The first occurs after the primary is killed and the second occurs after a replica is added. 
+
+We were a bit shocked by the amount of time that the system was unavailable during failover (time 60-90). Part of this downtime is due to the reconciliation process of the new primary, but we suspect this is relatively short. Certainly, part of the problem is failure detection, which relies on timeouts. In this case, the lease period was 10 seconds and the grace period was 15 seconds. This means a good portion of that downtime is likely due to the replicas waiting to timeout and propose a new configuration. It prompted one reviewer to exclaim "wow, timeouts are a real bummer". 
+
+While the timeout scheme is simple to implement, it also must be tuned. You want the timeout to be long enough so that temporary hiccups in the network do not cause undue reconfigurations, but short enough so that a real failure is detected in a reasonable amount of time. It seems like the type of tuning parameter that may be hard to get right. It would have been nice to see an evaluation in which various lease/grace periods were tried in a failure scenario. 
+
+During time 160-300 the server that was previously the primary (and was killed) rejoins the group as a secondary. What surprised us was the drop in client-perceived throughput by the addition of a replica, and how long it took for the system to recover. This re-emphasizes the need to set the timeouts correctly so that there is not a lot of churn in the configuration. Even when there is no change of primary, a reconfiguration causes a significant performance penalty (though it is still available).
+
+We were also curious about the read throughput in Figure 4. The total throughput seems shockingly low, but we reason this is due to disk throughput. The experiment performs random reads on a large dataset, which is partially contained in memory, several checkpoint files, and an on-disk image. 
+
+## Discussion
+
+We spent some time discussing when a primary/backup scheme might be used instead of a consensus algorithm like Paxos. The authors provide some pros and cons in the paper, most of which seem to be a wash (serving reads from a single server, external configuration) or in favor of Paxos (not bottlenecked by slowest server). The main reasons for preferring primary backup are simplicity and availability. 
+
+The simplicity argument is easy to understand (Paxos can be confusing) but only to a certain extent. Paxos has become more accessible over time, with simpler explanations, available implementations, and variations that make it more practical. In addition, if the primary/backup protocol in this paper is implemented as suggested by the authors, then Paxos should be used to implement the configuration manager, requiring the need to implement Paxos anyway.
+
+The authors make an availability argument (versus consensus) in favor of their scheme. They claim, rightfully so, that their system can survive *n-1* failures within a replica group and still make progress (the remaining server is the primary with no backups). On the other hand, a consensus algorithm cannot make progress when a majority of the servers are unavailable. This is a valid argument if the service values availability over durability; that is, it prefers to make progress even if writes are only persisted to one server. If, however, the service is deployed for durability (e.g. with a QoS that requires writes are persisted to 3 servers) then a replica group of 5 servers would have the same availability as a Paxos group of the same size.
