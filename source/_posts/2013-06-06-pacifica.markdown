@@ -9,6 +9,8 @@ published: false
 
 ## Why are we reading PacificA?
 
+In the PacificA paper, the authors describe very clearly how to properly implement a primary/backup replicated storage layer with strong consistency.
+
 At RICON East 2013, Kyle Kingsbury presented a performance evaluation of several commercial datastores. This evaluation is specifically geared toward assessing the correctness of distributed systems in the face of network partitions. Kyle has turned his talk into a <a href="http://aphyr.com/tags/jepsen">series of blog posts</a> describing the not-so-encouraging results.
 
 In previous weeks we have discussed consensus protocols like Paxos and Raft that provide strong consistency to clients and are provably safe in the event of a network partition. However, many commercial datastores use some variation of primary/backup replication, and according to the above mentioned evaluation, do not behave as one would hope when the network misbehaves. So is there a (provably) correct way to implement primary/backup replication? PacificA proposes such an algorithm and presents an evaluation of a distributed log built atop this protocol.
