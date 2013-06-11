@@ -80,7 +80,7 @@ Eugene, TBD
 Related but Already Covered
 ---------------------------
 
-note: we probably won’t read anything already covered [here](http://pdos.csail.mit.edu/6.824/schedule.html)
+Note: we probably won’t read anything covered in [6.824](http://pdos.csail.mit.edu/6.824/schedule.html), but you should.
 
 [Paxos Made Live: An Engineering Perspective](http://ece842.com/S13/readings/chandra2007.pdf)
 
