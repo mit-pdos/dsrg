@@ -19,11 +19,9 @@ Neha 5/23/2013
 
 [Using Paxos to Build a Scalable, Consistent, and Highly Available Datastore](http://goo.gl/N5fPj)
 
-[Viewstamped Replication Revisited](http://18.7.29.232/bitstream/handle/1721.1/71763/MIT-CSAIL-TR-2012-021.pdf)
-
 [Impossibility of Distributed Consensus With One Faulty Process ](http://macs.citadel.edu/rudolphg/csci604/ImpossibilityofConsensus.pdf)
 
-[Zookeeper: Wait-free coordination for Internet-scale systems](http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf)
+[Consensus in the presence of partial synchrony](http://doi.acm.org/10.1145/42282.42283)
 
 Replication
 -----------
@@ -57,11 +55,19 @@ Causality/Transactions
 ~~[Spanner: Google’s globally distributed database](https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf)~~
 Cody 5/30/2013
 
+Concurrency
+-----------
 
-Suggestions:
-------------
+[Transactional Memory: Architectural Support for Lock-Free Data Structures](http://dl.acm.org/citation.cfm?id=165164)
 
-note: we probably won’t read anything already covered [here](http://pdos.csail.mit.edu/6.824/schedule.html)
+[Software Transactional Memory](http://www.springerlink.com/content/f0m4j542v48avwtt)
+
+[Sharing Memory Robustly in Message-Passing Systems](http://dl.acm.org/citation.cfm?id=200869)
+
+[Wait-free Synchronization](http://doi.acm.org/10.1145/114005.102808)
+
+Industry
+--------
 
 [ZooKeeper’s atomic broadcast protocol: Theory and practice ](http://www.tcs.hut.fi/Studies/T-79.5001/reports/2012-deSouzaMedeiros.pdf)
 
@@ -70,9 +76,14 @@ note: we probably won’t read anything already covered [here](http://pdos.csail
 [Omega: ﬂexible, scalable schedulers for large compute clusters](http://eurosys2013.tudos.org/wp-content/uploads/2013/paper/Schwarzkopf.pdf)
 Eugene, TBD
 
-Interesting, but sort of covered:
----------------------------------
+
+Related but Already Covered
+---------------------------
+
+note: we probably won’t read anything already covered [here](http://pdos.csail.mit.edu/6.824/schedule.html)
 
 [Paxos Made Live: An Engineering Perspective](http://ece842.com/S13/readings/chandra2007.pdf)
 
 [Viewstamped Replication:  A new primary copy method to support highly-available distributed systems](http://www.cs.princeton.edu/courses/archive/fall11/cos518/papers/viewstamped.pdf)
+
+[Viewstamped Replication Revisited](http://18.7.29.232/bitstream/handle/1721.1/71763/MIT-CSAIL-TR-2012-021.pdf)
