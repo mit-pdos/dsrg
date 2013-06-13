@@ -1,7 +1,6 @@
 ---
 layout: page
 title: "papers"
-date: 2013-05-30 17:39
 comments: false
 sharing: true
 footer: true
@@ -46,9 +45,9 @@ Causality/Transactions
 
 [Sinfonia: a new paradigm for building scalable distributed systems](http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf)
 
-[Understanding the Limitations of Causally and Totally Ordered Communication](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf)
+~~[Understanding the Limitations of Causally and Totally Ordered Communication](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf)~~ Neha 6/13/2013
 
-[A Response to Cheriton and Skeen’s Criticism of Causal and Totally Ordered Communication](http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf)
+~~[A Response to Cheriton and Skeen’s Criticism of Causal and Totally Ordered Communication](http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf)~~ Neha 6/13/2013
 
 [MDCC: Multi-Datacenter Consistency](https://amplab.cs.berkeley.edu/wp-content/uploads/2013/03/mdcc-eurosys13.pdf)
 
