@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "pacifica"
+title: "PacificA"
 date: 2013-06-06 18:00
 comments: true
 categories: 
