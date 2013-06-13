@@ -4,7 +4,7 @@ title: "pacifica"
 date: 2013-06-06 18:00
 comments: true
 categories: 
-published: false
+published: true
 ---
 
 ## Why are we reading PacificA?
@@ -55,7 +55,7 @@ the primary. This protocol preserves the Commit Invariant, which
 guarantees the following properties of the logs on the primary
 <code>P</code> and replicas <code>R</code>:
 
-<code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube;prepared<sub>P,R</sub></code>
+<code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube; prepared<sub>P,R</sub></code>
 
 Because of this invariant, during failover recovery it is possible for
 a new primary (which is always a previous replica) to bring its commit
@@ -146,16 +146,54 @@ portion of that downtime is likely due to the replicas waiting to
 timeout and propose a new configuration. It prompted one reviewer to
 exclaim "wow, timeouts are a real bummer".
 
-While the timeout scheme is simple to implement, it also must be tuned. You want the timeout to be long enough so that temporary hiccups in the network do not cause undue reconfigurations, but short enough so that a real failure is detected in a reasonable amount of time. It seems like the type of tuning parameter that may be hard to get right. It would have been nice to see an evaluation in which various lease/grace periods were tried in a failure scenario. 
+While the timeout scheme is simple to implement, it also must be
+tuned. You want the timeout to be long enough so that temporary
+hiccups in the network do not cause undue reconfigurations, but short
+enough so that a real failure is detected in a reasonable amount of
+time. It seems like the type of tuning parameter that may be hard to
+get right. It would have been nice to see an evaluation in which
+various lease/grace periods were tried in a failure scenario.
 
-During time 160-300 the server that was previously the primary (and was killed) rejoins the group as a secondary. What surprised us was the drop in client-perceived throughput by the addition of a replica, and how long it took for the system to recover. This re-emphasizes the need to set the timeouts correctly so that there is not a lot of churn in the configuration. Even when there is no change of primary, a reconfiguration causes a significant performance penalty (though it is still available).
+During time 160-300 the server that was previously the primary (and
+was killed) rejoins the group as a secondary. What surprised us was
+the drop in client-perceived throughput by the addition of a replica,
+and how long it took for the system to recover. This re-emphasizes the
+need to set the timeouts correctly so that there is not a lot of churn
+in the configuration. Even when there is no change of primary, a
+reconfiguration causes a significant performance penalty (though it is
+still available).
 
-We were also curious about the read throughput in Figure 4. The total throughput seems shockingly low, but we reason this is due to disk throughput. The experiment performs random reads on a large dataset, which is partially contained in memory, several checkpoint files, and an on-disk image. 
+We were also curious about the read throughput in Figure 4. The total
+throughput seems shockingly low, but we reason this is due to disk
+throughput. The experiment performs random reads on a large dataset,
+which is partially contained in memory, several checkpoint files, and
+an on-disk image.
 
 ## Discussion
 
-We spent some time discussing when a primary/backup scheme might be used instead of a consensus algorithm like Paxos. The authors provide some pros and cons in the paper, most of which seem to be a wash (serving reads from a single server, external configuration) or in favor of Paxos (not bottlenecked by slowest server). The main reasons for preferring primary backup are simplicity and availability. 
+We spent some time discussing when a primary/backup scheme might be
+used instead of a consensus algorithm like Paxos. The authors provide
+some pros and cons in the paper, most of which seem to be a wash
+(serving reads from a single server, external configuration) or in
+favor of Paxos (not bottlenecked by slowest server). The main reasons
+for preferring primary backup are simplicity and availability.
 
-The simplicity argument is easy to understand (Paxos can be confusing) but only to a certain extent. Paxos has become more accessible over time, with simpler explanations, available implementations, and variations that make it more practical. In addition, if the primary/backup protocol in this paper is implemented as suggested by the authors, then Paxos should be used to implement the configuration manager, requiring the need to implement Paxos anyway.
+The simplicity argument is easy to understand (Paxos can be confusing)
+but only to a certain extent. Paxos has become more accessible over
+time, with simpler explanations, available implementations, and
+variations that make it more practical. In addition, if the
+primary/backup protocol in this paper is implemented as suggested by
+the authors, then Paxos should be used to implement the configuration
+manager, requiring the need to implement Paxos anyway.
 
-The authors make an availability argument (versus consensus) in favor of their scheme. They claim, rightfully so, that their system can survive *n-1* failures within a replica group and still make progress (the remaining server is the primary with no backups). On the other hand, a consensus algorithm cannot make progress when a majority of the servers are unavailable. This is a valid argument if the service values availability over durability; that is, it prefers to make progress even if writes are only persisted to one server. If, however, the service is deployed for durability (e.g. with a QoS that requires writes are persisted to 3 servers) then a replica group of 5 servers would have the same availability as a Paxos group of the same size.
+The authors make an availability argument (versus consensus) in favor
+of their scheme. They claim, rightfully so, that their system can
+survive *n-1* failures within a replica group and still make progress
+(the remaining server is the primary with no backups). On the other
+hand, a consensus algorithm cannot make progress when a majority of
+the servers are unavailable. This is a valid argument if the service
+values availability over durability; that is, it prefers to make
+progress even if writes are only persisted to one server. If, however,
+the service is deployed for durability (e.g. with a QoS that requires
+writes are persisted to 3 servers) then a replica group of 5 servers
+would have the same availability as a Paxos group of the same size.
