@@ -19,3 +19,5 @@ You can join our mailing list
 welcome non-MIT attendees who want to participate.  We will also
 broadcast the meetings via Google Hangout by request, but we've
 decided not to record them.
+
+Email narula@mit.edu with any questions.
