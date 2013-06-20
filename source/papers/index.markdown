@@ -85,4 +85,4 @@ Note: we probably won’t read anything covered in [6.824](http://pdos.csail.mit
 
 [Viewstamped Replication:  A new primary copy method to support highly-available distributed systems](http://www.cs.princeton.edu/courses/archive/fall11/cos518/papers/viewstamped.pdf)
 
-[Viewstamped Replication Revisited](http://18.7.29.232/bitstream/handle/1721.1/71763/MIT-CSAIL-TR-2012-021.pdf)
+[Viewstamped Replication Revisited](http://pmg.csail.mit.edu/papers/vr-revisited.pdf)
