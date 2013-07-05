@@ -4,15 +4,14 @@ title: "Cheriton and Skeen"
 date: 2013-06-13 16:21
 comments: true
 categories: 
-published: false
+published: true
 ---
 
 ## Why did we read this paper?
 
 Though from 1993, in its time this paper sparked some controversy,
 provoking an impassioned response.  We wanted to understand the debate
-about the question of providing causal and totally ordered
-communication properties as part of the network.
+about the question of providing ordering guarantees as part of the network.
 
 ## What is CATOCS?
 
@@ -47,13 +46,14 @@ They identify the following limitations in CATOCS systems:
 
   There are almost always hidden channels in a group of nodes, or
   methods of communication not captured by the network.  For example,
-  processes might all write to shared database, and writes seen at
-  that databasaemight not preserve CATOCS.  Similarly, threads on a
+  processes might all write to a shared database, and writes seen at
+  that database might not preserve CATOCS.  Similarly, threads on a
   single machine might share memory.
 
   They use a contrived example of an independent "FIRE" message
   appearing before an unrelated "FIRE OUT" message, and thus the
-  system might appear to not be in a "FIRE" state.
+  system might appear to not be in a "FIRE" state, because it
+  misapplied the unrelated "FIRE OUT".
 
 * Can't say "together"
 
@@ -96,23 +96,21 @@ He also claims that their assumptions about overhead are completely off.
 
 ## Conclusion
 
-This seems like a very common debate -- should systems developers aim
+This seems founded in a more general debate -- should systems developers aim
 for efficiency and performance first, giving application developers
-total control but them to layer safety accordingly, or should they
+total control but leaving them to layer safety accordingly, or should they
 apply an unknown cost to all users, making strong semantics an
 indelible part of the system?
 
-The former argument seems to have "won".  Most application developers
-do not run their databases with serializability or even other forms of
-slightly weaker consistency.  There is a move towards general
-key/value stores which do not provide transactions or any ordering
-guarantees and might not necessarily pay the penalty of writing to
-disk for durability.  It seems as though application developers have
-chosen performance over safety, and developed techniques to accomodate
-inconsistencies on their own.
+In the space of datastores, the former argument seems to have "won".
+Most application developers do not run their databases with
+serializability or even other forms of slightly weaker consistency.
+There is a move towards general key/value stores which do not provide
+transactions or any ordering guarantees and might not necessarily pay
+the penalty of writing to disk for durability.  It seems as though
+application developers have chosen performance over safety, and
+developed techniques to accomodate inconsistencies on their own (one
+of which might be simply ignoring them).
 
-That said, many applications seem to be re-implementing Paxos these
-days to provide a totally ordered log.
-
-We found it extremely difficult to reason about these different
-positions without looking at a real system, with real measurements.
+We found it extremely difficult to reason about these two papers
+without looking at a real system with a concrete design.
