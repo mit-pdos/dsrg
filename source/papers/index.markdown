@@ -75,6 +75,7 @@ Industry
 [Omega: ﬂexible, scalable schedulers for large compute clusters](http://eurosys2013.tudos.org/wp-content/uploads/2013/paper/Schwarzkopf.pdf)
 Eugene, TBD
 
+[Thialfi: A Client Notification Service for Internet-Scale Applications](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf)
 
 Related but Already Covered
 ---------------------------
