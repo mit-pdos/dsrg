@@ -175,9 +175,9 @@ executing it to ensure durability despite failures and that ordering is guarante
 
 <p>The system is in one of three states. These states are normal
 operation, view changes when the system needs a new primary, and reconfiguration
-when membership is changing. The primary node is deterministically computed
-from the configuration (list of servers) and the view numbers. As a result
-this system does not need to rely on leases, voting or consensus (e.g. longest
+when membership is changing. The primary node is deterministically chosen based
+on the configuration (list of servers) and the view numbers. As a result
+this system does not need to rely on voting or consensus (e.g. longest
 log) to determine the next leader to take over.</p>
 
 <h3>Normal Operation</h3>
@@ -192,11 +192,11 @@ sends <code>Prepare</code> messages to each of the backups and waits for
 <em>f</em> <code>PrepareOk</code> responses. Once it has received these responses it can
 assume that the message will persist and it applies the operation by making an
 upcall to the service code and finally replies to the client. A backup will
-perform the same operation, however it does not reply to the client.</p>
+perform the same operation but does not reply to the client.</p>
 
 <h3>View Changes</h3>
 
-<p>View Changes occcur when the system needs to elect a new leader. A key correctness
+<p>View changes occcur when the system needs to elect a new leader. A key correctness
 requirement for the protocol is that every operation executed by an up-call to
 the service code must make it into the new view in the same order as the original
 execution. To achieve this requirement, <em>f</em> + 1 logs are obtained and merged
@@ -207,7 +207,7 @@ using the view number to break conflicts in op number ordering.</p>
 <ul>
 <li>Replica sends <code>StartViewChange</code> to all other replicas</li>
 <li>Receives f responses, sends <code>DoViewChange</code> to new primary</li>
-<li>New primary waits for f + 1 <code>DoViewChange</code> messages before assuming new view</li>
+<li>New primary waits for <em>f</em> + 1 <code>DoViewChange</code> messages before assuming new view</li>
 </ul>
 
 
@@ -230,7 +230,7 @@ processing or view changes during the recovery phase):</p>
 </ul>
 
 
-<p>Note that in theoretical solution, logs may be prohibitively big, however
+<p>Note that in the theoretical solution, logs may be prohibitively big, however
 optimizations exist to trim the log (e.g. snapshots).</p>
 
 <p>Client recovery is simply achieved by starting any new request with the old
@@ -255,7 +255,7 @@ send the <code>StartEpoch</code> message and wait for <em>f</em> responses.</p>
 <p>Any new replicas will be brough up to date before the epoch change (by sending
 them a list of operations or a snapshot + diff). Once a new replica is up to date
 it will send an <code>EpochStarted</code> message to old replicas. Thus, once
-an old replica (that is not in the new configuration) has received <i>f&#8217; + 1</i>
+an old replica (that is not in the new configuration) has received <em>f</em> + 1
 <code>EpochStarted</code> messages, it is free to shut down. Note that one
 particular optimization is to bring new machines up to date (e.g. warm-up)
 before performing the reconfiguration to minimize the down time during
@@ -310,15 +310,13 @@ recovery.</p>
 <p>Another optimization is to batch operations which simply implies that if the
 system is busy then piggy-back several operations in a single message.</p>
 
-<p>Finally, <i>Fast Reads</i> is a technique used in several replication systems.
+<p>Finally, <em>fast reads</em> is a technique used in several replication systems.
 This essentially allows the primary to respond to a read request without going
 through the full protocol. These can be performed at the Primary, though the
 use of leases and loosely synchronized clocks are required to maintain
 consistency. Additionally, if the user of the system is ok with stale data,
 then reads can be served at backups where a backup will reply to a client if it
-has seens commits up to that request. This provides causality but not external
-consistency (see vector timestamps or Lamport clocks to achieve causailty in a
-setting with many storage repositories)</p>
+has seens commits up to that request.</p>
 </div>
 
 

@@ -77,9 +77,9 @@ executing it to ensure durability despite failures and that ordering is guarante
 
 The system is in one of three states. These states are normal
 operation, view changes when the system needs a new primary, and reconfiguration
-when membership is changing. The primary node is deterministically computed
-from the configuration (list of servers) and the view numbers. As a result
-this system does not need to rely on leases, voting or consensus (e.g. longest
+when membership is changing. The primary node is deterministically chosen based
+on the configuration (list of servers) and the view numbers. As a result
+this system does not need to rely on voting or consensus (e.g. longest
 log) to determine the next leader to take over.
 
 ### Normal Operation
@@ -94,11 +94,11 @@ sends <code>Prepare</code> messages to each of the backups and waits for
 *f* <code>PrepareOk</code> responses. Once it has received these responses it can
 assume that the message will persist and it applies the operation by making an
 upcall to the service code and finally replies to the client. A backup will
-perform the same operation, however it does not reply to the client.
+perform the same operation but does not reply to the client.
 
 ### View Changes
 
-View Changes occcur when the system needs to elect a new leader. A key correctness
+View changes occcur when the system needs to elect a new leader. A key correctness
 requirement for the protocol is that every operation executed by an up-call to
 the service code must make it into the new view in the same order as the original
 execution. To achieve this requirement, *f* + 1 logs are obtained and merged
@@ -109,7 +109,7 @@ Protocol:
 
 - Replica sends <code>StartViewChange</code> to all other replicas
 - Receives f responses, sends <code>DoViewChange</code> to new primary
-- New primary waits for f + 1 <code>DoViewChange</code> messages before assuming new view
+- New primary waits for *f* + 1 <code>DoViewChange</code> messages before assuming new view
 
 Note that sending a suffix of the log (e.g. 1-2 entries) in the
 <code>DoViewChange</code> message will likely bring the new server up to date
@@ -127,7 +127,7 @@ processing or view changes during the recovery phase):
 - All reply with “RecoveryResponse”, view number and nonce (and log, etc if primary)
 - Replica waits for *f* + 1 responses (and primary), applies log and begins normal processing
 
-Note that in theoretical solution, logs may be prohibitively big, however
+Note that in the theoretical solution, logs may be prohibitively big, however
 optimizations exist to trim the log (e.g. snapshots).
 
 Client recovery is simply achieved by starting any new request with the old
@@ -152,7 +152,7 @@ send the <code>StartEpoch</code> message and wait for *f* responses.
 Any new replicas will be brough up to date before the epoch change (by sending
 them a list of operations or a snapshot + diff). Once a new replica is up to date
 it will send an <code>EpochStarted</code> message to old replicas. Thus, once
-an old replica (that is not in the new configuration) has received <i>f' + 1</i>
+an old replica (that is not in the new configuration) has received *f* + 1
 <code>EpochStarted</code> messages, it is free to shut down. Note that one
 particular optimization is to bring new machines up to date (e.g. warm-up)
 before performing the reconfiguration to minimize the down time during
@@ -208,14 +208,10 @@ recovery.
 Another optimization is to batch operations which simply implies that if the
 system is busy then piggy-back several operations in a single message.
 
-Finally, <i>Fast Reads</i> is a technique used in several replication systems.
+Finally, *fast reads* is a technique used in several replication systems.
 This essentially allows the primary to respond to a read request without going
 through the full protocol. These can be performed at the Primary, though the
 use of leases and loosely synchronized clocks are required to maintain
 consistency. Additionally, if the user of the system is ok with stale data,
 then reads can be served at backups where a backup will reply to a client if it
-has seens commits up to that request. This provides causality but not external
-consistency (see vector timestamps or Lamport clocks to achieve causailty in a
-setting with many storage repositories)
-
-
+has seens commits up to that request.
