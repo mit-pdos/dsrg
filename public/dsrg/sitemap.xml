@@ -2,27 +2,27 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/05/23/raft/</loc>
-        <lastmod>2013-06-03T14:10:39-04:00</lastmod>
+        <lastmod>2013-07-15T18:32:45-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/</loc>
-        <lastmod>2013-06-04T22:40:04-04:00</lastmod>
+        <lastmod>2013-07-15T18:33:15-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/06/pacifica/</loc>
-        <lastmod>2013-06-13T16:43:04-04:00</lastmod>
+        <lastmod>2013-07-15T18:33:36-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/13/cheriton-and-skeen/</loc>
-        <lastmod>2013-07-05T17:15:15-04:00</lastmod>
+        <lastmod>2013-07-15T18:34:12-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/</loc>
-        <lastmod>2013-07-15T18:30:30-04:00</lastmod>
+        <lastmod>2013-07-15T18:34:19-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/07/03/thialfi/</loc>
-        <lastmod>2013-07-15T17:43:58-04:00</lastmod>
+        <lastmod>2013-07-15T18:34:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/robots.txt</loc>
@@ -30,7 +30,7 @@
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/</loc>
-        <lastmod>2013-07-15T18:30:30-04:00</lastmod>
+        <lastmod>2013-07-15T18:34:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/papers/</loc>
@@ -38,7 +38,7 @@
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/archives/</loc>
-        <lastmod>2013-07-15T18:30:30-04:00</lastmod>
+        <lastmod>2013-07-15T18:34:56-04:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/about/</loc>

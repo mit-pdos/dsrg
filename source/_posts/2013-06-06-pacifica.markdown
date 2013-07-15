@@ -9,7 +9,8 @@ published: true
 
 ## Why are we reading PacificA?
 
-In the PacificA paper, the authors describe very clearly how to
+In the [PacificA paper](http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814), 
+the authors describe very clearly how to
 properly implement a primary/backup replicated storage layer with
 strong consistency.
 

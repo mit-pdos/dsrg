@@ -9,8 +9,10 @@ published: true
 
 ## Why did we read this paper?
 
-Though from 1993, in its time this paper sparked some controversy,
-provoking an impassioned response.  We wanted to understand the debate
+Though from 1993, in its time [this paper](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf)
+ sparked some controversy,
+provoking an impassioned [response](http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf).
+  We wanted to understand the debate
 about the question of providing ordering guarantees as part of the network.
 
 ## What is CATOCS?

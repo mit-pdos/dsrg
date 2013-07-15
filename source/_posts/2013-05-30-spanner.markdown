@@ -9,7 +9,8 @@ published: true
 
 ##What is Spanner?
 
-Spanner is a highly distributed, externally consistent database
+[Spanner](https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf)
+ is a highly distributed, externally consistent database
 developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
 Paxos, and two-phase commit to ensure external consistency.
