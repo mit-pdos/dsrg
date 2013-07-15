@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-07-15T18:28:54-04:00</updated>
+  <updated>2013-07-15T18:30:36-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -141,12 +141,12 @@ revisited and reinforced from a very different perspective.</p>
     <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/"/>
     <updated>2013-06-20T18:00:00-04:00</updated>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited</id>
-    <content type="html"><![CDATA[<h2>Why are we reading Viewstamp Replication Revisited?</h2>
+    <content type="html"><![CDATA[<h2>Why are we reading Viewstamped Replication Revisited?</h2>
 
-<p>Viewstamp Replication is a mechanism for providing replication through a
+<p>Viewstamped Replication is a mechanism for providing replication through a
 Primary / Backup scheme. This paper provides a distilled view of this
 technique along with several optimizations that can be applied. In particular,
-this paper focuses solely on the Viewstamp Replication protocol
+this paper focuses solely on the Viewstamped Replication protocol
 without looking at any specific implementation or uses.</p>
 
 <p>While a general Primary / Backup replication scheme may seem easy to
@@ -160,9 +160,9 @@ This paper sits in-between these two extremes in that it is a technique
 used for replication, thus being more complete than one-time consensus, while
 eliding the details of a full storage system like Spanner.</p>
 
-<h2>What is Viewstamp Replication?</h2>
+<h2>What is Viewstamped Replication?</h2>
 
-<p>Viewstamp Replication (referred to as VR in the remainder of this post) is a
+<p>Viewstamped Replication (referred to as VR in the remainder of this post) is a
 replication protocol that uses consensus to support a replicated state machine.
 The replication state machine allows clients using this service to run operations
 that either view or modify the state, upon which other services can be built

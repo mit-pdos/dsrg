@@ -259,12 +259,12 @@ revisited and reinforced from a very different perspective.</p>
   </header>
 
 
-  <div class="entry-content"><h2>Why are we reading Viewstamp Replication Revisited?</h2>
+  <div class="entry-content"><h2>Why are we reading Viewstamped Replication Revisited?</h2>
 
-<p>Viewstamp Replication is a mechanism for providing replication through a
+<p>Viewstamped Replication is a mechanism for providing replication through a
 Primary / Backup scheme. This paper provides a distilled view of this
 technique along with several optimizations that can be applied. In particular,
-this paper focuses solely on the Viewstamp Replication protocol
+this paper focuses solely on the Viewstamped Replication protocol
 without looking at any specific implementation or uses.</p>
 
 <p>While a general Primary / Backup replication scheme may seem easy to
@@ -278,9 +278,9 @@ This paper sits in-between these two extremes in that it is a technique
 used for replication, thus being more complete than one-time consensus, while
 eliding the details of a full storage system like Spanner.</p>
 
-<h2>What is Viewstamp Replication?</h2>
+<h2>What is Viewstamped Replication?</h2>
 
-<p>Viewstamp Replication (referred to as VR in the remainder of this post) is a
+<p>Viewstamped Replication (referred to as VR in the remainder of this post) is a
 replication protocol that uses consensus to support a replicated state machine.
 The replication state machine allows clients using this service to run operations
 that either view or modify the state, upon which other services can be built
