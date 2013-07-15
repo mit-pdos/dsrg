@@ -9,10 +9,9 @@ footer: true
 Consensus
 ---------
 
-~~[In Search of an Understandable Consensus Algorithm (Raft)](https://ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf)~~
-Neha 5/23/2013
+[In Search of an Understandable Consensus Algorithm (Raft)](https://ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf)
 
-[Paxos Made Practical](http://www.scs.stanford.edu/~dm/home/papers/paxos.pdf)
+[Paxos Made Simple](http://research.microsoft.com/en-us/um/people/lamport/pubs/paxos-simple.pdf)
 
 [ZooKeeper: Wait-free coordination for Internet-scale systems](http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf)
 
@@ -22,19 +21,22 @@ Neha 5/23/2013
 
 [Consensus in the presence of partial synchrony](http://doi.acm.org/10.1145/42282.42283)
 
+[Viewstamped Replication Revisited](http://pmg.csail.mit.edu/papers/vr-revisited.pdf)
+
 Replication
 -----------
 
 [Don’t be lazy, be consistent:  Postgres-R, a new way to implement Database Replication](http://pdf.aminer.org/000/642/954/don_t_be_lazy_be_consistent_postgres_r_a_new.pdf)
 
-~~[PacificA: Replication in Log-Based Distributed Storage Systems](http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814)~~
-Bryan 6/6/2013
+[PacificA: Replication in Log-Based Distributed Storage Systems](http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814)
 
 [Chain Replication for Supporting High Throughput and Availability](http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf)
 
 [Byzantine Chain Replication](http://www.cs.cornell.edu/home/rvr/newpapers/opodis2012.pdf)
 
-[A comprehensive study of Convergent and Commutative Replicated Data Types](http://hal.upmc.fr/docs/00/55/55/88/PDF/techreport.pdf)
+[A Comprehensive Study of Convergent and Commutative Replicated Data Types](http://hal.upmc.fr/docs/00/55/55/88/PDF/techreport.pdf)
+
+[Optimistic Replication](http://www.ysaito.com/survey.pdf)
 
 Causality/Transactions
 ----------------------
@@ -45,14 +47,13 @@ Causality/Transactions
 
 [Sinfonia: a new paradigm for building scalable distributed systems](http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf)
 
-~~[Understanding the Limitations of Causally and Totally Ordered Communication](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf)~~ Neha 6/13/2013
+[Understanding the Limitations of Causally and Totally Ordered Communication](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf)
 
-~~[A Response to Cheriton and Skeen’s Criticism of Causal and Totally Ordered Communication](http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf)~~ Neha 6/13/2013
+[A Response to Cheriton and Skeen’s Criticism of Causal and Totally Ordered Communication](http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf)
 
 [MDCC: Multi-Datacenter Consistency](https://amplab.cs.berkeley.edu/wp-content/uploads/2013/03/mdcc-eurosys13.pdf)
 
-~~[Spanner: Google’s globally distributed database](https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf)~~
-Cody 5/30/2013
+[Spanner: Google’s globally distributed database](https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf)
 
 Concurrency
 -----------
@@ -73,17 +74,22 @@ Industry
 [Kafka (LinkedIn)](http://research.microsoft.com/en-us/UM/people/srikanth/netdb11/netdb11papers/netdb11-final12.pdf)
 
 [Omega: ﬂexible, scalable schedulers for large compute clusters](http://eurosys2013.tudos.org/wp-content/uploads/2013/paper/Schwarzkopf.pdf)
-Eugene, TBD
 
 [Thialfi: A Client Notification Service for Internet-Scale Applications](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf)
 
-Related but Already Covered
----------------------------
+[Large-scale Incremental Processing Using Distributed Transactions and Notifications](http://research.google.com/pubs/pub36726.html)
 
-Note: we probably won’t read anything covered in [6.824](http://pdos.csail.mit.edu/6.824/schedule.html), but you should.
+Other
+-----
+
+Note: We haven't included anything already covered in [6.824](http://pdos.csail.mit.edu/6.824/schedule.html), but you should read those papers too.
 
 [Paxos Made Live: An Engineering Perspective](http://ece842.com/S13/readings/chandra2007.pdf)
 
 [Viewstamped Replication:  A new primary copy method to support highly-available distributed systems](http://www.cs.princeton.edu/courses/archive/fall11/cos518/papers/viewstamped.pdf)
 
-[Viewstamped Replication Revisited](http://pmg.csail.mit.edu/papers/vr-revisited.pdf)
+[Time, Clocks, and the Ordering of Events in a Distributed System](http://research.microsoft.com/en-us/um/people/lamport/pubs/time-clocks.pdf)
+
+[The Part-Time Parliament](http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf)
+
+[Paxos Made Practical](http://www.scs.stanford.edu/~dm/home/papers/paxos.pdf)
