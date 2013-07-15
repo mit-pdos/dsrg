@@ -4,10 +4,10 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-07-15T17:59:23-04:00</updated>
+  <updated>2013-07-15T17:59:57-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
-    <name><![CDATA[PDOS]]></name>
+    <name><![CDATA[DSRG]]></name>
     <email><![CDATA[narula@mit.edu]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
