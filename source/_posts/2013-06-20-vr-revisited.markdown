@@ -12,19 +12,19 @@ published: true
 Viewstamp Replication is a mechanism for providing replication through a
 Primary / Backup scheme. This paper provides a distilled view of this
 technique along with several optimizations that can be applied. In particular,
-this paper focuses solely on Viewstamp Replication in a general sense
+this paper focuses solely on the Viewstamp Replication protocol
 without looking at any specific implementation or uses.
 
 While a general Primary / Backup replication scheme may seem easy to
-get right, considering how to handle configuration changes and the
+get right, considering how to handle view changes and the
 many optimizations that others have come up with over the years, this
 paper provides a go-to source for building such a system.
 
-Previously we have looked at the Paxos protocol which is used to provide
-consensus as well as Spanner which is a full distributed storage system.
+Previously we have looked at the Paxos protocol for 
+consensus as well as Spanner which is an externally consistent distributed storage system.
 This paper sits in-between these two extremes in that it is a technique
-used for replication, thus being more complete than a protocol, while
-remaining less complex as a full system like Spanner. 
+used for replication, thus being more complete than one-time consensus, while
+eliding the details of a full storage system like Spanner. 
 
 ## What is Viewstamp Replication?
 
@@ -34,14 +34,16 @@ The replication state machine allows clients using this service to run operation
 that either view or modify the state, upon which other services can be built
 such as a distributed key-value store.
 
-One goal of VR is to support <i>f</i> failures using <i>2f + 1</i>
-nodes, as such it is primarily used in a distrubted system where failures may
-be expected. Beyond normal operation, the system handles two scenarios:
-changing the primary between the current list of memebers in a "view change" as
-well as changing the set of participating members in a "reconfiguration". One
-contribution of this paper is that VR is presented in such a way that replicated
-state can be relied on instead of disk writes, thus avoiding a potential latency
-of writing to persistent storage.
+One goal of VR is to support *f* failures using 2*f* + 1 nodes, so it
+should be used in a distributed system where failures may
+occur. Beyond normal operation, the system handles two scenarios:
+changing the primary between the current list of members in a *view
+change* as well as changing the set of participating members in a
+*reconfiguration*.  This paper assumes that state replicated on many
+machiens can be used for durability, thus avoiding a potential latency
+of writing to persistent storage.  Unfortunately if VR is run in one
+datacenter all the machines may be on the same power source and thus
+in the same failure domain, so this might not be practical without a UPS.
 
 
 ## Architecture
@@ -53,8 +55,8 @@ the details of the replication so that client code will use the abstraction of
 monotonically increasing request number which will allow the system to detect
 duplicate requests.
 
-Some number of servers (<i>2f + 1</i> when trying to support
-<i>f</i> failures) will run the VR code as well as the service code. The
+Some number of servers 2*f* + 1 when trying to support
+*f* failures) will run the VR code as well as the service code. The
 VR code on the server will determine when to apply operations on the service
 data and push these operations up to the service code. Note that these servers
 can return after a failure (or network partition) and will only result in a
@@ -64,19 +66,17 @@ date.
 Note that in VR as presented in this paper, the operations are performed on
 several different replicas (instead of shipping the data around after the
 operation has been performed). As a result, the operations  must be
-deterministic in that given a starting state and an operation to be applied the
-same resulting / final state will always be identical.  It is mentioned in the
-paper that particular techniques can be used to ensure this property when the
-operations do not hold it on their own.
+deterministic.  It is mentioned in the
+paper that particular techniques can be used to ensure this property.
 
 As this is a Primary / Backup based system, the ordering is decided by the
-primary, however <i>f + 1</i> replicas must know about a request before
-executing it to ensure that the ordering is guaranteed.
+primary, however *f* + 1 replicas must know about a request before
+executing it to ensure durability despite failures and that ordering is guaranteed.
 
 ## System Operation
 
-The system can essentially exist in one of three states. Either normal
-operation, view changes when the system needs a new primary or reconfiguration
+The system is in one of three states. These states are normal
+operation, view changes when the system needs a new primary, and reconfiguration
 when membership is changing. The primary node is deterministically computed
 from the configuration (list of servers) and the view numbers. As a result
 this system does not need to rely on leases, voting or consensus (e.g. longest
@@ -90,18 +90,18 @@ sender is ahead the receiver must update itself first and then process the
 message.
 
 A client sends a request to perform an operation at the server. The server then
-sends <code>Prepare</code> messages to each of the backups and waits for <i>f</i>
-<code>PrepareOk</code> responses. Once it has received these responses it can
+sends <code>Prepare</code> messages to each of the backups and waits for 
+*f* <code>PrepareOk</code> responses. Once it has received these responses it can
 assume that the message will persist and it applies the operation by making an
 upcall to the service code and finally replies to the client. A backup will
-perform the same operation, however it does not reply directly to the client.
+perform the same operation, however it does not reply to the client.
 
 ### View Changes
 
 View Changes occcur when the system needs to elect a new leader. A key correctness
 requirement for the protocol is that every operation executed by an up-call to
 the service code must make it into the new view in the same order as the original
-execution. To achieve this requirement, <i>f + 1</i> logs are obtained and merged
+execution. To achieve this requirement, *f* + 1 logs are obtained and merged
 using the view number to break conflicts in op number ordering.
 
 
@@ -125,7 +125,7 @@ processing or view changes during the recovery phase):
 
 - Recovering node send “Recovery” message to all
 - All reply with “RecoveryResponse”, view number and nonce (and log, etc if primary)
-- Replica waits for f+1 responses (and primary), applies log and begins normal processing
+- Replica waits for *f* + 1 responses (and primary), applies log and begins normal processing
 
 Note that in theoretical solution, logs may be prohibitively big, however
 optimizations exist to trim the log (e.g. snapshots).
@@ -140,14 +140,14 @@ in that it is essentially the last mode of operation. Beyond that several
 optimizations are considered to speed up various parts of the system.
 
 Reconfiguration is used to add/remove nodes to the system (thus changing the
-<i>f</i> failures that the system can handle) or to upgrade or relocate
+*f* failures that the system can handle) or to upgrade or relocate
 machines (for long running systems). A reconfiguration is instantiated by an
 administrator of the system. In this paper, the term "epoch" refers to a configuration
 number and the "transitioning" state refers to a node that is currently changing
 configurations. The reconfiguration is started similarly to other operations by
 sending the operation to the leader, however included in this operation is the
 new configuration (list of participating machines). The primary will then 
-send the <code>StartEpoch</code> message and wait for <i>f</i> responses.
+send the <code>StartEpoch</code> message and wait for *f* responses.
 
 Any new replicas will be brough up to date before the epoch change (by sending
 them a list of operations or a snapshot + diff). Once a new replica is up to date
@@ -202,7 +202,7 @@ fast-forward using application state (such as a checkpoint).
 There are a handful of optimizations that others have come up with since the
 original VR procool was presented. One example is using Witnesses that aren't
 performing the operations. This is a simple extension to the system by having
-<i>f</i> replicas act as log keepers that are only used for view changes and
+*f* replicas act as log keepers that are only used for view changes and
 recovery.
 
 Another optimization is to batch operations which simply implies that if the

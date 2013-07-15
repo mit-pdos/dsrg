@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>VR Revisited - DSRG</title>
+  <meta name="author" content="PDOS">
+
+  
+  <meta name="description" content="Why are we reading Viewstamp Replication Revisited? Viewstamp Replication is a mechanism for providing replication through a
+Primary / Backup scheme &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited">
+  <link href="/dsrg/favicon.png" rel="icon">
+  <link href="/dsrg/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/dsrg/atom.xml" rel="alternate" title="DSRG" type="application/atom+xml">
+  <script src="/dsrg/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/dsrg/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-968607-14']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/dsrg/">DSRG</a></h1>
+  
+    <h2>Distributed systems reading group at MIT</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/dsrg/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:pdos.csail.mit.edu/dsrg" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/dsrg/about">About</a></li>
+  <li><a href="/dsrg/">Blog</a></li>
+  <li><a href="/dsrg/schedule">Schedule</a></li>
+  <li><a href="/dsrg/papers">Papers</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">VR Revisited</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-20T18:00:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Why are we reading Viewstamp Replication Revisited?</h2>
+
+<p>Viewstamp Replication is a mechanism for providing replication through a
+Primary / Backup scheme. This paper provides a distilled view of this
+technique along with several optimizations that can be applied. In particular,
+this paper focuses solely on the Viewstamp Replication protocol
+without looking at any specific implementation or uses.</p>
+
+<p>While a general Primary / Backup replication scheme may seem easy to
+get right, considering how to handle view changes and the
+many optimizations that others have come up with over the years, this
+paper provides a go-to source for building such a system.</p>
+
+<p>Previously we have looked at the Paxos protocol for
+consensus as well as Spanner which is an externally consistent distributed storage system.
+This paper sits in-between these two extremes in that it is a technique
+used for replication, thus being more complete than one-time consensus, while
+eliding the details of a full storage system like Spanner.</p>
+
+<h2>What is Viewstamp Replication?</h2>
+
+<p>Viewstamp Replication (referred to as VR in the remainder of this post) is a
+replication protocol that uses consensus to support a replicated state machine.
+The replication state machine allows clients using this service to run operations
+that either view or modify the state, upon which other services can be built
+such as a distributed key-value store.</p>
+
+<p>One goal of VR is to support <em>f</em> failures using 2<em>f</em> + 1 nodes, so it
+should be used in a distributed system where failures may
+occur. Beyond normal operation, the system handles two scenarios:
+changing the primary between the current list of members in a <em>view
+change</em> as well as changing the set of participating members in a
+<em>reconfiguration</em>.  This paper assumes that state replicated on many
+machiens can be used for durability, thus avoiding a potential latency
+of writing to persistent storage.  Unfortunately if VR is run in one
+datacenter all the machines may be on the same power source and thus
+in the same failure domain, so this might not be practical without a UPS.</p>
+
+<h2>Architecture</h2>
+
+<p>Some number of clients will be interacting directly with a service such as a
+key-value store. The clients use a VR library or proxy that will abstract away
+the details of the replication so that client code will use the abstraction of
+&ldquo;read&rdquo; and &ldquo;write&rdquo; like operations on client defined state. Clients will use a
+monotonically increasing request number which will allow the system to detect
+duplicate requests.</p>
+
+<p>Some number of servers 2<em>f</em> + 1 when trying to support
+<em>f</em> failures) will run the VR code as well as the service code. The
+VR code on the server will determine when to apply operations on the service
+data and push these operations up to the service code. Note that these servers
+can return after a failure (or network partition) and will only result in a
+view change which would require getting the failed / partitioned node(s) up to
+date.</p>
+
+<p>Note that in VR as presented in this paper, the operations are performed on
+several different replicas (instead of shipping the data around after the
+operation has been performed). As a result, the operations  must be
+deterministic.  It is mentioned in the
+paper that particular techniques can be used to ensure this property.</p>
+
+<p>As this is a Primary / Backup based system, the ordering is decided by the
+primary, however <em>f</em> + 1 replicas must know about a request before
+executing it to ensure durability despite failures and that ordering is guaranteed.</p>
+
+<h2>System Operation</h2>
+
+<p>The system is in one of three states. These states are normal
+operation, view changes when the system needs a new primary, and reconfiguration
+when membership is changing. The primary node is deterministically computed
+from the configuration (list of servers) and the view numbers. As a result
+this system does not need to rely on leases, voting or consensus (e.g. longest
+log) to determine the next leader to take over.</p>
+
+<h3>Normal Operation</h3>
+
+<p>Replicas use a view number to determine if they are in the correct state. If
+the sender is behind the receiver will drop the message, on the other hand if a
+sender is ahead the receiver must update itself first and then process the
+message.</p>
+
+<p>A client sends a request to perform an operation at the server. The server then
+sends <code>Prepare</code> messages to each of the backups and waits for
+<em>f</em> <code>PrepareOk</code> responses. Once it has received these responses it can
+assume that the message will persist and it applies the operation by making an
+upcall to the service code and finally replies to the client. A backup will
+perform the same operation, however it does not reply to the client.</p>
+
+<h3>View Changes</h3>
+
+<p>View Changes occcur when the system needs to elect a new leader. A key correctness
+requirement for the protocol is that every operation executed by an up-call to
+the service code must make it into the new view in the same order as the original
+execution. To achieve this requirement, <em>f</em> + 1 logs are obtained and merged
+using the view number to break conflicts in op number ordering.</p>
+
+<p>Protocol:</p>
+
+<ul>
+<li>Replica sends <code>StartViewChange</code> to all other replicas</li>
+<li>Receives f responses, sends <code>DoViewChange</code> to new primary</li>
+<li>New primary waits for f + 1 <code>DoViewChange</code> messages before assuming new view</li>
+</ul>
+
+
+<p>Note that sending a suffix of the log (e.g. 1-2 entries) in the
+<code>DoViewChange</code> message will likely bring the new server up to date
+without requiring any additional state transfer from the replicas.</p>
+
+<h3>Recovery</h3>
+
+<p>Server recovery has the correctness requirement that a replicamust be as up to
+date as it was when it crashed, otherwise it may forget about ops that it
+prepared. This is achieved by receiving state from other replicas using the
+following recovery protocol (note that nodes do not participate in request
+processing or view changes during the recovery phase):</p>
+
+<ul>
+<li>Recovering node send “Recovery” message to all</li>
+<li>All reply with “RecoveryResponse”, view number and nonce (and log, etc if primary)</li>
+<li>Replica waits for <em>f</em> + 1 responses (and primary), applies log and begins normal processing</li>
+</ul>
+
+
+<p>Note that in theoretical solution, logs may be prohibitively big, however
+optimizations exist to trim the log (e.g. snapshots).</p>
+
+<p>Client recovery is simply achieved by starting any new request with the old
+request number (obtained from replicas) + 2.</p>
+
+<h3>Reconfiguration</h3>
+
+<p>Though reconfiguration is discussed later in the paper, it fits the flow here
+in that it is essentially the last mode of operation. Beyond that several
+optimizations are considered to speed up various parts of the system.</p>
+
+<p>Reconfiguration is used to add/remove nodes to the system (thus changing the
+<em>f</em> failures that the system can handle) or to upgrade or relocate
+machines (for long running systems). A reconfiguration is instantiated by an
+administrator of the system. In this paper, the term &ldquo;epoch&rdquo; refers to a configuration
+number and the &ldquo;transitioning&rdquo; state refers to a node that is currently changing
+configurations. The reconfiguration is started similarly to other operations by
+sending the operation to the leader, however included in this operation is the
+new configuration (list of participating machines). The primary will then
+send the <code>StartEpoch</code> message and wait for <em>f</em> responses.</p>
+
+<p>Any new replicas will be brough up to date before the epoch change (by sending
+them a list of operations or a snapshot + diff). Once a new replica is up to date
+it will send an <code>EpochStarted</code> message to old replicas. Thus, once
+an old replica (that is not in the new configuration) has received <i>f&#8217; + 1</i>
+<code>EpochStarted</code> messages, it is free to shut down. Note that one
+particular optimization is to bring new machines up to date (e.g. warm-up)
+before performing the reconfiguration to minimize the down time during
+transition as nodes will not respond to messages for earlier epochs or while
+transitioning.</p>
+
+<p>The administrator can determine status of old replicas by sending out
+<code>CheckEpoch</code> messages and then know when it is safe to shut down old
+machine(s).</p>
+
+<p>One issue for this system is rendesvous, however the solution provided in the
+paper is to simply publish it somewhere out-of-band.</p>
+
+<h4>Efficient Recovery</h4>
+
+<p>One concern is achieving efficient recovery of failed server machines. As
+presented previously, sending the missing log could result in the transfer of a
+substantial amount of data. One way to solve this is to store application state
+as a &ldquo;checkpoint&rdquo; that represents a log prefix, thus allowing the transfer of a
+potentially much more compressed state + some log diff.</p>
+
+<p>After a server creates a checkpoint, it can mark any modification as &ldquo;dirty&rdquo;
+and provide those as the diff over the last created checkpoint. A perhaps
+generic way of accomplishing this diff is to use merkle trees to efficiently
+determine which pages are dirty to avoid sending the entire checkpoint.
+Finally, if the state is too large to transfer then the paper suggests an
+out-of-band mechanism (e.g. sneakernet).</p>
+
+<p>Note that checkpoints allow garbage collection of the log, but the log may
+still be required to bring back a recovering node, so it is beneficial to keep
+some of it, else the system will suffer the cost of state transfer between
+servers.</p>
+
+<h3>State Transfer</h3>
+
+<p>State transfer between two replicas can exist in essentially two cases. One
+being that there are missing operations in the current view. To solve this the
+replica will simply obtain said operations from another replica. The second and
+more difficult situation is that there was a view change in which case the
+replica will set it&rsquo;s op-number to the latest commit-number and obtain updates
+from another replica. If there is a gap in this replica&rsquo;s log, it will need to
+fast-forward using application state (such as a checkpoint).</p>
+
+<h3>Other Optimizations</h3>
+
+<p>There are a handful of optimizations that others have come up with since the
+original VR procool was presented. One example is using Witnesses that aren&rsquo;t
+performing the operations. This is a simple extension to the system by having
+<em>f</em> replicas act as log keepers that are only used for view changes and
+recovery.</p>
+
+<p>Another optimization is to batch operations which simply implies that if the
+system is busy then piggy-back several operations in a single message.</p>
+
+<p>Finally, <i>Fast Reads</i> is a technique used in several replication systems.
+This essentially allows the primary to respond to a read request without going
+through the full protocol. These can be performed at the Primary, though the
+use of leases and loosely synchronized clocks are required to maintain
+consistency. Additionally, if the user of the system is ok with stale data,
+then reads can be served at backups where a backup will reply to a client if it
+has seens commits up to that request. This provides causality but not external
+consistency (see vector timestamps or Lamport clocks to achieve causailty in a
+setting with many storage repositories)</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">PDOS</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-20T18:00:00-04:00" pubdate data-updated="true">Jun 20<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/dsrg/blog/2013/06/13/cheriton-and-skeen/" title="Previous Post: Cheriton and Skeen">&laquo; Cheriton and Skeen</a>
+      
+      
+        <a class="basic-alignment right" href="/dsrg/blog/2013/07/03/thialfi/" title="Next Post: Thialfi">Thialfi &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/07/03/thialfi/">Thialfi</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/20/vr-revisited/">VR Revisited</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/13/cheriton-and-skeen/">Cheriton and Skeen</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/06/pacifica/">PacificA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/05/30/spanner/">Spanner</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - PDOS -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'dsrg';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/';
+        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
