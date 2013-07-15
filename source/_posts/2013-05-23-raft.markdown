@@ -9,9 +9,10 @@ categories:
 Disclaimer:  This paper is still under submission.
 
 
-##What is Raft and why was it written and why did we read it?
+##Why did we read about Raft?
 
-Raft is a new consensus algorithm that is optimized for “ease of
+[Raft](ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf)
+ is a new consensus algorithm that is optimized for “ease of
 implementation”.  Its main purpose is to present a protocol that is
 more understandable than Paxos, which, for many practitioners, is
 difficult to implement correctly.  Viewstamped Replication is more

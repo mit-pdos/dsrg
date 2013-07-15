@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-07-15T18:30:36-04:00</updated>
+  <updated>2013-07-15T18:35:15-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -22,7 +22,8 @@
 
 <p>Several of the papers we&rsquo;ve read recently have focused on
 sophisticated, generic fault tolerance abstractions based on complex
-protocols.  Thialfi offers a contrast: its approach to fault tolerance
+protocols.  <a href="http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf">Thialfi</a>
+ offers a contrast: its approach to fault tolerance
 is intentionally simple, while at the same time being resilient to
 arbitrary (halting) failure, including entire data centers.  Thialfi&rsquo;s
 approach to fault tolerance permeates the design of its abstraction,
@@ -143,7 +144,8 @@ revisited and reinforced from a very different perspective.</p>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited</id>
     <content type="html"><![CDATA[<h2>Why are we reading Viewstamped Replication Revisited?</h2>
 
-<p>Viewstamped Replication is a mechanism for providing replication through a
+<p><a href="http://pmg.csail.mit.edu/papers/vr-revisited.pdf">Viewstamped Replication</a>
+ is a mechanism for providing replication through a
 Primary / Backup scheme. This paper provides a distilled view of this
 technique along with several optimizations that can be applied. In particular,
 this paper focuses solely on the Viewstamped Replication protocol
@@ -362,8 +364,10 @@ has seens commits up to that request.</p>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/06/13/cheriton-and-skeen</id>
     <content type="html"><![CDATA[<h2>Why did we read this paper?</h2>
 
-<p>Though from 1993, in its time this paper sparked some controversy,
-provoking an impassioned response.  We wanted to understand the debate
+<p>Though from 1993, in its time <a href="http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf">this paper</a>
+ sparked some controversy,
+provoking an impassioned <a href="http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf">response</a>.
+  We wanted to understand the debate
 about the question of providing ordering guarantees as part of the network.</p>
 
 <h2>What is CATOCS?</h2>
@@ -477,7 +481,8 @@ without looking at a real system with a concrete design.</p>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/06/06/pacifica</id>
     <content type="html"><![CDATA[<h2>Why are we reading PacificA?</h2>
 
-<p>In the PacificA paper, the authors describe very clearly how to
+<p>In the <a href="http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814">PacificA paper</a>,
+the authors describe very clearly how to
 properly implement a primary/backup replicated storage layer with
 strong consistency.</p>
 
@@ -675,7 +680,8 @@ would have the same availability as a Paxos group of the same size.</p>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner</id>
     <content type="html"><![CDATA[<h2>What is Spanner?</h2>
 
-<p>Spanner is a highly distributed, externally consistent database
+<p><a href="https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf">Spanner</a>
+ is a highly distributed, externally consistent database
 developed by Google.  It provides replication and transactions over a
 geographically distributed set of servers.  Spanner uses time bounds,
 Paxos, and two-phase commit to ensure external consistency.</p>
@@ -735,9 +741,10 @@ the system is still sequentially consistent.</p></li>
     <id>http://pdos.csail.mit.edu/dsrg/blog/2013/05/23/raft</id>
     <content type="html"><![CDATA[<p>Disclaimer:  This paper is still under submission.</p>
 
-<h2>What is Raft and why was it written and why did we read it?</h2>
+<h2>Why did we read about Raft?</h2>
 
-<p>Raft is a new consensus algorithm that is optimized for “ease of
+<p><a href="ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf">Raft</a>
+ is a new consensus algorithm that is optimized for “ease of
 implementation”.  Its main purpose is to present a protocol that is
 more understandable than Paxos, which, for many practitioners, is
 difficult to implement correctly.  Viewstamped Replication is more

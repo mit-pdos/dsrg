@@ -11,7 +11,8 @@ published: true
 
 Several of the papers we've read recently have focused on
 sophisticated, generic fault tolerance abstractions based on complex
-protocols.  Thialfi offers a contrast: its approach to fault tolerance
+protocols.  [Thialfi](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf)
+ offers a contrast: its approach to fault tolerance
 is intentionally simple, while at the same time being resilient to
 arbitrary (halting) failure, including entire data centers.  Thialfi's
 approach to fault tolerance permeates the design of its abstraction,

@@ -9,7 +9,8 @@ published: true
 
 ## Why are we reading Viewstamped Replication Revisited?
 
-Viewstamped Replication is a mechanism for providing replication through a
+[Viewstamped Replication](http://pmg.csail.mit.edu/papers/vr-revisited.pdf)
+ is a mechanism for providing replication through a
 Primary / Backup scheme. This paper provides a distilled view of this
 technique along with several optimizations that can be applied. In particular,
 this paper focuses solely on the Viewstamped Replication protocol
