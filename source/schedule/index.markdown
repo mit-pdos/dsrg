@@ -14,3 +14,4 @@ footer: true
 * 7/3/2013: [Thialfi](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf) (Austin)
 * 7/11/2013: [Zookeeper](https://www.usenix.org/legacy/event/usenix10/tech/full_papers/Hunt.pdf) (Yandong)
 * 7/18/2013: [CoralCDN](http://www.coralcdn.org/docs/coral-nsdi04.pdf) (Michael)
+* 7/25/2013: [MDCC](https://amplab.cs.berkeley.edu/wp-content/uploads/2013/03/mdcc-eurosys13.pdf) (Eugene)
