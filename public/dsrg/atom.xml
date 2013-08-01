@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-08-01T15:22:17-04:00</updated>
+  <updated>2013-08-01T15:23:27-04:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[CoralCDN]]></title>
+    <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/"/>
+    <updated>2013-07-18T15:00:00-04:00</updated>
+    <id>http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn</id>
+    <content type="html"><![CDATA[<h2>Why did we read this paper?</h2>
+
+<p><a href="http://www.coralcdn.org/docs/coral-nsdi04.pdf">CoralCDN</a>
+is a system that allows small websites or those with limited resources a method
+for remaining available in the face of flash-crowds. The system is interesting
+for a number of reasons: it is a live running system that the public can use,
+it&rsquo;s peer to peer, self organizing, and also has a <a href="http://www.coralcdn.org/docs/coral-nsdi10.pdf">follow-up paper</a>
+that analyzes the system with five years of hindsight.</p>
+
+<h2>What is CoralCDN</h2>
+
+<p>CoralCDN is a content distribution network (CDN) built on top of the Coral
+indexing service.  The system can be described in its component parts: Coral
+DNS services, Coral HTTP proxy, and the Coral indexing service.</p>
+
+<h2>DNS Functions</h2>
+
+<p>Many of CoralCDN&rsquo;s processes attempt to preserve locality in order to keep
+latency low. This starts with the DNS lookup by the end user&rsquo;s browser.
+CoralCDN assumes that the resolver for the user&rsquo;s browser is close to the
+end user on the network. It then picks a Coral HTTP proxy close to the source
+address of the DNS request.</p>
+
+<p>Specifically, CoralCDN keeps track of the latencies between the proxies and the
+user and creates levels.  The Coral DNS server can get a round trip time to the
+end user and only provide listings to proxies that fall within a given level.</p>
+
+<p>The DNS servers are also responsible for ensuring that the HTTP proxies that
+are returned to the end user are available, since a bad HTTP proxy will fail
+the user&rsquo;s request. The DNS servers can do this by synchronously checking a
+proxy&rsquo;s status with an RPC prior to releasing the DNS response.</p>
+
+<h2>The HTTP Proxy</h2>
+
+<p>The driving goal of the system is to shield origin servers from request
+stampedes. The Coral proxies therefore attempt to find the content within
+CoralCDN before going to the origin server. Additionally, when a proxy begins
+retrieval from the origin server, it inserts a short lived record into the
+Coral index so any additional servers that want the object will not
+simultaneously contact the origin.</p>
+
+<h2>The Indexing Service</h2>
+
+<p>One of the authors&#8217; stated contributions of this work is the indexing system
+including a <em>distributed sloppy hash table</em> (DSHT).  Each node is given a 160 bit ID
+and holds key/value pairs with keys that are &lsquo;close&rsquo; to the node&rsquo;s ID.
+Additionally, each node maintains a routing table to other nodes. On a put or
+get, the request can be routed to successively closer nodes to toward the
+closest node.</p>
+
+<p>The service is considered <em>sloppy</em> because a key/value is not always stored at
+the closest node. The put process is completed in two phases. The first is a
+collection of hops to get to the closest node and forms a stack from the list
+of nodes. This phase ends when the storing node reaches the closest node or
+when it reaches one that is <em>full</em> and <em>loaded</em>. A full node is one that
+already stores <em>l</em> values for that key. A loaded node is one that is receiving
+more than <em>b</em> requests per minute.  In the second phase, the storing node
+attempts to place the value at the node on top of the stack. If that store
+fails for some reason, the storer pops the stack and tries again.</p>
+
+<p>Nodes are arranged in clusters based on their average pairwise latency. If that
+latency is below a certain threshold, the cluster is said to be part of a
+specific level. A node can be part of multiple clusters but uses
+the same ID in each. This clustering allows a sequential search for a target
+value, beginning with low latency &lsquo;close&rsquo; nodes and only proceeding to slower
+levels if needed.</p>
+
+<h2>Comments</h2>
+
+<p>The idea of levels was interesting mostly because the latency thresholds allow
+the clusters to be self-organizing. Clearly, locality is important to a CDN.
+It does seem however, that simple static organization of nodes into clusters
+would be sufficient to allow latency locality.</p>
+
+<p>Though we didn&rsquo;t technically read the follow-up paper, there is an interesting
+section on lessons learned. In the section on usage, the authors found
+that a small number of popular URLs account for a large percentage of the
+requests but that these requests take up relatively little room on the cache.
+This means that more than 70% of requests are served from local cache, with only
+7.1% retrieved from other Coral proxies.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Zookeeper]]></title>

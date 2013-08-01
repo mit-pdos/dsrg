@@ -4,7 +4,7 @@ title: "CoralCDN"
 date: 2013-07-18 15:00
 comments: true
 categories:
-published: false
+published: true
 ---
 
 ## Why did we read this paper?
