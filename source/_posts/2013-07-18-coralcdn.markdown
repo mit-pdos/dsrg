@@ -12,13 +12,13 @@ published: false
 [CoralCDN](http://www.coralcdn.org/docs/coral-nsdi04.pdf)
 is a system that allows small websites or those with limited resources a method
 for remaining available in the face of flash-crowds. The system is interesting
-for a number of reasons: is is a live running system that the public can use,
+for a number of reasons: it is a live running system that the public can use,
 it's peer to peer, self organizing, and also has a [follow-up paper](http://www.coralcdn.org/docs/coral-nsdi10.pdf)
 that analyzes the system with five years of hindsight.
 
 ## What is CoralCDN
 
-CoralCND is a content distribution network (CDN) built on top of the Coral
+CoralCDN is a content distribution network (CDN) built on top of the Coral
 indexing service.  The system can be described in its component parts: Coral
 DNS services, Coral HTTP proxy, and the Coral indexing service.
 
@@ -27,7 +27,7 @@ DNS services, Coral HTTP proxy, and the Coral indexing service.
 Many of CoralCDN's processes attempt to preserve locality in order to keep
 latency low. This starts with the DNS lookup by the end user's browser.
 CoralCDN assumes that the resolver for the user's browser is close to the
-enduser on the network. It then picks a Coral HTTP proxy close to the source
+end user on the network. It then picks a Coral HTTP proxy close to the source
 address of the DNS request.
 
 Specifically, CoralCDN keeps track of the latencies between the proxies and the
@@ -50,8 +50,8 @@ simultaneously contact the origin.
 
 ## The Indexing Service
 
-One of the author stated contributions of this work is the indexing system
-including a *distributed sloppy hash table*.  Each node is given a 160 bit ID
+One of the authors' stated contributions of this work is the indexing system
+including a *distributed sloppy hash table* (DSHT).  Each node is given a 160 bit ID
 and holds key/value pairs with keys that are 'close' to the node's ID.
 Additionally, each node maintains a routing table to other nodes. On a put or
 get, the request can be routed to successively closer nodes to toward the
@@ -76,13 +76,13 @@ levels if needed.
 
 ## Comments
 
-The idea of levels was interesting mostly be cause the latency thresholds allow
+The idea of levels was interesting mostly because the latency thresholds allow
 the clusters to be self-organizing. Clearly, locality is important to a CDN.
 It does seem however, that simple static organization of nodes into clusters
 would be sufficient to allow latency locality. 
 
 Though we didn't technically read the follow-up paper, there is an interesting
-section on lessons learned. The section on usage is interesting. They found
+section on lessons learned. In the section on usage, the authors found
 that a small number of popular URLs account for a large percentage of the
 requests but that these requests take up relatively little room on the cache.
 This means that more than 70% of requests are served from local cache, with only
