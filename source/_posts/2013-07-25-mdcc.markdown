@@ -1,0 +1,285 @@
+---
+layout: post
+title: "MDCC"
+date: 2013-07-25 12:00
+comments: true
+categories:
+---
+
+## Overview 
+
+###Why did we read about MDCC?
+
+There is a write performance trade off when consistently replicating
+across multiple data centers due to the high latency when sending
+messages between data centers (often > 100ms).  Existing protocols
+use forms of two phase commit which incur 3 blocking round trips
+between data centers.
+
+MDCC introduces a new cross data center transaction protocol for
+transactions over key-value stores (no range scans) that uses many
+forms of paxos to achieve 1 synchronous cross-data center message
+in the common case.
+
+
+* >100ms Latencies between data centers
+* 2PC uses too many round trips
+  * Megastore uses paxos per-shard.  Heavy conflicts reduces performance to 4 xacts per second
+  * Spanner has snapshot consistency, but writes are still slow
+
+###MDCC Goals
+
+
+**Read commited isolation**: meaning transactions never read records
+that have not been fully committed.  The paper notes that this is
+the form that most commercial and open source databases provide,
+so ensuring this level of consistency is sufficient.
+
+**No lost updates**: This is when transaction T1 reads a record X,
+another transaction T2 commits an update to X, then T1 commits a
+write to X which overwrites T2's commit without having ever read
+it.
+
+**Non-stale reads**: Be able to ensure that reads are always of the
+most recent value.
+
+**Low latency**: Minimize number of *synchronous* roundtrips -- in
+this case to 1.
+
+**Costs scale to true transaction overlap**: There should not be
+large fixed costs incurred for each transaction commit.  Rather,
+the costs should be proportional to the amount of actual contention
+between transactions.
+
+**Integrity Constraints**: Support some forms of integrity Constraints.
+The paper discusses FIELD >/=/< VALUE type constraints.
+
+### Bulleted List of Key Ideas
+
+* Paxos per record
+  * Awesome -- could shuffle record ownership depending on access patterns!
+* OCC (keep write sets)
+* During paxos, rather than propose the new value, propose an _option_ to
+  update the new value.  If the option succeeds, then a later write can safely
+  set the value asynchronously.
+* Move more logic into quorum nodes than in regular paxos
+  * Decide write-write conflicts
+  * Enforce integrity constraints
+* Reduce roundtrips via
+  * multi-paxos: select master every N commits
+  * fast paxos: clients directly talk to quorum nodes
+* Reduce Conflicts
+  * Generalized Paxos: commutative operations
+  * "Demarcation protocol" conservatively figures out how many conservativy ops are allowed
+* Failure
+  * Send client state to every node on commit (every record's quorom)
+    * write set, xact id
+
+### Questions
+
+* How does a per-record protocol affect/enable fine-grained tuple placement?
+* What to do to make repeatable reads work?
+* How does fast paxos work?
+* How powerful/efficient is the demarcation protocol?
+* How do run range-queries or queries that need indexes?
+
+## How MDCC is built up.
+
+The MDCC paper flows by identifying issues with the best solution proposed so far, and 
+introducing a new technique to resolve the issues.  This post will flow in a similar manner.
+
+### Per-record Paxos
+
+Megastore is slow because it runs paxos at a per shard granularity.
+What if we ran paxos per record?
+
+Paxos on a record runs as follows:
+
+* up to 1 roundtrip for client to tell master "I want to commit my transaction"
+* 1 roundtrip to elect master for record
+* 1 roundtrip to set the value (learn the value)
+* 1 roundtrip to make value visible (can be async)
+
+### Multi-record Transactions
+
+The key idea is to add logic into the acceptor nodes to perform
+write-write detection.
+
+If I want to commit records A and B, I run paxos for each record.  
+When running paxos, instead of setting the values in the second round, 
+send an *option* containing the record's read and write versions. 
+If there's no write conflict, the node returns OK, otherwise NO
+
+If I hear OK for every record, I tell each record's quorums to write
+"commit" into their option log.  Otherwise I write "abort".  **This
+is different than SQL transaction aborts!**.
+
+Also, quorum nodes are only allowed to accept options if all previous
+options have been decided (written "commit" or "abort").  Otherwise
+write-write conflicts can't be correctly detected.
+
+### Supporting Failures
+
+The following sequence of action could block all nodes participating in a transaction.
+
+* I send options to acceptors for records A and B.
+* They accept and respond to me.  The options are undecided, so they can't accept
+  anything else until I write a "commit" or "abort" in the options.
+* I go on vacation before writing anything.
+
+I was the only one that knew what other records were updated in my
+transaction!  So the participating nodes can't make anymore progress
+until I'm back from vacation.
+
+The solution is to send my transaction state (transaction id and
+write set) along with the options.  That way if I disappear, each
+record's quorum can make a clone of me using the transaction state.
+
+**At this point, multi-record transactions using per-record paxos
+"works".  Everything after this point is to make paxos consensus run
+faster**
+
+### Multi-paxos
+
+We stil require 3 roundtrips to commit (send to master, elect master,
+pick option).  We can use paxos to elect a master for a block of rounds
+which amortizes the cost of electing a master to 0 (assuming the masters are stable).
+
+The communication is now
+
+* up to 1 roundtrip for client to tell master "I want to commit my transaction"
+* 0 roundtrips (amortized) to elect master for record
+* 1 roundtrip to send option to acceptors
+* 1 asynchronous roundtrip to write "commit"/"abort" on options
+* 1 asynchronous roundtrip (can be bundled with other messages) to make commit visible
+
+
+### Fast-paxos
+
+We still need two synchronous roundtrips -- one to contact the master if it is in 
+another datacenter, and one to send the options.  Can we avoid the former message?
+
+Yes! Fast Paxos is lets clients bypass the master to directly send
+options to the quorum nodes.  Recall that the master's job is to
+serialize the log entries.  If we want to de away with the master,
+fast paxos needs a larger quorum size (a fast quorum).  If a fast
+quorum responds OK, then the client can consider the option committed.
+Otherwise it falls back to normal paxos with some details.
+
+None of us have read the fast-paxos paper so we were ill-equipped
+to work through why this section of the paper works. Read below for
+how we *think* fast paxos works based on first principles.  Read
+the fast-paxos paper to actually understand how it works.
+
+### Generalized-paxos
+
+If my operations are all commutative, I want to avoid the cost of
+serialization.
+
+Normal paxos only allows 1 value update per round.  Generalized
+paxos allows M as long as those values are commutative.  For example,
+if in the same round David wants to increment record A by 1 and
+Jane wants to increment record A by 1, then the value of A is 2
+regardless of the log order on any of the quorum nodes.
+
+What this means is the acceptors aren't simply writing values
+anymore, they also understand "delta operations", how they commute,
+and how to apply them.
+
+### Integrity constrains
+
+If I want to support integrity constraints (e.g., A >= 0) the
+acceptors need to understand and enforce them.
+
+The paper restricts the domains of the delta operations (e.g., can
+only add/subtract 1 or 2) and conservatively computes the maximum
+number of operations that are allowed before it is at all possible
+(on a single node and any combinations of transactions in a quorum)
+that the constraint is violated.
+
+This is useful because many transactions are simply updating counters.
+
+
+### That's a lot of steps, are there any more tricks?
+
+We usually want reads to go fast, but if I'm reading record A and
+the A's replica in my datacenter was not in the quorum, then it
+would give me stale data.  One way to get around this is to make
+sure the replica in my data center is *always* in the quorum.  This
+works if my data center is the only one reading this record.  For
+example, if each data center is collecting the local weather data
+and replicating the data, it can be pretty sure that only people
+living around the data center will want the local data.
+
+Fast-paxos is really really bad (in terms of cross datacenter
+roundtrips) if a collision happens.  For those cases it makes more
+sense to stick with a master and use Multi-paxos.  Figuring out
+when to use each is important.  The paper provides a heuristic that
+sticks with multi-paxos and periodically tries to "upgrade" to
+fast-paxos.
+
+That's it!  MDCC collects a number of paxos variants and puts them
+together into a nice cross data-center commit protocol.
+
+
+## A Note on Fast Paxos
+
+The following were derived from first principles.
+
+The fast-paxos protocol was described (briefly) in the paper as
+
+> Any app-server can propose an option directly to the storage (quorum) nodes, which in turn
+> promise only to accept the first proposed option.  Simple majority quorums, however, are
+> no longer sufficient to leran a value and ensure safeness...
+> If a proposer receives an acknowledgment from a fast quorum, the value is safe and 
+> guaranteed to be committed.
+
+A classical paxos quorum requires the property that for any two quorums, Qc1 and Qc2, 
+
+  Qc1 INTERSECT Qc2 != Empty set
+
+For fast paxos it has the requirement that for a fast quorum, Qf,
+
+  Qf1 INTERSECT Qf2 INTERSECT Qc != empty set
+
+
+One of our questions was why a simple majority (Qc) is insufficient and we 
+need a Qf > Qc. The following is an example of when it fails.
+
+
+Recall that Safety in paxos depends on two nontriviality and
+consistency.  Consistency states that "At most one value can be
+learned".  One example is that even with *f* failures, a committed
+log position stays committed.
+
+
+Lets say Qf = Qc.  Consider the following logical proposals and
+their quorums where each column is the state of an acceptor (1-5),
+and each row is the state at one paxos round.  C1, C2, C3 are clients
+(proposers).  C1 commits A and manages to communicate with acceptors
+1-3, C2 commits B and so on.
+
+
+        1 2 3 4 5
+    C1  A A A
+    C2      B B B
+    C3  C C   C
+
+Say C1 and C2 happen concurrently, and C3 happens later (as a normal
+paxos round, or fast paxos).  Then the actual acceptances and what
+round each node thinks its in may be
+
+     1 2 3 4 5 Round (as understood by local node)
+     A A A B B 1
+         B     2
+
+Now if C3 tries to set C, its quorum could be 1,2,4 which don't
+know that A won in round 1 and B "won" in round 2, because they
+have only seen values for round 1, so the nodes happily accept C
+in (what they think is) round 2.  This effectively overwrites B,
+violating safety.
+
+     1 2 3 4 5 Round (as understood by local node)
+     A A A B B 1
+     C C B C   2
+
