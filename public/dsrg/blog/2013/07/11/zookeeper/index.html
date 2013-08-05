@@ -5,12 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>spanner - DSRG</title>
+  <title>Zookeeper - DSRG</title>
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="What is Spanner? Spanner is a highly distributed, externally consistent database
-developed by Google. It provides replication and transactions over a &hellip;">
+  <meta name="description" content="Why did we read this paper? Zookeeper
+is a practical system with replicated storage used by Yahoo!.
+We are interested in understanding what &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +20,7 @@ developed by Google. It provides replication and transactions over a &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner">
+  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper">
   <link href="/dsrg/favicon.png" rel="icon">
   <link href="/dsrg/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/dsrg/atom.xml" rel="alternate" title="DSRG" type="application/atom+xml">
@@ -83,7 +84,7 @@ developed by Google. It provides replication and transactions over a &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Spanner</h1>
+      <h1 class="entry-title">Zookeeper</h1>
     
     
       <p class="meta">
@@ -99,66 +100,94 @@ developed by Google. It provides replication and transactions over a &hellip;">
   
 
 
-<time datetime="2013-05-30T18:05:00-04:00" pubdate data-updated="true">May 30<span>th</span>, 2013</time>
+<time datetime="2013-07-11T15:00:00-04:00" pubdate data-updated="true">Jul 11<span>th</span>, 2013</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>What is Spanner?</h2>
+<div class="entry-content"><h2>Why did we read this paper?</h2>
 
-<p><a href="https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf">Spanner</a>
- is a highly distributed, externally consistent database
-developed by Google.  It provides replication and transactions over a
-geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit to ensure external consistency.</p>
+<p><a href="http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf">Zookeeper</a>
+is a practical system with replicated storage used by Yahoo!.
+We are interested in understanding what replication protocol Zookeeper uses, why they
+needed a <em>new</em> replication protocol, what applications/services people build upon it,
+and what features are required to make such a replicated storage system
+practical.</p>
 
-<h2>Interesting Ideas</h2>
+<p>Also, Zookeeper has pretty good performance for a replication
+protocol. It is interesting to see how it works.</p>
 
-<p>Spanner uses clocks with bounded uncertainty to provide synchrony between
-servers. It also shards an application&rsquo;s data to provide fine-grained load
-distribution.</p>
+<h2>What is Zookeeper</h2>
 
-<p>Spanner uses the TrueTime API (TT) to synchronize time between
-servers. A call to <code>TT.now()</code> gives a range guaranteed to
-contain the actual time.</p>
+<p>The Zookeeper design consists of three components &ndash; replicated storage,
+relaxed consistent caching at clients, and detection of client failures.</p>
 
-<p>Spanner has two kind of reads.  The first reads the most recent value
-of a key or set of keys, called a read-only transaction.  The second
-is a snapshot read which is executed at a specific timestamp in the
-past.  Using a combination of Paxos leases and TrueTime guarantees to
-agree on a timestamp, Spanner can execute snapshot reads and read-only
-transactions without locks or two-phase commit.</p>
+<h2>Replication</h2>
 
-<p>Spanner peforms schema changes atomically without blocking, by picking
-a future time for the change to occur. Other read and write operations
-choose a timestamp so that at each replica, the operation performs
-either before or after the schema change.</p>
+<p>Zookeeper provides a key/value data model, where keys are named like the paths of
+a file system and values are arbitrary blobs. They call each key/value pair a
+<em>Znode</em>. Each Znode must be accessed with a full path so that Zookeeper doesn&rsquo;t
+have to implement open/close. Each value has a version number and an internal
+sequence number, which they use a lot when building applications/services presented
+in the paper. Each Znode can have its own value, and a collection of children.</p>
 
-<h2>Subtleties</h2>
+<p>Data can be accessed with get/set/create/delete methods. Zookeeper supports
+conditional versions of these operations too. For example, a client can say
+set the value of &ldquo;/ds-reading/schedule&rdquo; to &ldquo;3pm,thursday&rdquo; only if the Znode&rsquo;s
+current version is 100. This feature is used widely in the the presented
+applications/services.</p>
 
-<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code>
-is true, we are guaranteed that from now on <code>TT.now.latest()</code> will
-always be larger than the commited timestamp on all servers.</p>
+<p>Znodes are replicated via what they called Zab, an atomic broadcast protocol.
+Zab is their own replication protocol. It seems quite similar to viewstamped
+replication (VR). The only difference I can tell is that Zab is special case
+of viewstamped based replication. Zab requires clients to send requests
+in order (thus they use TCP), but VR does not. Zab also requires the requests
+to be idempotent, so that a new leader can re-propose the most recent request
+without detecting duplicated requests.</p>
 
-<p>Spanner very carefully chooses timestamps for RW transactions to ensure when
-they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
+<p>Despite Zab&rsquo;s restriction for replication of only idempotent operations, Zookeeper does
+support non-idempotent operations. The trick is that for each potentially
+non-idempotent request, the leader converts it to idempotent requests by
+executing it locally.</p>
 
-<h2>Questions</h2>
+<h2>Relaxed consisent caching</h2>
 
-<ul>
-<li><p><strong>Why is the write throughput so low?</strong> 4K ops/sec for 50 paxos
-servers of one replica each (so not running Paxos), not waiting for
-any other commit times, seems very low.</p></li>
-<li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
-<li><p><strong>What happens if we use logical time(which preserves causality)
-rather than the true time?</strong> Maybe external consistency breaks, but
-the system is still sequentially consistent.</p></li>
-</ul>
+<p>Another component of Zookeeper is relaxed consistent caching between clients
+and Zookeeper. When clients get data from Zookeeper, clients can cache it, and
+optionally register at Zookeeper to receive notifications if the accessed Znode
+changes.  Zookeeper will send notifications to caching clients ASYNCHRONOUSLY
+once the data is changed. The benefit of this is that updates don&rsquo;t have to wait for
+invalidations to complete, thus they don&rsquo;t suffer from the impact of client failure;
+the downside is that now the client&rsquo;s cache is not consistent with Zookeeper.</p>
 
+<p>The notification doesn&rsquo;t contain the actual update, and each registration is
+triggered only once (the server deletes it once the notification is delivered).</p>
 
-<p><a href="http://pdos.csail.mit.edu/6.824/notes/l07.txt">6.824 notes</a></p>
+<h2>Detection of client failures</h2>
+
+<p>Zookeeper supports a special Znode type called &ldquo;ephemeral Znode&rdquo; to detect the
+failure of clients.  If a session terminates, all ephemeral ZNodes created
+within that session are deleted. Services/applications can use it to detect
+failure. For example, Katta uses it to detect master failure.</p>
+
+<h2>Other design choices</h2>
+
+<p>Zookeeper allows applications and services to choose their own level of consistency.  Zookeeper
+linearizes all writes. Reads are served from a local Zookeeper server, but a
+client can linearize reads using the sync() API.</p>
+
+<h2>Comments</h2>
+
+<p>In all, we feel that ZooKeeper is cool. It provides building blocks that people
+can use to construct their own services with different consistency/performance
+requirements. It also simplifies the building of other services, as demonstrated
+in the paper.</p>
+
+<p>One thing we didn&rsquo;t understand is why the paper makes the claim that
+ZooKeeper is not intended for general storage.  It seems like that
+would work.</p>
 </div>
 
 
@@ -181,7 +210,7 @@ the system is still sequentially consistent.</p></li>
   
 
 
-<time datetime="2013-05-30T18:05:00-04:00" pubdate data-updated="true">May 30<span>th</span>, 2013</time>
+<time datetime="2013-07-11T15:00:00-04:00" pubdate data-updated="true">Jul 11<span>th</span>, 2013</time>
       
 
 
@@ -189,7 +218,7 @@ the system is still sequentially consistent.</p></li>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper/" >Tweet</a>
   
   
   
@@ -198,10 +227,10 @@ the system is still sequentially consistent.</p></li>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/dsrg/blog/2013/05/23/raft/" title="Previous Post: raft">&laquo; raft</a>
+        <a class="basic-alignment left" href="/dsrg/blog/2013/07/03/thialfi/" title="Previous Post: Thialfi">&laquo; Thialfi</a>
       
       
-        <a class="basic-alignment right" href="/dsrg/blog/2013/06/06/pacifica/" title="Next Post: PacificA">PacificA &raquo;</a>
+        <a class="basic-alignment right" href="/dsrg/blog/2013/07/18/coralcdn/" title="Next Post: CoralCDN">CoralCDN &raquo;</a>
       
     </p>
   </footer>
@@ -275,8 +304,8 @@ the system is still sequentially consistent.</p></li>
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/';
-        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/';
+        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper/';
+        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper/';
         var disqus_script = 'embed.js';
       
     (function () {
