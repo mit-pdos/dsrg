@@ -82,7 +82,7 @@ The paper discusses FIELD >/=/< VALUE type constraints.
 * What to do to make repeatable reads work?
 * How does Fast Paxos work?
 * How powerful/efficient is the demarcation protocol?
-* How do run range-queries or queries that need indexes?
+* How do you run range-queries or queries that need indexes?
 
 ## How MDCC is built up.
 
@@ -122,7 +122,7 @@ write-write conflicts can't be correctly detected.
 
 ### Supporting Failures
 
-The following sequence of action could block all nodes participating
+The following sequence of actions could block all nodes participating
 in a transaction.
 
 * I send options to acceptors for records A and B.
@@ -144,7 +144,7 @@ faster**
 
 ### Multi-Paxos
 
-We stil require 3 roundtrips to commit (send to master, elect master,
+We still require 3 roundtrips to commit (send to master, elect master,
 pick option).  We can use Paxos to elect a master for a block of
 rounds which amortizes the cost of electing a master to 0 (assuming
 the masters are stable).
@@ -172,7 +172,9 @@ Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
 quorum responds OK, then the client can consider the option committed.
 Otherwise it falls back to normal Paxos with some details.
 
-None of us had read the fast-Paxos paper so we were ill-equipped
+None of us had read the 
+[fast-Paxos paper](http://research.microsoft.com/pubs/64624/tr-2005-112.pdf) 
+so we were ill-equipped
 to work through why this section of the paper works. Read below for
 how we *think* Fast Paxos works based on first principles.  Read
 the fast-Paxos paper to actually understand how it works.

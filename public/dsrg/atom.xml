@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2013-08-08T12:47:14-04:00</updated>
+  <updated>2013-12-15T12:59:25-05:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -12,6 +12,199 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Discretized Streams]]></title>
+    <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/"/>
+    <updated>2013-09-30T16:00:00-04:00</updated>
+    <id>http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming</id>
+    <content type="html"><![CDATA[<h2>Why did we read this paper?</h2>
+
+<p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at Scale</a>
+describes additions to the
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a> system to
+handle streaming data. Compared to other streaming systems, Spark Streaming
+offers a more robust fault recovery and straggler handling strategies using the Resilient
+Distributed Dataset (RDD) memory abstraction. In addition to allowing parallel
+recovery, Spark Streaming is one of the first systems which can
+incorporate batch and interactive query models all within the same system.</p>
+
+<h2>What are RDDs?</h2>
+
+<p>RDDs are a memory abstraction model described in the original
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
+paper.  They are immutable and only allow a specified set of
+functional-like transformations to be operated on them. However, these
+seemingly constraining properties allow the computation done on RDDs
+to be completely deterministic, and RDDs can be computed in parallel
+without having to worry about synchronization. Another really
+interesting aspect of RDDs are their resilience to faults. By tracking
+the lineage of transformations done on RDDs, we can reconstruct any
+lost RDDs by simply retracing the lineage and recomputing from the
+source RDDs.</p>
+
+<h2>Stream Discretization</h2>
+
+<p>The Spark Streaming is different from other streaming systems in that it
+discretizes streaming input using a sliding window. The discretized input are
+turned into RDDs and Spark Streaming can then perform small batch operations on
+them as it would have in general batched mode. By converting the input streaming
+data into batched RDDs, Spark Streaming can easily intermix between the
+streaming model and the general batched model because it operates over the same
+RDD abstraction.</p>
+
+<h2>Tracking</h2>
+
+<p>Typically, streaming systems employ a constant operator model in which several
+constantly running workers wait for streaming data, operate on them, and output
+the data. Spark Streaming differs from this model in that it expresses all the
+operations done on the data through the RDDs. The worker nodes maintain no
+state of their own. If state is needed to operate on the data, Spark Streaming
+employs a special track operation, which provides access to a key-value store
+(structured as an RDD). The state for any data can be stored as a value in the
+key-value store and can be accessed again using the same key.</p>
+
+<h2>Parallel Recovery</h2>
+
+<p>When a fault occurs, the Spark Streaming model simply recalculates the RDDs that
+have been destroyed by retracing through the lineage of the graph. However,
+because the RDDs are immutable and deterministic, recomputation can be performed
+in parallel both in time and partition. This allows Spark Streaming model to
+have fault-recovery times on the order of seconds and tens of seconds, while
+existing systems take minutes.</p>
+
+<h2>Stragglers</h2>
+
+<p>Once again because RDDs are immutable and deterministic, Spark Streaming can
+perform speculative replication to handle any stragglers. It is not a problem if
+an RDD is computed twice because transformations on an RDD is deterministic, so
+no synchronization needs to take place when actually storing the RDD.</p>
+
+<h2>Comments</h2>
+
+<p>Overall, using RDDs to operate on streaming data provides a nice clean solution
+for fault-recovery and stragglers. Also, this idea of discretizing streaming
+data could lead to interesting future work in the area.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[SPANStore]]></title>
+    <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/"/>
+    <updated>2013-09-30T16:00:00-04:00</updated>
+    <id>http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore</id>
+    <content type="html"><![CDATA[<h2>Why did we read this paper?</h2>
+
+<p>Several cloud providers provide
+storage in many data centers globally, and customers can use simple PUTs and
+GETs to store and retrieve data without dealing with the complexities of the
+storage infrastructure. However, in reality, every storage system leaves
+replication across data centers to the application, and although replication
+across all data centers provides low latency, it is expensive.</p>
+
+<p><a href="http://doi.acm.org/10.1145/2517349.2522730">SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple Cloud Services</a>
+ is the first system to solve that tries to minimize the cost incurred
+by latency-sensitive application providers.</p>
+
+<h2>What is SPANStore?</h2>
+
+<p>SPANStore is a key-value store that provides a unified view of storage services
+present in several geographically distributed data centers. It spans data
+centers across multiple cloud providers and dtermines where to replicate every
+object and how to perform this replication. Finally, it reduces cost by
+minimizing the computing resources necessary to offer a global view of storage.</p>
+
+<h2>Multi-Cloud</h2>
+
+<p>SPANStore uses multiple cloud providers to offer lower GET/PUT latencies.
+Also, this allows for lower cost by exploiting price decrepancies across
+providers to meet latency SLOs.</p>
+
+<h2>Replication Policy</h2>
+
+<p>PMan determines the replication policies in SPANStore. It requires 1) a
+characterization of SPANStore&rsquo;s deployment, 2) the application&rsquo;s latency, fault
+tolerance, and consistency requirements, and 3) a specification of the
+application&rsquo;s workload as inputs.</p>
+
+<p>As output, PMan specifies 1) the set of data centers that maintain copies of all
+objects with that access set, and 2) at each data center in the access set,
+which of these copies SPANStore should read from and write to when an
+application VM issues a GET or PUT.</p>
+
+<h2>Eventual consistency</h2>
+
+<p>SPANStore can trade-off costs for storage, PUT/GET requests, and network
+transfers if the application requires only eventual consistency. SPANStore
+replicates objects at fewer data centers to reduce storage costs and PUT request
+costs. PMan address this trade-off between storage, networking, and PUT/GET
+request costs using a replication policy as a mixed integer program.</p>
+
+<h2>Strong consistency</h2>
+
+<p>They rely on quorum consistency for strong consistency. They use asymmetric
+quorum sets and require an intersection of at least 2f + 1 data geners with the
+PUT replica set of every other data center in the access set.</p>
+
+<h2>Comments</h2>
+
+<p>The main goal of this paper seems to minimize costs of deploying an application
+by trading off replication, network costs, storage costs, and latency. It seems
+that there is still a huge burden on developer to provide the correct inputs to
+PMan so that PMan can provide the best replication policy. This doesn&rsquo;t seem to
+reduce the complexity involved. A lot of the paper relies on the objective
+function, and there are not many new distributed system concepts.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Chain Replication]]></title>
+    <link href="http://pdos.csail.mit.edu/dsrg/blog/2013/08/08/chain-replication/"/>
+    <updated>2013-08-08T15:00:00-04:00</updated>
+    <id>http://pdos.csail.mit.edu/dsrg/blog/2013/08/08/chain-replication</id>
+    <content type="html"><![CDATA[<h2>Why did we read this paper?</h2>
+
+<p><a href="http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf">Chain Replication</a> is a paper from &lsquo;04 by Renesse and Schneider. The system is interesting, because it is a primary-backup system with an unconventional architecture that aimed to achieve high throughput and availability while maintaining strong consistency.</p>
+
+<h2>What is Chain Replication</h2>
+
+<p>Chain replication is a special primary backup system, in which the servers are linearly ordered to form a chain with the primary at the end. In &ldquo;classic&rdquo; primary backup systems, the topology resembles a star with the primary at the center.
+ The goal of this design is, in the authors&#8217; own words, &lsquo;to achieve high throughput and availability without sacrificing strong consistency&rsquo;.</p>
+
+<h2>The Chain replication protocol</h2>
+
+<p>The chain replication protocol is quite simple: All read requests are sent to the tail (primary) of the chain as in normal primary-backup systems, all write requests are sent to the head (a backup), which then passes the update along the chain. To avoid unneccessary work, only the result of the write is passed down the chain. Strong consistency naturally follows, because all requests are ordered by the primary at the tail of the chain.</p>
+
+<p>The protocol considers only three failure cases, all of which are fail-stop failures:</p>
+
+<ol>
+<li>Fail-stop of the head</li>
+<li>Fail-stop of the tail (primary)</li>
+<li>Fail-stop of a middle server</li>
+</ol>
+
+
+<p>Failures are detected by a Paxos-service. The simplest failure is fail-stop of the head, where the next server in the chain takes over as head. Failure of the tail is equally simple.</p>
+
+<p>To cope with a middle server failure, servers need to keep a history of requests that they have processed. If a middle server fails, its two neighbors bypass it and connect. The later server sends the other one the list of requests it has seen, so that the other server can forward any requests that were dropped when the middle server failed. To keep the size of this history short, the tail of the chain acks requests and the ack is passed up the chain.</p>
+
+<p>The protocol also allows for chains to be extended. This is done by copying the state of the tail to a new server and then making the new server the tail.</p>
+
+<h2>Performance evaluation</h2>
+
+<p>Renesse and Schneider compare their protocol with ordinary primary backup. While they admit that detecting a failed server will take much longer than fixing the failure once it&rsquo;s detected, they discuss at length how many message round-trips the recovery will take in both systems. Which system performs better actually depends on the mix of reads vs. writes, because while primary failure is easier to fix in chain replication, backup failure is easier to fix under a classic primary-backup scheme.</p>
+
+<p>A big part of the paper consists of evaluating the performance of chain replication with different setups under multiple load scenarios. The interesting take-away for systems with a single chain is that weak chain replication (where one can read (possibly stale) data from any server in the chain) may actually perform worse than strong chain replication with a ratio of updates to writes as small as 1/10. They explain this with the fact that processing reads uses resources at the head that could otherwise be used for updates.</p>
+
+<p>Renesse and Schneider also evaluate the performance of their system when the data is spread in <em>volumes</em> across multiple chains. The interesting thing to note there is that read throughput is permanently lowered after a failure, even when a new server is added to the system, because that new server will become the tail of all the chains that the failed server was involved in. Also interesting to note is that work throughput increases temporarily after a failure, because the shorter length of chains means that less work has to be done for each write until the failed server is replaced.</p>
+
+<h2>Discussion</h2>
+
+<p>It was interesting to read a paper about a different kind of primary-backup system, and the simplicity of chain-replication was quite surprising. While the system is interesting from a conceputal point of view, it doesn&rsquo;t seem very suitable for any real-world scenarios. Firstly, the system is designed to operate with equal latency between all nodes and thus doesn&rsquo;t scale beyond a LAN. Secondly, the authors assume uniform popularity of stored items. The current system would perform very poorly if a few items were the target of the majority of the requests, because repliaction is not used to spread the load.</p>
+
+<p>The system still has some potential for improvement. As the experiments clearly show, performance decreases with every failure. This could easily be fixed by allowing for servers to be added not only as tail, but also as head or middle server.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[MDCC]]></title>
@@ -121,7 +314,7 @@ set the value asynchronously.</li>
 <li>What to do to make repeatable reads work?</li>
 <li>How does Fast Paxos work?</li>
 <li>How powerful/efficient is the demarcation protocol?</li>
-<li>How do run range-queries or queries that need indexes?</li>
+<li>How do you run range-queries or queries that need indexes?</li>
 </ul>
 
 
@@ -166,7 +359,7 @@ write-write conflicts can&rsquo;t be correctly detected.</p>
 
 <h3>Supporting Failures</h3>
 
-<p>The following sequence of action could block all nodes participating
+<p>The following sequence of actions could block all nodes participating
 in a transaction.</p>
 
 <ul>
@@ -191,7 +384,7 @@ faster</strong></p>
 
 <h3>Multi-Paxos</h3>
 
-<p>We stil require 3 roundtrips to commit (send to master, elect master,
+<p>We still require 3 roundtrips to commit (send to master, elect master,
 pick option).  We can use Paxos to elect a master for a block of
 rounds which amortizes the cost of electing a master to 0 (assuming
 the masters are stable).</p>
@@ -221,7 +414,9 @@ Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
 quorum responds OK, then the client can consider the option committed.
 Otherwise it falls back to normal Paxos with some details.</p>
 
-<p>None of us had read the fast-Paxos paper so we were ill-equipped
+<p>None of us had read the
+<a href="http://research.microsoft.com/pubs/64624/tr-2005-112.pdf">fast-Paxos paper</a>
+so we were ill-equipped
 to work through why this section of the paper works. Read below for
 how we <em>think</em> Fast Paxos works based on first principles.  Read
 the fast-Paxos paper to actually understand how it works.</p>

@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple Cloud
-Services"
+title: SPANStore
 date: 2013-09-30 16:00
 comments: true
 categories:
-published: false
+published: true
 ---
 
 ## Why did we read this paper?
+
 Several cloud providers provide
 storage in many data centers globally, and customers can use simple PUTs and
 GETs to store and retrieve data without dealing with the complexities of the
@@ -16,7 +16,8 @@ storage infrastructure. However, in reality, every storage system leaves
 replication across data centers to the application, and although replication
 across all data centers provides low latency, it is expensive.
 
-[SPANStore] is the first system to solve that tries to minimize the cost incurred
+[SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple Cloud Services](http://doi.acm.org/10.1145/2517349.2522730)
+ is the first system to solve that tries to minimize the cost incurred
 by latency-sensitive application providers.
 
 ## What is SPANStore?

@@ -9,8 +9,10 @@
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="Overview Why did we read about MDCC? There is a write performance trade off when consistently replicating
-across multiple data centers due to the &hellip;">
+  <meta name="description" content="Why did we read this paper? Discretized Streams: Fault Tolerant Computing at Scale
+describes additions to the
+Spark system to
+handle streaming data. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -80,6 +82,280 @@ across multiple data centers due to the &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/dsrg/blog/2013/09/30/spark-streaming/">Discretized Streams</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Why did we read this paper?</h2>
+
+<p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at Scale</a>
+describes additions to the
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a> system to
+handle streaming data. Compared to other streaming systems, Spark Streaming
+offers a more robust fault recovery and straggler handling strategies using the Resilient
+Distributed Dataset (RDD) memory abstraction. In addition to allowing parallel
+recovery, Spark Streaming is one of the first systems which can
+incorporate batch and interactive query models all within the same system.</p>
+
+<h2>What are RDDs?</h2>
+
+<p>RDDs are a memory abstraction model described in the original
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
+paper.  They are immutable and only allow a specified set of
+functional-like transformations to be operated on them. However, these
+seemingly constraining properties allow the computation done on RDDs
+to be completely deterministic, and RDDs can be computed in parallel
+without having to worry about synchronization. Another really
+interesting aspect of RDDs are their resilience to faults. By tracking
+the lineage of transformations done on RDDs, we can reconstruct any
+lost RDDs by simply retracing the lineage and recomputing from the
+source RDDs.</p>
+
+<h2>Stream Discretization</h2>
+
+<p>The Spark Streaming is different from other streaming systems in that it
+discretizes streaming input using a sliding window. The discretized input are
+turned into RDDs and Spark Streaming can then perform small batch operations on
+them as it would have in general batched mode. By converting the input streaming
+data into batched RDDs, Spark Streaming can easily intermix between the
+streaming model and the general batched model because it operates over the same
+RDD abstraction.</p>
+
+<h2>Tracking</h2>
+
+<p>Typically, streaming systems employ a constant operator model in which several
+constantly running workers wait for streaming data, operate on them, and output
+the data. Spark Streaming differs from this model in that it expresses all the
+operations done on the data through the RDDs. The worker nodes maintain no
+state of their own. If state is needed to operate on the data, Spark Streaming
+employs a special track operation, which provides access to a key-value store
+(structured as an RDD). The state for any data can be stored as a value in the
+key-value store and can be accessed again using the same key.</p>
+
+<h2>Parallel Recovery</h2>
+
+<p>When a fault occurs, the Spark Streaming model simply recalculates the RDDs that
+have been destroyed by retracing through the lineage of the graph. However,
+because the RDDs are immutable and deterministic, recomputation can be performed
+in parallel both in time and partition. This allows Spark Streaming model to
+have fault-recovery times on the order of seconds and tens of seconds, while
+existing systems take minutes.</p>
+
+<h2>Stragglers</h2>
+
+<p>Once again because RDDs are immutable and deterministic, Spark Streaming can
+perform speculative replication to handle any stragglers. It is not a problem if
+an RDD is computed twice because transformations on an RDD is deterministic, so
+no synchronization needs to take place when actually storing the RDD.</p>
+
+<h2>Comments</h2>
+
+<p>Overall, using RDDs to operate on streaming data provides a nice clean solution
+for fault-recovery and stragglers. Also, this idea of discretizing streaming
+data could lead to interesting future work in the area.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/dsrg/blog/2013/09/30/spanstore/">SPANStore</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Why did we read this paper?</h2>
+
+<p>Several cloud providers provide
+storage in many data centers globally, and customers can use simple PUTs and
+GETs to store and retrieve data without dealing with the complexities of the
+storage infrastructure. However, in reality, every storage system leaves
+replication across data centers to the application, and although replication
+across all data centers provides low latency, it is expensive.</p>
+
+<p><a href="http://doi.acm.org/10.1145/2517349.2522730">SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple Cloud Services</a>
+ is the first system to solve that tries to minimize the cost incurred
+by latency-sensitive application providers.</p>
+
+<h2>What is SPANStore?</h2>
+
+<p>SPANStore is a key-value store that provides a unified view of storage services
+present in several geographically distributed data centers. It spans data
+centers across multiple cloud providers and dtermines where to replicate every
+object and how to perform this replication. Finally, it reduces cost by
+minimizing the computing resources necessary to offer a global view of storage.</p>
+
+<h2>Multi-Cloud</h2>
+
+<p>SPANStore uses multiple cloud providers to offer lower GET/PUT latencies.
+Also, this allows for lower cost by exploiting price decrepancies across
+providers to meet latency SLOs.</p>
+
+<h2>Replication Policy</h2>
+
+<p>PMan determines the replication policies in SPANStore. It requires 1) a
+characterization of SPANStore&rsquo;s deployment, 2) the application&rsquo;s latency, fault
+tolerance, and consistency requirements, and 3) a specification of the
+application&rsquo;s workload as inputs.</p>
+
+<p>As output, PMan specifies 1) the set of data centers that maintain copies of all
+objects with that access set, and 2) at each data center in the access set,
+which of these copies SPANStore should read from and write to when an
+application VM issues a GET or PUT.</p>
+
+<h2>Eventual consistency</h2>
+
+<p>SPANStore can trade-off costs for storage, PUT/GET requests, and network
+transfers if the application requires only eventual consistency. SPANStore
+replicates objects at fewer data centers to reduce storage costs and PUT request
+costs. PMan address this trade-off between storage, networking, and PUT/GET
+request costs using a replication policy as a mixed integer program.</p>
+
+<h2>Strong consistency</h2>
+
+<p>They rely on quorum consistency for strong consistency. They use asymmetric
+quorum sets and require an intersection of at least 2f + 1 data geners with the
+PUT replica set of every other data center in the access set.</p>
+
+<h2>Comments</h2>
+
+<p>The main goal of this paper seems to minimize costs of deploying an application
+by trading off replication, network costs, storage costs, and latency. It seems
+that there is still a huge burden on developer to provide the correct inputs to
+PMan so that PMan can provide the best replication policy. This doesn&rsquo;t seem to
+reduce the complexity involved. A lot of the paper relies on the objective
+function, and there are not many new distributed system concepts.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/dsrg/blog/2013/08/08/chain-replication/">Chain Replication</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-08T15:00:00-04:00" pubdate data-updated="true">Aug 8<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Why did we read this paper?</h2>
+
+<p><a href="http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf">Chain Replication</a> is a paper from &lsquo;04 by Renesse and Schneider. The system is interesting, because it is a primary-backup system with an unconventional architecture that aimed to achieve high throughput and availability while maintaining strong consistency.</p>
+
+<h2>What is Chain Replication</h2>
+
+<p>Chain replication is a special primary backup system, in which the servers are linearly ordered to form a chain with the primary at the end. In &ldquo;classic&rdquo; primary backup systems, the topology resembles a star with the primary at the center.
+ The goal of this design is, in the authors&#8217; own words, &lsquo;to achieve high throughput and availability without sacrificing strong consistency&rsquo;.</p>
+
+<h2>The Chain replication protocol</h2>
+
+<p>The chain replication protocol is quite simple: All read requests are sent to the tail (primary) of the chain as in normal primary-backup systems, all write requests are sent to the head (a backup), which then passes the update along the chain. To avoid unneccessary work, only the result of the write is passed down the chain. Strong consistency naturally follows, because all requests are ordered by the primary at the tail of the chain.</p>
+
+<p>The protocol considers only three failure cases, all of which are fail-stop failures:</p>
+
+<ol>
+<li>Fail-stop of the head</li>
+<li>Fail-stop of the tail (primary)</li>
+<li>Fail-stop of a middle server</li>
+</ol>
+
+
+<p>Failures are detected by a Paxos-service. The simplest failure is fail-stop of the head, where the next server in the chain takes over as head. Failure of the tail is equally simple.</p>
+
+<p>To cope with a middle server failure, servers need to keep a history of requests that they have processed. If a middle server fails, its two neighbors bypass it and connect. The later server sends the other one the list of requests it has seen, so that the other server can forward any requests that were dropped when the middle server failed. To keep the size of this history short, the tail of the chain acks requests and the ack is passed up the chain.</p>
+
+<p>The protocol also allows for chains to be extended. This is done by copying the state of the tail to a new server and then making the new server the tail.</p>
+
+<h2>Performance evaluation</h2>
+
+<p>Renesse and Schneider compare their protocol with ordinary primary backup. While they admit that detecting a failed server will take much longer than fixing the failure once it&rsquo;s detected, they discuss at length how many message round-trips the recovery will take in both systems. Which system performs better actually depends on the mix of reads vs. writes, because while primary failure is easier to fix in chain replication, backup failure is easier to fix under a classic primary-backup scheme.</p>
+
+<p>A big part of the paper consists of evaluating the performance of chain replication with different setups under multiple load scenarios. The interesting take-away for systems with a single chain is that weak chain replication (where one can read (possibly stale) data from any server in the chain) may actually perform worse than strong chain replication with a ratio of updates to writes as small as 1/10. They explain this with the fact that processing reads uses resources at the head that could otherwise be used for updates.</p>
+
+<p>Renesse and Schneider also evaluate the performance of their system when the data is spread in <em>volumes</em> across multiple chains. The interesting thing to note there is that read throughput is permanently lowered after a failure, even when a new server is added to the system, because that new server will become the tail of all the chains that the failed server was involved in. Also interesting to note is that work throughput increases temporarily after a failure, because the shorter length of chains means that less work has to be done for each write until the failed server is replaced.</p>
+
+<h2>Discussion</h2>
+
+<p>It was interesting to read a paper about a different kind of primary-backup system, and the simplicity of chain-replication was quite surprising. While the system is interesting from a conceputal point of view, it doesn&rsquo;t seem very suitable for any real-world scenarios. Firstly, the system is designed to operate with equal latency between all nodes and thus doesn&rsquo;t scale beyond a LAN. Secondly, the authors assume uniform popularity of stored items. The current system would perform very poorly if a few items were the target of the majority of the requests, because repliaction is not used to spread the load.</p>
+
+<p>The system still has some potential for improvement. As the experiments clearly show, performance decreases with every failure. This could easily be fixed by allowing for servers to be added not only as tail, but also as head or middle server.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -212,7 +488,7 @@ set the value asynchronously.</li>
 <li>What to do to make repeatable reads work?</li>
 <li>How does Fast Paxos work?</li>
 <li>How powerful/efficient is the demarcation protocol?</li>
-<li>How do run range-queries or queries that need indexes?</li>
+<li>How do you run range-queries or queries that need indexes?</li>
 </ul>
 
 
@@ -257,7 +533,7 @@ write-write conflicts can&rsquo;t be correctly detected.</p>
 
 <h3>Supporting Failures</h3>
 
-<p>The following sequence of action could block all nodes participating
+<p>The following sequence of actions could block all nodes participating
 in a transaction.</p>
 
 <ul>
@@ -282,7 +558,7 @@ faster</strong></p>
 
 <h3>Multi-Paxos</h3>
 
-<p>We stil require 3 roundtrips to commit (send to master, elect master,
+<p>We still require 3 roundtrips to commit (send to master, elect master,
 pick option).  We can use Paxos to elect a master for a block of
 rounds which amortizes the cost of electing a master to 0 (assuming
 the masters are stable).</p>
@@ -312,7 +588,9 @@ Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
 quorum responds OK, then the client can consider the option committed.
 Otherwise it falls back to normal Paxos with some details.</p>
 
-<p>None of us had read the fast-Paxos paper so we were ill-equipped
+<p>None of us had read the
+<a href="http://research.microsoft.com/pubs/64624/tr-2005-112.pdf">fast-Paxos paper</a>
+so we were ill-equipped
 to work through why this section of the paper works. Read below for
 how we <em>think</em> Fast Paxos works based on first principles.  Read
 the fast-Paxos paper to actually understand how it works.</p>
@@ -1436,282 +1714,9 @@ would have the same availability as a Paxos group of the same size.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/dsrg/blog/2013/05/30/spanner/">Spanner</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-30T18:05:00-04:00" pubdate data-updated="true">May 30<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>What is Spanner?</h2>
-
-<p><a href="https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf">Spanner</a>
- is a highly distributed, externally consistent database
-developed by Google.  It provides replication and transactions over a
-geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit to ensure external consistency.</p>
-
-<h2>Interesting Ideas</h2>
-
-<p>Spanner uses clocks with bounded uncertainty to provide synchrony between
-servers. It also shards an application&rsquo;s data to provide fine-grained load
-distribution.</p>
-
-<p>Spanner uses the TrueTime API (TT) to synchronize time between
-servers. A call to <code>TT.now()</code> gives a range guaranteed to
-contain the actual time.</p>
-
-<p>Spanner has two kind of reads.  The first reads the most recent value
-of a key or set of keys, called a read-only transaction.  The second
-is a snapshot read which is executed at a specific timestamp in the
-past.  Using a combination of Paxos leases and TrueTime guarantees to
-agree on a timestamp, Spanner can execute snapshot reads and read-only
-transactions without locks or two-phase commit.</p>
-
-<p>Spanner peforms schema changes atomically without blocking, by picking
-a future time for the change to occur. Other read and write operations
-choose a timestamp so that at each replica, the operation performs
-either before or after the schema change.</p>
-
-<h2>Subtleties</h2>
-
-<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code>
-is true, we are guaranteed that from now on <code>TT.now.latest()</code> will
-always be larger than the commited timestamp on all servers.</p>
-
-<p>Spanner very carefully chooses timestamps for RW transactions to ensure when
-they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
-
-<h2>Questions</h2>
-
-<ul>
-<li><p><strong>Why is the write throughput so low?</strong> 4K ops/sec for 50 paxos
-servers of one replica each (so not running Paxos), not waiting for
-any other commit times, seems very low.</p></li>
-<li><p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p></li>
-<li><p><strong>What happens if we use logical time(which preserves causality)
-rather than the true time?</strong> Maybe external consistency breaks, but
-the system is still sequentially consistent.</p></li>
-</ul>
-
-
-<p><a href="http://pdos.csail.mit.edu/6.824/notes/l07.txt">6.824 notes</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/dsrg/blog/2013/05/23/raft/">Raft</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-05-23T18:00:00-04:00" pubdate data-updated="true">May 23<span>rd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Disclaimer:  This paper is still under submission.</p>
-
-<h2>Why did we read about Raft?</h2>
-
-<p><a href="ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf">Raft</a>
- is a new consensus algorithm that is optimized for “ease of
-implementation”.  Its main purpose is to present a protocol that is
-more understandable than Paxos, which, for many practitioners, is
-difficult to implement correctly.  Viewstamped Replication is more
-similar to Raft, however it is far less popular than Paxos, so it is
-unfortunately not focused on in the paper.</p>
-
-<p>All of these consensus algorithms operate as long as a majority of
-servers are functioning.  So you would require 2f+1 servers to
-tolerate f failures.  Servers are assumed to fail by stopping, though
-they might recover with state from stable storage (such as disk).  We
-read this paper because there are very few consensus algorithms, and
-something that is easier to understand than Paxos sounds great!  Raft
-pros and cons</p>
-
-<p>The paper designs and ensures invariants around the data structure
-that Paxos, in practice, is used for &mdash; a replicated state machine
-log.  This abstraction is nice, because it is easier to think about
-operating on a sequential log and ensuring a small number of
-properties rather than running multiple independent instances of
-Paxos.  Raft assigns leaders on a per-term basis (i.e., epochs), and
-terms are used as an implicit coordination mechanism.  It also
-supports configuration changes (removing or adding nodes from the
-system) while still serving requests.</p>
-
-<p>The bulk of the paper is fairly digestible and it was nice that the
-mechanisms to ensure safety were concentrated in a small handful of
-subsections.  However distributed consensus is hard, so verifying
-Raft’s safety still took effort.  Many members of the reading group
-have a basic understanding of Paxos, so we didn’t necessarily feel
-that understanding Raft’s correctness was easier than understanding
-Paxos.</p>
-
-<p>One of the group members noted that he wrote an implementation of Raft
-from the paper and some basic tests “just worked”, which was
-surprising.  However, note that a production implementation of Raft
-would require many of the same things required to properly implement
-and run Paxos (see Paxos Made Live).  Namely, you’d have to consider
-and handle disk corruptions, safely implement snapshots, and use
-something like leases so that reads don’t always require running a
-round of the consensus algorithm.  These added features are necessary
-in a practical system, and would complicate a Raft implementation as
-much as a Paxos one.</p>
-
-<p>In terms of performance, Raft can add log entries with f+1 roundtrips
-total, whereas Paxos requires 2(f+1).  Paxos can be further optimized
-by using leaders, and both systems can benefit from batching log
-entries.  The space used for “understandability” experiments could
-have been better used to show more performance numbers or more
-explanation about correctness.</p>
-
-<h2>Main Subtleties</h2>
-
-<p>One of the most interesting parts of the algorithm is the commit point
-for a log entry, or the point at which you can determine that even if
-f servers fail, the log entry will be present.  It turns out that
-because nodes perform leader election by consulting and sending only
-their log length and term number, a log entry that is simply on the
-majority of the nodes can still be overwritten when a new leader is
-elected.  The paper bolds the actual requirement:</p>
-
-<p>A log entry may only be considered committed if the entry is stored on
-a majority of the servers; in addition, at least one entry from the
-leader’s current term must also be stored on a majority of servers.</p>
-
-<p>Figure 7 shows how this can happen.  Consider this case with five
-servers, S1, S2, S3, S4, S5.  We use the notation Value:Term in each
-slot.  S1 is leader in term 2, and replicates an entry X for slot 2,
-it goes to 2 servers (S1, S2).</p>
-
-<pre>     
-slot    1     2
-S1     1:1  X:2
-S2     1:1  X:2
-S3     1:1
-S4     1:1
-S5     1:1
-</pre>
-
-
-<p>S1 crashes before it can finish replicating X:2, S5 is elected leader
-for term 3 (with votes from S3, S4, and S5) and stores Y in slot 2</p>
-
-<pre>
-slot    1     2
-S1     1:1  X:2
-S2     1:1  X:2
-S3     1:1
-S4     1:1
-S5     1:1  Y:3
-</pre>
-
-
-<p>S5 crashes before it can replicate Y, and S1 is elected leader again,
-now for term 4.  S1 finishes replicating X:2, and adds a new entry, Z
-in slot 3, but crashes before it can completely replicate it</p>
-
-<pre>
-slot    1     2     3
-S1     1:1  X:2   Z:4
-S2     1:1  X:2  
-S3     1:1  X:2
-S4     1:1
-S5     1:1  Y:3
-</pre>
-
-
-<p>S5 becomes leader for term 5 because it has the most recent term out
-of the remaining nodes.  S5 will force a Y into slot 2 (Note that S5
-has Y in slot 2 and S1,S2,S3 had an X in slot 2.)</p>
-
-<pre>
-slot    1     2     3
-S1     1:1  X:2   Z:4
-S2     1:1  Y:3 
-S3     1:1  Y:3
-S4     1:1
-S5     1:1  Y:3
-</pre>
-
-
-<p>Note that if S1 had gotten Z into two additional logs (two out of S2,
-S3, S4), then S5 could never have been elected leader, because its log
-was not long enough.</p>
-
-<p>We found this surprising.</p>
-
-<h2>Conclusions</h2>
-
-<p>There are some nice aspects of Raft &mdash; the log as a first order
-primitive, the method of configuration changes, and only two RPCs
-(though one could argue AppendEntry is heavily overloaded).
-Unfortunately, the authors’ main point falls flat for two reasons:
-First, they primarily compare their system to Paxos while their system
-is much closer to Viewstamped Replication. They claim this is
-reasonable because Paxos is much more widely used. Second, they claim
-Raft is much simpler and easier to implement (compared to Paxos).
-However, in our reading, Raft didn’t appear to be any less subtle (it
-took effort to convince ourselves of the correctness of the example
-explained here) and several things that make Paxos difficult to
-implement are still evidenced in Raft.</p>
-
-<p>We don’t see many new consensus algorithms, so this was still very interesting to read and discuss.</p>
-
-<h2>Open Questions</h2>
-
-<p>Did they make any comparisons between Raft and Paxos that couldn’t have been made between Paxos and VR?</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/dsrg/blog/page/2/">&larr; Older</a>
     
     <a href="/dsrg/blog/archives">Blog Archives</a>
     
@@ -1722,6 +1727,18 @@ implement are still evidenced in Raft.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spark-streaming/">Discretized Streams</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spanstore/">SPANStore</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/08/08/chain-replication/">Chain Replication</a>
+      </li>
     
       <li class="post">
         <a href="/dsrg/blog/2013/07/25/mdcc/">MDCC</a>

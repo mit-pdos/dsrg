@@ -1,33 +1,36 @@
 ---
 layout: post
-title: "Discretized Streams: Fault Tolerant Computing at Scale"
+title: "Discretized Streams"
 date: 2013-09-30 16:00
 comments: true
 categories:
-published: false
+published: true
 ---
 
 ## Why did we read this paper?
 
-[Discretized Streams](?) describes additions to the
+[Discretized Streams: Fault Tolerant Computing at Scale](http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf) 
+describes additions to the
 [Spark](http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf) system to
 handle streaming data. Compared to other streaming systems, Spark Streaming
 offers a more robust fault recovery and straggler handling strategies using the Resilient
 Distributed Dataset (RDD) memory abstraction. In addition to allowing parallel
-recovery, Spark Streaming is the first instance of a system which can
+recovery, Spark Streaming is one of the first systems which can
 incorporate batch and interactive query models all within the same system.
 
 ## What are RDDs?
 
 RDDs are a memory abstraction model described in the original
-[Spark](http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf) paper.
-They are immutable and only allow a specified set of functional-like
-transformations to be operated on them. However, these seemingly constraining
-properties allow the computation done on RDDs to be completely deterministic,
-and RDDs can be computed in parallel without having to worry about
-synchronization. Another really interesting aspect of RDDs are their resilience
-to faults. By tracking the lineage of transformations done on RDDs, we can
-reconstruct any lost RDDs by simply tretracing the lineage from the source RDDs.
+[Spark](http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf)
+paper.  They are immutable and only allow a specified set of
+functional-like transformations to be operated on them. However, these
+seemingly constraining properties allow the computation done on RDDs
+to be completely deterministic, and RDDs can be computed in parallel
+without having to worry about synchronization. Another really
+interesting aspect of RDDs are their resilience to faults. By tracking
+the lineage of transformations done on RDDs, we can reconstruct any
+lost RDDs by simply retracing the lineage and recomputing from the
+source RDDs.
 
 ## Stream Discretization
 

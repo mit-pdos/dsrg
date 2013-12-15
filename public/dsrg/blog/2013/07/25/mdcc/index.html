@@ -209,7 +209,7 @@ set the value asynchronously.</li>
 <li>What to do to make repeatable reads work?</li>
 <li>How does Fast Paxos work?</li>
 <li>How powerful/efficient is the demarcation protocol?</li>
-<li>How do run range-queries or queries that need indexes?</li>
+<li>How do you run range-queries or queries that need indexes?</li>
 </ul>
 
 
@@ -254,7 +254,7 @@ write-write conflicts can&rsquo;t be correctly detected.</p>
 
 <h3>Supporting Failures</h3>
 
-<p>The following sequence of action could block all nodes participating
+<p>The following sequence of actions could block all nodes participating
 in a transaction.</p>
 
 <ul>
@@ -279,7 +279,7 @@ faster</strong></p>
 
 <h3>Multi-Paxos</h3>
 
-<p>We stil require 3 roundtrips to commit (send to master, elect master,
+<p>We still require 3 roundtrips to commit (send to master, elect master,
 pick option).  We can use Paxos to elect a master for a block of
 rounds which amortizes the cost of electing a master to 0 (assuming
 the masters are stable).</p>
@@ -309,7 +309,9 @@ Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
 quorum responds OK, then the client can consider the option committed.
 Otherwise it falls back to normal Paxos with some details.</p>
 
-<p>None of us had read the fast-Paxos paper so we were ill-equipped
+<p>None of us had read the
+<a href="http://research.microsoft.com/pubs/64624/tr-2005-112.pdf">fast-Paxos paper</a>
+so we were ill-equipped
 to work through why this section of the paper works. Read below for
 how we <em>think</em> Fast Paxos works based on first principles.  Read
 the fast-Paxos paper to actually understand how it works.</p>
@@ -469,6 +471,8 @@ violating safety.</p>
         <a class="basic-alignment left" href="/dsrg/blog/2013/07/18/coralcdn/" title="Previous Post: CoralCDN">&laquo; CoralCDN</a>
       
       
+        <a class="basic-alignment right" href="/dsrg/blog/2013/08/08/chain-replication/" title="Next Post: Chain Replication">Chain Replication &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -486,6 +490,18 @@ violating safety.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spark-streaming/">Discretized Streams</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spanstore/">SPANStore</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/08/08/chain-replication/">Chain Replication</a>
+      </li>
     
       <li class="post">
         <a href="/dsrg/blog/2013/07/25/mdcc/">MDCC</a>

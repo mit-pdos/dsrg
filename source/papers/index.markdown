@@ -93,3 +93,5 @@ Note: We haven't included anything already covered in [6.824](http://pdos.csail.
 [The Part-Time Parliament](http://research.microsoft.com/en-us/um/people/lamport/pubs/lamport-paxos.pdf)
 
 [Paxos Made Practical](http://www.scs.stanford.edu/~dm/home/papers/paxos.pdf)
+
+The papers from [SOSP 2013](http://sigops.org/sosp/sosp13/program.html)

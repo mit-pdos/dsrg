@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>CoralCDN - DSRG</title>
+  <title>SPANStore - DSRG</title>
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="Why did we read this paper? CoralCDN
-is a system that allows small websites or those with limited resources a method
-for remaining available in the &hellip;">
+  <meta name="description" content="Why did we read this paper? Several cloud providers provide
+storage in many data centers globally, and customers can use simple PUTs and
+GETs to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +20,7 @@ for remaining available in the &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn">
+  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore">
   <link href="/dsrg/favicon.png" rel="icon">
   <link href="/dsrg/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/dsrg/atom.xml" rel="alternate" title="DSRG" type="application/atom+xml">
@@ -84,7 +84,7 @@ for remaining available in the &hellip;">
   
   <header>
     
-      <h1 class="entry-title">CoralCDN</h1>
+      <h1 class="entry-title">SPANStore</h1>
     
     
       <p class="meta">
@@ -100,7 +100,7 @@ for remaining available in the &hellip;">
   
 
 
-<time datetime="2013-07-18T15:00:00-04:00" pubdate data-updated="true">Jul 18<span>th</span>, 2013</time>
+<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
         
       </p>
     
@@ -109,84 +109,65 @@ for remaining available in the &hellip;">
 
 <div class="entry-content"><h2>Why did we read this paper?</h2>
 
-<p><a href="http://www.coralcdn.org/docs/coral-nsdi04.pdf">CoralCDN</a>
-is a system that allows small websites or those with limited resources a method
-for remaining available in the face of flash-crowds. The system is interesting
-for a number of reasons: it is a live running system that the public can use,
-it&rsquo;s peer to peer, self organizing, and also has a <a href="http://www.coralcdn.org/docs/coral-nsdi10.pdf">follow-up paper</a>
-that analyzes the system with five years of hindsight.</p>
+<p>Several cloud providers provide
+storage in many data centers globally, and customers can use simple PUTs and
+GETs to store and retrieve data without dealing with the complexities of the
+storage infrastructure. However, in reality, every storage system leaves
+replication across data centers to the application, and although replication
+across all data centers provides low latency, it is expensive.</p>
 
-<h2>What is CoralCDN</h2>
+<p><a href="http://doi.acm.org/10.1145/2517349.2522730">SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple Cloud Services</a>
+ is the first system to solve that tries to minimize the cost incurred
+by latency-sensitive application providers.</p>
 
-<p>CoralCDN is a content distribution network (CDN) built on top of the Coral
-indexing service.  The system can be described in its component parts: Coral
-DNS services, Coral HTTP proxy, and the Coral indexing service.</p>
+<h2>What is SPANStore?</h2>
 
-<h2>DNS Functions</h2>
+<p>SPANStore is a key-value store that provides a unified view of storage services
+present in several geographically distributed data centers. It spans data
+centers across multiple cloud providers and dtermines where to replicate every
+object and how to perform this replication. Finally, it reduces cost by
+minimizing the computing resources necessary to offer a global view of storage.</p>
 
-<p>Many of CoralCDN&rsquo;s processes attempt to preserve locality in order to keep
-latency low. This starts with the DNS lookup by the end user&rsquo;s browser.
-CoralCDN assumes that the resolver for the user&rsquo;s browser is close to the
-end user on the network. It then picks a Coral HTTP proxy close to the source
-address of the DNS request.</p>
+<h2>Multi-Cloud</h2>
 
-<p>Specifically, CoralCDN keeps track of the latencies between the proxies and the
-user and creates levels.  The Coral DNS server can get a round trip time to the
-end user and only provide listings to proxies that fall within a given level.</p>
+<p>SPANStore uses multiple cloud providers to offer lower GET/PUT latencies.
+Also, this allows for lower cost by exploiting price decrepancies across
+providers to meet latency SLOs.</p>
 
-<p>The DNS servers are also responsible for ensuring that the HTTP proxies that
-are returned to the end user are available, since a bad HTTP proxy will fail
-the user&rsquo;s request. The DNS servers can do this by synchronously checking a
-proxy&rsquo;s status with an RPC prior to releasing the DNS response.</p>
+<h2>Replication Policy</h2>
 
-<h2>The HTTP Proxy</h2>
+<p>PMan determines the replication policies in SPANStore. It requires 1) a
+characterization of SPANStore&rsquo;s deployment, 2) the application&rsquo;s latency, fault
+tolerance, and consistency requirements, and 3) a specification of the
+application&rsquo;s workload as inputs.</p>
 
-<p>The driving goal of the system is to shield origin servers from request
-stampedes. The Coral proxies therefore attempt to find the content within
-CoralCDN before going to the origin server. Additionally, when a proxy begins
-retrieval from the origin server, it inserts a short lived record into the
-Coral index so any additional servers that want the object will not
-simultaneously contact the origin.</p>
+<p>As output, PMan specifies 1) the set of data centers that maintain copies of all
+objects with that access set, and 2) at each data center in the access set,
+which of these copies SPANStore should read from and write to when an
+application VM issues a GET or PUT.</p>
 
-<h2>The Indexing Service</h2>
+<h2>Eventual consistency</h2>
 
-<p>One of the authors&#8217; stated contributions of this work is the indexing system
-including a <em>distributed sloppy hash table</em> (DSHT).  Each node is given a 160 bit ID
-and holds key/value pairs with keys that are &lsquo;close&rsquo; to the node&rsquo;s ID.
-Additionally, each node maintains a routing table to other nodes. On a put or
-get, the request can be routed to successively closer nodes to toward the
-closest node.</p>
+<p>SPANStore can trade-off costs for storage, PUT/GET requests, and network
+transfers if the application requires only eventual consistency. SPANStore
+replicates objects at fewer data centers to reduce storage costs and PUT request
+costs. PMan address this trade-off between storage, networking, and PUT/GET
+request costs using a replication policy as a mixed integer program.</p>
 
-<p>The service is considered <em>sloppy</em> because a key/value is not always stored at
-the closest node. The put process is completed in two phases. The first is a
-collection of hops to get to the closest node and forms a stack from the list
-of nodes. This phase ends when the storing node reaches the closest node or
-when it reaches one that is <em>full</em> and <em>loaded</em>. A full node is one that
-already stores <em>l</em> values for that key. A loaded node is one that is receiving
-more than <em>b</em> requests per minute.  In the second phase, the storing node
-attempts to place the value at the node on top of the stack. If that store
-fails for some reason, the storer pops the stack and tries again.</p>
+<h2>Strong consistency</h2>
 
-<p>Nodes are arranged in clusters based on their average pairwise latency. If that
-latency is below a certain threshold, the cluster is said to be part of a
-specific level. A node can be part of multiple clusters but uses
-the same ID in each. This clustering allows a sequential search for a target
-value, beginning with low latency &lsquo;close&rsquo; nodes and only proceeding to slower
-levels if needed.</p>
+<p>They rely on quorum consistency for strong consistency. They use asymmetric
+quorum sets and require an intersection of at least 2f + 1 data geners with the
+PUT replica set of every other data center in the access set.</p>
 
 <h2>Comments</h2>
 
-<p>The idea of levels was interesting mostly because the latency thresholds allow
-the clusters to be self-organizing. Clearly, locality is important to a CDN.
-It does seem however, that simple static organization of nodes into clusters
-would be sufficient to allow latency locality.</p>
-
-<p>Though we didn&rsquo;t technically read the follow-up paper, there is an interesting
-section on lessons learned. In the section on usage, the authors found
-that a small number of popular URLs account for a large percentage of the
-requests but that these requests take up relatively little room on the cache.
-This means that more than 70% of requests are served from local cache, with only
-7.1% retrieved from other Coral proxies.</p>
+<p>The main goal of this paper seems to minimize costs of deploying an application
+by trading off replication, network costs, storage costs, and latency. It seems
+that there is still a huge burden on developer to provide the correct inputs to
+PMan so that PMan can provide the best replication policy. This doesn&rsquo;t seem to
+reduce the complexity involved. A lot of the paper relies on the objective
+function, and there are not many new distributed system concepts.</p>
 </div>
 
 
@@ -209,7 +190,7 @@ This means that more than 70% of requests are served from local cache, with only
   
 
 
-<time datetime="2013-07-18T15:00:00-04:00" pubdate data-updated="true">Jul 18<span>th</span>, 2013</time>
+<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
       
 
 
@@ -217,7 +198,7 @@ This means that more than 70% of requests are served from local cache, with only
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/" >Tweet</a>
   
   
   
@@ -226,10 +207,10 @@ This means that more than 70% of requests are served from local cache, with only
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/dsrg/blog/2013/07/11/zookeeper/" title="Previous Post: Zookeeper">&laquo; Zookeeper</a>
+        <a class="basic-alignment left" href="/dsrg/blog/2013/08/08/chain-replication/" title="Previous Post: Chain Replication">&laquo; Chain Replication</a>
       
       
-        <a class="basic-alignment right" href="/dsrg/blog/2013/07/25/mdcc/" title="Next Post: MDCC">MDCC &raquo;</a>
+        <a class="basic-alignment right" href="/dsrg/blog/2013/09/30/spark-streaming/" title="Next Post: Discretized Streams">Discretized Streams &raquo;</a>
       
     </p>
   </footer>
@@ -319,8 +300,8 @@ This means that more than 70% of requests are served from local cache, with only
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/';
-        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/';
+        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/';
+        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/';
         var disqus_script = 'embed.js';
       
     (function () {
