@@ -2,51 +2,51 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/05/23/raft/</loc>
-        <lastmod>2013-07-15T18:32:45-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/05/30/spanner/</loc>
-        <lastmod>2013-07-15T18:33:15-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/06/pacifica/</loc>
-        <lastmod>2013-07-15T18:33:36-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/13/cheriton-and-skeen/</loc>
-        <lastmod>2013-07-15T18:34:12-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/06/20/vr-revisited/</loc>
-        <lastmod>2013-07-15T18:34:19-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/07/03/thialfi/</loc>
-        <lastmod>2013-07-15T18:34:56-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/07/11/zookeeper/</loc>
-        <lastmod>2013-07-26T12:58:06-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/07/18/coralcdn/</loc>
-        <lastmod>2013-08-01T15:23:22-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/07/25/mdcc/</loc>
-        <lastmod>2013-10-18T09:18:16-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/08/08/chain-replication/</loc>
-        <lastmod>2013-08-22T19:05:14-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spanstore/</loc>
-        <lastmod>2013-12-15T13:02:41-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/</loc>
-        <lastmod>2013-12-15T12:59:58-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/robots.txt</loc>
@@ -54,22 +54,22 @@
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/</loc>
-        <lastmod>2013-12-15T13:02:41-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/papers/</loc>
-        <lastmod>2013-12-15T12:49:26-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/blog/archives/</loc>
-        <lastmod>2013-12-15T13:02:41-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/about/</loc>
-        <lastmod>2013-06-13T17:05:18-04:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
     <url>
         <loc>http://pdos.csail.mit.edu/dsrg/schedule/</loc>
-        <lastmod>2013-12-15T12:52:16-05:00</lastmod>
+        <lastmod>2013-12-15T13:24:16-05:00</lastmod>
     </url>
 </urlset>
