@@ -44,7 +44,33 @@ For example, an atomic compare and swap operation on the first byte at memory no
 )
 {% endhighlight %}
 
-Minitransactions are committed using a 2-phase commit protocol where application nodes are coordinators and memory nodes are participants.
+Minitransactions are committed using a 2-phase commit protocol where
+application nodes are coordinators and memory nodes are participants,
+but minitransactions operating on a single participant use only a
+single phase. This allows for operations that perform writes on one
+memory node as a result of a compare on another memory node. The
+paper gives several examples of powerful operations that can be
+implemented using minitransactions, including: atomic reads across
+multiple memory nodes, compare and swap, acquiring multiple leases
+atomically, and changing data if a lease is held. 
+
+Minitransactions were designed so that the operation itself can
+piggyback on the commit protocol for added performance.  This does
+not work for arbitrary transactions, but the restricted operations
+available for minitransactions allows this optimization.  For
+example, a participant can vote "no" to commit a transaction if it
+knows that the coordinator will abort the transaction as a result
+of a value it is reading (this occurs when a comparison in the
+compare-set fails). Additionally, the results for reads in
+minitransactions are included with the vote for committing in the
+first phase.
+
+The design of minitransactions permits this kind of optimization,
+but it makes certain operations impossible to fit in a single
+minitransaction. For example, reading and copying data between
+memory nodes requires two minitransactions (one to read the data
+and another that atomically checks that the data is still valid and
+writes the data to another memory node).
 
 ## Design
 
@@ -57,7 +83,7 @@ commit.
 Sinfonia uses logging and replication to provide fault tolerance
 and reduce downtime. The design of Sinfonia, however, does not
 support automatic load-balancing or caching. Load-balancing and
-caching are left to the application developer who is given some,
+caching are left to the application developer who is given some
 load information by the system.
 
 ## Comments
