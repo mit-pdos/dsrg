@@ -1,0 +1,388 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Sinfonia - DSRG</title>
+  <meta name="author" content="DSRG">
+
+  
+  <meta name="description" content="Why did we read this paper? Sinfonia
+is a service that allows hosts to share application data in a
+fault-tolerent, scalable, and consistent manner &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/12/16/sinfonia">
+  <link href="/dsrg/favicon.png" rel="icon">
+  <link href="/dsrg/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/dsrg/atom.xml" rel="alternate" title="DSRG" type="application/atom+xml">
+  <script src="/dsrg/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/dsrg/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-968607-14']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/dsrg/">DSRG</a></h1>
+  
+    <h2>Distributed systems reading group at MIT</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/dsrg/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:pdos.csail.mit.edu/dsrg" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/dsrg/about">About</a></li>
+  <li><a href="/dsrg/">Blog</a></li>
+  <li><a href="/dsrg/schedule">Schedule</a></li>
+  <li><a href="/dsrg/papers">Papers</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Sinfonia</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-16T15:52:00-05:00" pubdate data-updated="true">Dec 16<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Why did we read this paper?</h2>
+
+<p><a href="http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf">Sinfonia</a>
+is a service that allows hosts to share application data in a
+fault-tolerent, scalable, and consistent manner using a novel
+minitransaction primitive. We read this paper because it provides
+an interesting alternative to message passing for building distributed
+systems.</p>
+
+<h2>Data Layout</h2>
+
+<p>At a high level, Sinfonia provides multiple independent linear address spaces that live on &ldquo;memory nodes.&rdquo; No structure is imposed on these address spaces, and they can contain arbitrary bytes of data. Data in Sinfonia is referenced using a pair: (memory-node-id, offset). Sinfonia does not perform automatic load balancing, and data placement is left to the application.</p>
+
+<h2>Minitransactions</h2>
+
+<p>Operations on data take the form of &ldquo;minitransactions,&rdquo; which are
+basically distributed compare and swap/read operations. A minitransaction
+consists of a triple (compare-set, write-set, read-set). Elements in the compare-set are tuples: (memory-node-id, offset, length, data) where the first three fields describe the location and size of the data to compare, and the last field is the value expected at that location. The write-set is the same, except that the last field is the value to write to the location. Elements in the read-set are similar, but they omit the data field.</p>
+
+<p>The minitransaction performs the following operation atomically:</p>
+
+<div>
+  <pre><code class='c'>if compare-set comparisons match expected data {
+  Perform each write in write-set
+  Return each read in read-set
+}</code></pre>
+</div>
+
+
+<p>For example, an atomic compare and swap operation on the first byte at memory node 0 (where the expected value is &ldquo;5&rdquo; and the new value is &ldquo;6&rdquo;) would be:</p>
+
+<div>
+  <pre><code class='python'>(
+    { (0, 0, 1, 5) },
+    { (0, 0, 1, 6) },
+    {}
+)</code></pre>
+</div>
+
+
+<p>Minitransactions are committed using a 2-phase commit protocol where
+application nodes are coordinators and memory nodes are participants,
+but minitransactions operating on a single participant use only a
+single phase. This allows for operations that perform writes on one
+memory node as a result of a compare on another memory node. The
+paper gives several examples of powerful operations that can be
+implemented using minitransactions, including: atomic reads across
+multiple memory nodes, compare and swap, acquiring multiple leases
+atomically, and changing data if a lease is held.</p>
+
+<p>Minitransactions were designed so that the operation itself can
+piggyback on the commit protocol for added performance.  This does
+not work for arbitrary transactions, but the restricted operations
+available for minitransactions allows this optimization.  For
+example, a participant can vote &ldquo;no&rdquo; to commit a transaction if it
+knows that the coordinator will abort the transaction as a result
+of a value it is reading (this occurs when a comparison in the
+compare-set fails). Additionally, the results for reads in
+minitransactions are included with the vote for committing in the
+first phase.</p>
+
+<p>The design of minitransactions permits this kind of optimization,
+but it makes certain operations impossible to fit in a single
+minitransaction. For example, reading and copying data between
+memory nodes requires two minitransactions (one to read the data
+and another that atomically checks that the data is still valid and
+writes the data to another memory node).</p>
+
+<h2>Design</h2>
+
+<p>Overall, Sinfonia provides an alternative to message passing for
+implementing distributed systems. Rather than explicitly sending
+messages, applications describe operations on shared data in terms
+of minitransactions that are executed atomically using 2-phase
+commit.</p>
+
+<p>Sinfonia uses logging and replication to provide fault tolerance
+and reduce downtime. The design of Sinfonia, however, does not
+support automatic load-balancing or caching. Load-balancing and
+caching are left to the application developer who is given some
+load information by the system.</p>
+
+<p>Coordinator crashes are handled using a recovery coordinator, which
+is triggered when a transaction has not been committed or aborted
+after some timeout. The recovery coordinator asks each participant
+how it voted on that transaction, and the participant replies with
+its original vote if it had already voted or &ldquo;ABORT&rdquo; if it had not
+(remembering that it must abort this transaction in the future if
+the original coordinator reappears).</p>
+
+<p>Sinfonia uses a write-ahead redo-log for performance and fault-tolerance
+for the participants.  When a participant votes to commit, the
+transaction data is added to the redo-log which is replayed if the
+participant crashes. Participants also keep track of decided
+transactions so they know if they can commit the changes or not.
+Other participants must be contacted for their votes if the
+recovered participant does not know how the transaction was
+decided.</p>
+
+<h2>Comments</h2>
+
+<p>Sinfonia provides an interesting alternative to message passing in
+distributed systems, but requires application developer intervention
+to provide data locality, caching, and data placement. The paper
+details several optimizations, which are especially important for
+minitransaction performance. The paper also includes interesting
+applications built on top of Sinfonia: a file system and a group
+communication service, which show how Sinfonia can be used to
+implement real-world applications.</p>
+
+<p>Minitransactions are somewhat limited in what operations they can perform, but the
+operations they do support can be efficiently executed.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">DSRG</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-16T15:52:00-05:00" pubdate data-updated="true">Dec 16<span>th</span>, 2013</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/12/16/sinfonia/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/12/16/sinfonia/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/dsrg/blog/2013/09/30/spark-streaming/" title="Previous Post: Discretized Streams">&laquo; Discretized Streams</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/12/16/sinfonia/">Sinfonia</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spark-streaming/">Discretized Streams</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/09/30/spanstore/">SPANStore</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/08/08/chain-replication/">Chain Replication</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/07/25/mdcc/">MDCC</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/07/18/coralcdn/">CoralCDN</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/07/11/zookeeper/">Zookeeper</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/07/03/thialfi/">Thialfi</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/20/vr-revisited/">VR Revisited</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/13/cheriton-and-skeen/">Cheriton and Skeen</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/06/06/pacifica/">PacificA</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/05/30/spanner/">Spanner</a>
+      </li>
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/05/23/raft/">Raft</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - DSRG -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'dsrg';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/12/16/sinfonia/';
+        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/12/16/sinfonia/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

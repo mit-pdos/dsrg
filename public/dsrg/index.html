@@ -9,10 +9,9 @@
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="Why did we read this paper? Discretized Streams: Fault Tolerant Computing at Scale
-describes additions to the
-Spark system to
-handle streaming data. &hellip;">
+  <meta name="description" content="Why did we read this paper? Sinfonia
+is a service that allows hosts to share application data in a
+fault-tolerent, scalable, and consistent manner &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -82,6 +81,153 @@ handle streaming data. &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/dsrg/blog/2013/12/16/sinfonia/">Sinfonia</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-16T15:52:00-05:00" pubdate data-updated="true">Dec 16<span>th</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>Why did we read this paper?</h2>
+
+<p><a href="http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf">Sinfonia</a>
+is a service that allows hosts to share application data in a
+fault-tolerent, scalable, and consistent manner using a novel
+minitransaction primitive. We read this paper because it provides
+an interesting alternative to message passing for building distributed
+systems.</p>
+
+<h2>Data Layout</h2>
+
+<p>At a high level, Sinfonia provides multiple independent linear address spaces that live on &ldquo;memory nodes.&rdquo; No structure is imposed on these address spaces, and they can contain arbitrary bytes of data. Data in Sinfonia is referenced using a pair: (memory-node-id, offset). Sinfonia does not perform automatic load balancing, and data placement is left to the application.</p>
+
+<h2>Minitransactions</h2>
+
+<p>Operations on data take the form of &ldquo;minitransactions,&rdquo; which are
+basically distributed compare and swap/read operations. A minitransaction
+consists of a triple (compare-set, write-set, read-set). Elements in the compare-set are tuples: (memory-node-id, offset, length, data) where the first three fields describe the location and size of the data to compare, and the last field is the value expected at that location. The write-set is the same, except that the last field is the value to write to the location. Elements in the read-set are similar, but they omit the data field.</p>
+
+<p>The minitransaction performs the following operation atomically:</p>
+
+<div>
+  <pre><code class='c'>if compare-set comparisons match expected data {
+  Perform each write in write-set
+  Return each read in read-set
+}</code></pre>
+</div>
+
+
+<p>For example, an atomic compare and swap operation on the first byte at memory node 0 (where the expected value is &ldquo;5&rdquo; and the new value is &ldquo;6&rdquo;) would be:</p>
+
+<div>
+  <pre><code class='python'>(
+    { (0, 0, 1, 5) },
+    { (0, 0, 1, 6) },
+    {}
+)</code></pre>
+</div>
+
+
+<p>Minitransactions are committed using a 2-phase commit protocol where
+application nodes are coordinators and memory nodes are participants,
+but minitransactions operating on a single participant use only a
+single phase. This allows for operations that perform writes on one
+memory node as a result of a compare on another memory node. The
+paper gives several examples of powerful operations that can be
+implemented using minitransactions, including: atomic reads across
+multiple memory nodes, compare and swap, acquiring multiple leases
+atomically, and changing data if a lease is held.</p>
+
+<p>Minitransactions were designed so that the operation itself can
+piggyback on the commit protocol for added performance.  This does
+not work for arbitrary transactions, but the restricted operations
+available for minitransactions allows this optimization.  For
+example, a participant can vote &ldquo;no&rdquo; to commit a transaction if it
+knows that the coordinator will abort the transaction as a result
+of a value it is reading (this occurs when a comparison in the
+compare-set fails). Additionally, the results for reads in
+minitransactions are included with the vote for committing in the
+first phase.</p>
+
+<p>The design of minitransactions permits this kind of optimization,
+but it makes certain operations impossible to fit in a single
+minitransaction. For example, reading and copying data between
+memory nodes requires two minitransactions (one to read the data
+and another that atomically checks that the data is still valid and
+writes the data to another memory node).</p>
+
+<h2>Design</h2>
+
+<p>Overall, Sinfonia provides an alternative to message passing for
+implementing distributed systems. Rather than explicitly sending
+messages, applications describe operations on shared data in terms
+of minitransactions that are executed atomically using 2-phase
+commit.</p>
+
+<p>Sinfonia uses logging and replication to provide fault tolerance
+and reduce downtime. The design of Sinfonia, however, does not
+support automatic load-balancing or caching. Load-balancing and
+caching are left to the application developer who is given some
+load information by the system.</p>
+
+<p>Coordinator crashes are handled using a recovery coordinator, which
+is triggered when a transaction has not been committed or aborted
+after some timeout. The recovery coordinator asks each participant
+how it voted on that transaction, and the participant replies with
+its original vote if it had already voted or &ldquo;ABORT&rdquo; if it had not
+(remembering that it must abort this transaction in the future if
+the original coordinator reappears).</p>
+
+<p>Sinfonia uses a write-ahead redo-log for performance and fault-tolerance
+for the participants.  When a participant votes to commit, the
+transaction data is added to the redo-log which is replayed if the
+participant crashes. Participants also keep track of decided
+transactions so they know if they can commit the changes or not.
+Other participants must be contacted for their votes if the
+recovered participant does not know how the transaction was
+decided.</p>
+
+<h2>Comments</h2>
+
+<p>Sinfonia provides an interesting alternative to message passing in
+distributed systems, but requires application developer intervention
+to provide data locality, caching, and data placement. The paper
+details several optimizations, which are especially important for
+minitransaction performance. The paper also includes interesting
+applications built on top of Sinfonia: a file system and a group
+communication service, which show how Sinfonia can be used to
+implement real-world applications.</p>
+
+<p>Minitransactions are somewhat limited in what operations they can perform, but the
+operations they do support can be efficiently executed.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1489,232 +1635,6 @@ without looking at a real system with a concrete design.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/dsrg/blog/2013/06/06/pacifica/">PacificA</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-06T18:00:00-04:00" pubdate data-updated="true">Jun 6<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Why are we reading PacificA?</h2>
-
-<p>In the <a href="http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814">PacificA paper</a>,
-the authors describe very clearly how to
-properly implement a primary/backup replicated storage layer with
-strong consistency.</p>
-
-<p>At RICON East 2013, Kyle Kingsbury presented a performance evaluation
-of several commercial datastores. This evaluation is specifically
-geared toward assessing the correctness of distributed systems in the
-face of network partitions. Kyle has turned his talk into a <a
-href="http://aphyr.com/tags/jepsen">series of blog posts</a>
-describing the not-so-encouraging results.</p>
-
-<p>In previous weeks we have discussed consensus protocols like Paxos and
-Raft that provide strong consistency to clients and are provably safe
-in the event of a network partition. However, many commercial
-datastores use some variation of primary/backup replication, and
-according to the above mentioned evaluation, do not behave as one
-would hope when the network misbehaves. So is there a (provably)
-correct way to implement primary/backup replication? PacificA proposes
-such an algorithm and presents an evaluation of a distributed log
-built atop this protocol.</p>
-
-<h2>The Protocol</h2>
-
-<h3>Configuration and Data Management</h3>
-
-<p>The PacificA protocol separates the responsibility for data storage
-from the task of configuration management. From the perspective of the
-servers participating in the primary/backup protocol, the
-configuration of the storage cluster is handled by an authoritative
-3rd party (a separate Paxos cluster in their implementation).</p>
-
-<h3>Replicating Data</h3>
-
-<p>The server designated as the current primary is responsible for
-interacting with clients. It handles all reads (from its committed
-state) and writes. When a write is requested, the primary assigns a
-sequence number to the operation and sends a <code>prepare</code>
-message all replicas. When a replica receives a <code>prepare</code>
-message, it adds the operation to its log and acknowledges the
-primary. When the primary receives an acknowledgement from all
-replicas it commits the operation and responds to the client. The
-commit point on the replicas is advanced in a subsequent message from
-the primary. This protocol preserves the Commit Invariant, which
-guarantees the following properties of the logs on the primary
-<code>P</code> and replicas <code>R</code>:</p>
-
-<p><code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube; prepared<sub>P,R</sub></code></p>
-
-<p>Because of this invariant, during failover recovery it is possible for
-a new primary (which is always a previous replica) to bring its commit
-point up to (and possibly past) the commit point of the previous
-primary while guaranteeing that the operations in its log are
-consistent with the previous primary&rsquo;s state.</p>
-
-<h3>Detecting Failures</h3>
-
-<p>The PacificA protocol uses a lease mechanism to detect failures in the
-system. The primary and replicas all track how long it has been since
-communicating with the others (using normal message traffic or with
-heartbeat messages injected during idle periods) and assume a failure
-has occurred if no communication occurs within a given timeout
-period. When a server realizes a failure, it stops processing messages
-and requests a configuration change from the 3rd party configuration
-manager. To prevent a situation where two servers believe they are the
-primary, the timeout periods differ depending on the server&rsquo;s current
-role. The primary will timeout if it has not heard from one of its
-replicas in a &ldquo;lease period&rdquo; of <code>T<sub>L</sub></code> seconds,
-whereas a replica will timeout if it has not heard from the primary in
-a &ldquo;grace period&rdquo; of <code>T<sub>G</sub></code> seconds. If
-<code>T<sub>L</sub> &lt; T<sub>G</sub></code> then the current primary
-will always realize the failure first (if it is still alive) and stop
-processing messages. It will also propose a new configuration first,
-allowing it to continue as the primary, which may mitigate disruptions
-to the service. Should the primary fail or become partitioned, the
-grace period will expire and one of the replicas will request to be
-the new primary.</p>
-
-<p>The appeal of this approach is its implementation simplicity.
-However, for a short period of time during our discussion we were
-convinced that this scheme could result in a situation where two
-servers believed they were the primary and could serve (possibly
-stale) reads, violating the strong consistency guarantee. The scenario
-involved a heartbeat <code>ACK</code> that was delayed by the network,
-extending the primary&rsquo;s lease but not the replica&rsquo;s grace period. It
-turns out we were wrong. A careful reading of the paper specifies that
-the lease period is measured from the <em>sending time</em> of the last
-acknowledged heartbeat. We had mistakenly used the reception time in
-our example, and had convinced ourselves that the protocol was
-flawed. While this is clearly our fault, it is a caution that even
-simple schemes can be implemented incorrectly, and would probably work
-under normal conditions before eventually causing big problems.</p>
-
-<h3>Changing Configurations</h3>
-
-<p>When a new primary is selected it must reconcile the state of the
-system using its log. It does so by sending new prepare messages for
-any operations that were prepared by the previous primary but not (to
-its knowledge) committed. This will bring its commit point up to or
-past that of the previous primary before responding to clients,
-preserving strong consistency. In addition, the other replicas must
-truncate their logs to purge any prepared operations that extend
-beyond the log of the new primary.</p>
-
-<p>When a new replica is brought online it must obtain the current state
-from another server before it can participate in replication. If
-starting cold, this could halt progress in the system for a long time,
-so replicas are allowed to join as candidates (their acks are not
-required for committing at the primary) while they catch up.</p>
-
-<p>As far as configuration changes go, this strategy appears to be fairly
-straightforward (especially after working through some of the
-subtleties in Raft).</p>
-
-<h2>Implementing a Distributed Log</h2>
-
-<p>The paper shifts focus and includes an explanation of how to implement
-three variations of a distributed log with features similar to
-Bigtable. We find this portion of the paper to be somewhat superfluous
-in the context of the primary/backup protocol.</p>
-
-<h2>Evaluation</h2>
-
-<p>The most interesting part of the evaluation is Figure 5. There are two
-portions of this graph that sparked discussion, from time 60-90 and
-160-300. The first occurs after the primary is killed and the second
-occurs after a replica is added.</p>
-
-<p>We were a bit shocked by the amount of time that the system was
-unavailable during failover (time 60-90). Part of this downtime is due
-to the reconciliation process of the new primary, but we suspect this
-is relatively short. Certainly, part of the problem is failure
-detection, which relies on timeouts. In this case, the lease period
-was 10 seconds and the grace period was 15 seconds. This means a good
-portion of that downtime is likely due to the replicas waiting to
-timeout and propose a new configuration. It prompted one reviewer to
-exclaim &ldquo;wow, timeouts are a real bummer&rdquo;.</p>
-
-<p>While the timeout scheme is simple to implement, it also must be
-tuned. You want the timeout to be long enough so that temporary
-hiccups in the network do not cause undue reconfigurations, but short
-enough so that a real failure is detected in a reasonable amount of
-time. It seems like the type of tuning parameter that may be hard to
-get right. It would have been nice to see an evaluation in which
-various lease/grace periods were tried in a failure scenario.</p>
-
-<p>During time 160-300 the server that was previously the primary (and
-was killed) rejoins the group as a secondary. What surprised us was
-the drop in client-perceived throughput by the addition of a replica,
-and how long it took for the system to recover. This re-emphasizes the
-need to set the timeouts correctly so that there is not a lot of churn
-in the configuration. Even when there is no change of primary, a
-reconfiguration causes a significant performance penalty (though it is
-still available).</p>
-
-<p>We were also curious about the read throughput in Figure 4. The total
-throughput seems shockingly low, but we reason this is due to disk
-throughput. The experiment performs random reads on a large dataset,
-which is partially contained in memory, several checkpoint files, and
-an on-disk image.</p>
-
-<h2>Discussion</h2>
-
-<p>We spent some time discussing when a primary/backup scheme might be
-used instead of a consensus algorithm like Paxos. The authors provide
-some pros and cons in the paper, most of which seem to be a wash
-(serving reads from a single server, external configuration) or in
-favor of Paxos (not bottlenecked by slowest server). The main reasons
-for preferring primary backup are simplicity and availability.</p>
-
-<p>The simplicity argument is easy to understand (Paxos can be confusing)
-but only to a certain extent. Paxos has become more accessible over
-time, with simpler explanations, available implementations, and
-variations that make it more practical. In addition, if the
-primary/backup protocol in this paper is implemented as suggested by
-the authors, then Paxos should be used to implement the configuration
-manager, requiring the need to implement Paxos anyway.</p>
-
-<p>The authors make an availability argument (versus consensus) in favor
-of their scheme. They claim, rightfully so, that their system can
-survive <em>n-1</em> failures within a replica group and still make progress
-(the remaining server is the primary with no backups). On the other
-hand, a consensus algorithm cannot make progress when a majority of
-the servers are unavailable. This is a valid argument if the service
-values availability over durability; that is, it prefers to make
-progress even if writes are only persisted to one server. If, however,
-the service is deployed for durability (e.g. with a QoS that requires
-writes are persisted to 3 servers) then a replica group of 5 servers
-would have the same availability as a Paxos group of the same size.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/dsrg/blog/page/2/">&larr; Older</a>
@@ -1728,6 +1648,10 @@ would have the same availability as a Paxos group of the same size.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2013/12/16/sinfonia/">Sinfonia</a>
+      </li>
     
       <li class="post">
         <a href="/dsrg/blog/2013/09/30/spark-streaming/">Discretized Streams</a>
