@@ -86,6 +86,23 @@ support automatic load-balancing or caching. Load-balancing and
 caching are left to the application developer who is given some
 load information by the system.
 
+Coordinator crashes are handled using a recovery coordinator, which
+is triggered when a transaction has not been committed or aborted
+after some timeout. The recovery coordinator asks each participant
+how it voted on that transaction, and the participant replies with
+its original vote if it had already voted or "ABORT" if it had not
+(remembering that it must abort this transaction in the future if
+the original coordinator reappears).
+
+Sinfonia uses a write-ahead redo-log for performance and fault-tolerance
+for the participants.  When a participant votes to commit, the
+transaction data is added to the redo-log which is replayed if the
+participant crashes. Participants also keep track of decided
+transactions so they know if they can commit the changes or not.
+Other participants must be contacted for their votes if the
+recovered participant does not know how the transaction was
+decided.
+
 ## Comments
 
 Sinfonia provides an interesting alternative to message passing in
@@ -96,3 +113,6 @@ minitransaction performance. The paper also includes interesting
 applications built on top of Sinfonia: a file system and a group
 communication service, which show how Sinfonia can be used to
 implement real-world applications.
+
+Minitransactions are somewhat limited in what operations they can perform, but the 
+operations they do support can be efficiently executed.
