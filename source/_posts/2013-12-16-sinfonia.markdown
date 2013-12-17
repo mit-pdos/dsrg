@@ -1,0 +1,72 @@
+---
+layout: post
+title: "Sinfonia"
+date: 2013-12-16 15:52
+comments: true
+categories: 
+---
+
+## Why did we read this paper?
+
+[Sinfonia](http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf)
+is a service that allows hosts to share application data in a
+fault-tolerent, scalable, and consistent manner using a novel
+minitransaction primitive. We read this paper because it provides
+an interesting alternative to message passing for building distributed
+systems.
+
+## Data Layout
+
+At a high level, Sinfonia provides multiple independent linear address spaces that live on "memory nodes." No structure is imposed on these address spaces, and they can contain arbitrary bytes of data. Data in Sinfonia is referenced using a pair: (memory-node-id, offset). Sinfonia does not perform automatic load balancing, and data placement is left to the application.
+
+## Minitransactions
+
+Operations on data take the form of "minitransactions," which are
+basically distributed compare and swap/read operations. A minitransaction
+consists of a triple (compare-set, write-set, read-set). Elements in the compare-set are tuples: (memory-node-id, offset, length, data) where the first three fields describe the location and size of the data to compare, and the last field is the value expected at that location. The write-set is the same, except that the last field is the value to write to the location. Elements in the read-set are similar, but they omit the data field.
+
+The minitransaction performs the following operation atomically:
+
+{% highlight c %}
+if compare-set comparisons match expected data {
+  Perform each write in write-set
+  Return each read in read-set
+}
+{% endhighlight %}
+
+For example, an atomic compare and swap operation on the first byte at memory node 0 (where the expected value is "5" and the new value is "6") would be:
+
+{% highlight python %}
+(
+    { (0, 0, 1, 5) },
+    { (0, 0, 1, 6) },
+    {}
+)
+{% endhighlight %}
+
+Minitransactions are committed using a 2-phase commit protocol where application nodes are coordinators and memory nodes are participants.
+
+## Design
+
+Overall, Sinfonia provides an alternative to message passing for
+implementing distributed systems. Rather than explicitly sending
+messages, applications describe operations on shared data in terms
+of minitransactions that are executed atomically using 2-phase
+commit.
+
+Sinfonia uses logging and replication to provide fault tolerance
+and reduce downtime. The design of Sinfonia, however, does not
+support automatic load-balancing or caching. Load-balancing and
+caching are left to the application developer who is given some,
+load information by the system.
+
+## Comments
+
+Sinfonia provides an interesting alternative to message passing in
+distributed systems, but requires application developer intervention
+to provide data locality, caching, and data placement. The paper
+details several optimizations, which are especially important for
+minitransaction performance. The paper also includes interesting
+applications built on top of Sinfonia: a file system and a group
+communication service, which show how Sinfonia can be used to
+implement real-world applications.
