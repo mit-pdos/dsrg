@@ -24,10 +24,10 @@ Consider a replica group of five nodes. The fast-path quorum size for five
 replicas is 3 (F + floor((F + 1)/2)), making the EPaxos fast-path quorum the
 same size as a simple majority. Let us name the replicas like so:
 
-{% highlight c %}
+<pre>
         A   B
       C   D   E
-{% endhighlight %}
+</pre>
 
 One situation that could be problematic occurs when a client completes two
 operations (which have side-effects i.e. writes), issuing one after the other
@@ -46,10 +46,10 @@ five replicas can tolerate two failures in EPaxos. However, the remaining
 replicas look like this (with subscripts representing which operation the
 replica has pre-accepted in its log):
 
-{% highlight c %}
+<pre>
         X   X
       C_1 D_1 E_2
-{% endhighlight %}
+</pre>
 
 At this point, each replica knows about only one of the two operations but not
 whether it is committed, and both operations conflict with each other (see the
