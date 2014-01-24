@@ -30,7 +30,7 @@ Replication
 
 [PacificA: Replication in Log-Based Distributed Storage Systems](http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814)
 
-[Chain Replication for Supporting High Throughput and Availability](http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf)
+[Chain Replication for Supporting High Throughput and Availability](https://www.usenix.org/legacy/event/osdi04/tech/full_papers/renesse/renesse.pdf)
 
 [Byzantine Chain Replication](http://www.cs.cornell.edu/home/rvr/newpapers/opodis2012.pdf)
 
