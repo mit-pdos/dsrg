@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2014-03-04T16:50:37-05:00</updated>
+  <updated>2014-03-04T19:14:21-05:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -43,11 +43,11 @@ same size as a simple majority. Let us name the replicas like so:</p>
 </pre>
 
 
-<p>One situation that could be problematic occurs when a client completes two
-operations (which have side-effects i.e. writes), issuing one after the other
-with the per-operation leader replying success for both, but then some failure
-occurs and the recovery protocol incorrectly orders the second operation before
-the first.</p>
+<p>One situation that could be problematic occurs when a client successfully
+completes one operation (which has side-effects i.e. writes), then issues
+another one, but then some failure occurs before the second operation completes
+and the recovery protocol incorrectly orders the second operation before the
+first.</p>
 
 <p>Suppose the first operation uses A as leader with C and D making up the other
 fast-path quorum members while the second operation uses B as leader with D and

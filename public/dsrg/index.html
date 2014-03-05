@@ -136,11 +136,11 @@ same size as a simple majority. Let us name the replicas like so:</p>
 </pre>
 
 
-<p>One situation that could be problematic occurs when a client completes two
-operations (which have side-effects i.e. writes), issuing one after the other
-with the per-operation leader replying success for both, but then some failure
-occurs and the recovery protocol incorrectly orders the second operation before
-the first.</p>
+<p>One situation that could be problematic occurs when a client successfully
+completes one operation (which has side-effects i.e. writes), then issues
+another one, but then some failure occurs before the second operation completes
+and the recovery protocol incorrectly orders the second operation before the
+first.</p>
 
 <p>Suppose the first operation uses A as leader with C and D making up the other
 fast-path quorum members while the second operation uses B as leader with D and
