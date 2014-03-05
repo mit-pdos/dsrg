@@ -4,7 +4,7 @@ title: "EPaxos"
 date: 2014-01-10 13:04
 comments: true
 categories: 
-published: false
+published: true
 ---
 
 [EPaxos](https://github.com/efficient/epaxos)

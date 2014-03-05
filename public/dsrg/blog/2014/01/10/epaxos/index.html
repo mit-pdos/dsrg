@@ -5,14 +5,14 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Discretized Streams - DSRG</title>
+  <title>EPaxos - DSRG</title>
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="Why did we read this paper? Discretized Streams: Fault Tolerant Computing at Scale
-describes additions to the
-Spark system to
-handle streaming data. &hellip;">
+  <meta name="description" content="EPaxos
+is a leaderless Paxos variant which tries to reduce latencies for
+a geo-distributed replica group by:
+1. enabling the client to use the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +21,7 @@ handle streaming data. &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming">
+  <link rel="canonical" href="http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos">
   <link href="/dsrg/favicon.png" rel="icon">
   <link href="/dsrg/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/dsrg/atom.xml" rel="alternate" title="DSRG" type="application/atom+xml">
@@ -85,7 +85,7 @@ handle streaming data. &hellip;">
   
   <header>
     
-      <h1 class="entry-title">Discretized Streams</h1>
+      <h1 class="entry-title">EPaxos</h1>
     
     
       <p class="meta">
@@ -101,80 +101,94 @@ handle streaming data. &hellip;">
   
 
 
-<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+<time datetime="2014-01-10T13:04:00-05:00" pubdate data-updated="true">Jan 10<span>th</span>, 2014</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2>Why did we read this paper?</h2>
+<div class="entry-content"><p><a href="https://github.com/efficient/epaxos">EPaxos</a>
+is a leaderless Paxos variant which tries to reduce latencies for
+a geo-distributed replica group by:
+1. enabling the client to use the replica with the lowest round-trip latency as the operation leader
+2. optimistically skipping a round of replica communication by inter-operation conflict detection</p>
 
-<p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at Scale</a>
-describes additions to the
-<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a> system to
-handle streaming data. Compared to other streaming systems, Spark Streaming
-offers a more robust fault recovery and straggler handling strategies using the Resilient
-Distributed Dataset (RDD) memory abstraction. In addition to allowing parallel
-recovery, Spark Streaming is one of the first systems which can
-incorporate batch and interactive query models all within the same system.</p>
+<p>Instead of explaining EPaxos in this post, I will go over an example of how the
+recovery protocol works. This example confused me for a while since it is not
+actually addressed in the SOSP&#8217;13 paper &mdash; the full recovery protocol is in the
+<a href="http://www.pdl.cmu.edu/PDL-FTP/associated/CMU-PDL-13-111.pdf">tech report</a>.
+Therefore, I recommend you read the recovery protocol in the tech report before
+you start playing EPaxos with toy examples.</p>
 
-<h2>What are RDDs?</h2>
+<h2>Failure and recovery scenario</h2>
 
-<p>RDDs are a memory abstraction model described in the original
-<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
-paper.  They are immutable and only allow a specified set of
-functional-like transformations to be operated on them. However, these
-seemingly constraining properties allow the computation done on RDDs
-to be completely deterministic, and RDDs can be computed in parallel
-without having to worry about synchronization. Another really
-interesting aspect of RDDs are their resilience to faults. By tracking
-the lineage of transformations done on RDDs, we can reconstruct any
-lost RDDs by simply retracing the lineage and recomputing from the
-source RDDs.</p>
+<p>Consider a replica group of five nodes. The fast-path quorum size for five
+replicas is 3 (F + floor((F + 1)/2)), making the EPaxos fast-path quorum the
+same size as a simple majority. Let us name the replicas like so:</p>
 
-<h2>Stream Discretization</h2>
+<pre>
+        A   B
+      C   D   E
+</pre>
 
-<p>Spark Streaming is different from other streaming systems in that it
-discretizes streaming input using a sliding window. The discretized input are
-turned into RDDs and Spark Streaming can then perform small batch operations on
-them as it would have in general batched mode. By converting the input streaming
-data into batched RDDs, Spark Streaming can easily intermix between the
-streaming model and the general batched model because it operates over the same
-RDD abstraction.</p>
 
-<h2>Tracking</h2>
+<p>One situation that could be problematic occurs when a client completes two
+operations (which have side-effects i.e. writes), issuing one after the other
+with the per-operation leader replying success for both, but then some failure
+occurs and the recovery protocol incorrectly orders the second operation before
+the first.</p>
 
-<p>Typically, streaming systems employ a constant operator model in which several
-constantly running workers wait for streaming data, operate on them, and output
-the data. Spark Streaming differs from this model in that it expresses all the
-operations done on the data through the RDDs. The worker nodes maintain no
-state of their own. If state is needed to operate on the data, Spark Streaming
-employs a special track operation, which provides access to a key-value store
-(structured as an RDD). The state for any data can be stored as a value in the
-key-value store and can be accessed again using the same key.</p>
+<p>Suppose the first operation uses A as leader with C and D making up the other
+fast-path quorum members while the second operation uses B as leader with D and
+E as quorum members. Furthermore, let&rsquo;s say that A fast-path commits operation
+1, responding success to the client but crashing right before it sends &ldquo;commit&rdquo;
+messages to C and D. Then, B sends pre-accepts to D and E (without operation 1
+in the deps because B doesn&rsquo;t know about operation 1) and also crashes. The
+system has suffered two failures but must recover and continue operation since
+five replicas can tolerate two failures in EPaxos. However, the remaining
+replicas look like this (with subscripts representing which operation the
+replica has pre-accepted in its log):</p>
 
-<h2>Parallel Recovery</h2>
+<pre>
+        X   X
+      C_1 D_1 E_2
+</pre>
 
-<p>When a fault occurs, the Spark Streaming model simply recalculates the RDDs that
-have been destroyed by retracing through the lineage of the graph. However,
-because the RDDs are immutable and deterministic, recomputation can be performed
-in parallel both in time and partition. This allows Spark Streaming model to
-have fault-recovery times on the order of seconds and tens of seconds, while
-existing systems take minutes.</p>
 
-<h2>Stragglers</h2>
+<p>At this point, each replica knows about only one of the two operations but not
+whether it is committed, and both operations conflict with each other (see the
+tech report section 6.2 number 6 for exactly what &ldquo;conflicts&rdquo; means). But when
+C, D, or E initiates recovery for operations 1 and 2, how does it know which
+operation, if any, was fast-path committed and in which order?</p>
 
-<p>Once again because RDDs are immutable and deterministic, Spark Streaming can
-perform speculative replication to handle any stragglers. It is not a problem if
-an RDD is computed twice because transformations on an RDD is deterministic, so
-no synchronization needs to take place when actually storing the RDD.</p>
+<p>Turns out we can figure out this mess if we know the leaders for both
+operations &mdash; this is exactly what EPaxos does in this situation. If the leader
+of an operation, alpha, is in the fast-path quorum of a different operation,
+beta, then beta could not have been fast-path committed if the pre-accept
+messages for alpha do not contain beta in deps.</p>
 
-<h2>Comments</h2>
+<p>The recovery would proceed as follows. Suppose C initiates recovery for
+operation 1. First, it asks the fast-path quorum what their logs contain. C
+observes that at least floor((F + 1)/2) replicas (C and D) have pre-accepted an
+operation with the identical default attributes, and then tries to convince
+other replicas to accept the operation until at least F + 1 have accepted it.
+When C asks E to accept operation 1, E refuses since operation 1 conflicts with
+operation 2 and E has already pre-accepted operation 2. Therefore, C will defer
+the recovery of operation 1 (section 6.2, step 7-e) and instead try to recover
+the operation it conflicts with, operation 2.</p>
 
-<p>Overall, using RDDs to operate on streaming data provides a nice clean solution
-for fault-recovery and stragglers. Also, this idea of discretizing streaming
-data could lead to interesting future work in the area.</p>
+<p>For the recovery of operation 2, replicas C and D will not accept operation 2
+and will respond with the conflicting operation and the identity of the leader
+for the conflicting operation. The recovering replica will now observe that the
+leader for operation 1, replica A, is in the fast-path quorum for operation 2,
+but that A clearly didn&rsquo;t know about operation 2; otherwise it would have
+listed operation 2 as a dependency for operation 1 in the pre-accept messages.
+Thus operation 2 could not have been fast-path accepted. Operation 2 would then
+be filled with a no-op and the recovery of operation 1 would be resolved,
+concluding that operation 1 was fast-path committed (note that it is always
+safe to conclude that an operation was fast-path committed if there are no
+conflicts, even if the operation in question wasn&rsquo;t).</p>
 </div>
 
 
@@ -197,7 +211,7 @@ data could lead to interesting future work in the area.</p>
   
 
 
-<time datetime="2013-09-30T16:00:00-04:00" pubdate data-updated="true">Sep 30<span>th</span>, 2013</time>
+<time datetime="2014-01-10T13:04:00-05:00" pubdate data-updated="true">Jan 10<span>th</span>, 2014</time>
       
 
 
@@ -205,7 +219,7 @@ data could lead to interesting future work in the area.</p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos/" data-via="" data-counturl="http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos/" >Tweet</a>
   
   
   
@@ -214,10 +228,8 @@ data could lead to interesting future work in the area.</p>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/dsrg/blog/2013/09/30/spanstore/" title="Previous Post: SPANStore">&laquo; SPANStore</a>
+        <a class="basic-alignment left" href="/dsrg/blog/2013/12/16/sinfonia/" title="Previous Post: Sinfonia">&laquo; Sinfonia</a>
       
-      
-        <a class="basic-alignment right" href="/dsrg/blog/2013/12/16/sinfonia/" title="Next Post: Sinfonia">Sinfonia &raquo;</a>
       
     </p>
   </footer>
@@ -315,8 +327,8 @@ data could lead to interesting future work in the area.</p>
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/';
-        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2013/09/30/spark-streaming/';
+        var disqus_identifier = 'http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos/';
+        var disqus_url = 'http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos/';
         var disqus_script = 'embed.js';
       
     (function () {

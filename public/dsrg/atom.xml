@@ -4,7 +4,7 @@
   <title><![CDATA[DSRG]]></title>
   <link href="http://pdos.csail.mit.edu/dsrg/atom.xml" rel="self"/>
   <link href="http://pdos.csail.mit.edu/dsrg/"/>
-  <updated>2014-01-24T12:30:22-05:00</updated>
+  <updated>2014-03-04T16:50:37-05:00</updated>
   <id>http://pdos.csail.mit.edu/dsrg/</id>
   <author>
     <name><![CDATA[DSRG]]></name>
@@ -12,6 +12,95 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[EPaxos]]></title>
+    <link href="http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos/"/>
+    <updated>2014-01-10T13:04:00-05:00</updated>
+    <id>http://pdos.csail.mit.edu/dsrg/blog/2014/01/10/epaxos</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/efficient/epaxos">EPaxos</a>
+is a leaderless Paxos variant which tries to reduce latencies for
+a geo-distributed replica group by:
+1. enabling the client to use the replica with the lowest round-trip latency as the operation leader
+2. optimistically skipping a round of replica communication by inter-operation conflict detection</p>
+
+<p>Instead of explaining EPaxos in this post, I will go over an example of how the
+recovery protocol works. This example confused me for a while since it is not
+actually addressed in the SOSP&#8217;13 paper &mdash; the full recovery protocol is in the
+<a href="http://www.pdl.cmu.edu/PDL-FTP/associated/CMU-PDL-13-111.pdf">tech report</a>.
+Therefore, I recommend you read the recovery protocol in the tech report before
+you start playing EPaxos with toy examples.</p>
+
+<h2>Failure and recovery scenario</h2>
+
+<p>Consider a replica group of five nodes. The fast-path quorum size for five
+replicas is 3 (F + floor((F + 1)/2)), making the EPaxos fast-path quorum the
+same size as a simple majority. Let us name the replicas like so:</p>
+
+<pre>
+        A   B
+      C   D   E
+</pre>
+
+
+<p>One situation that could be problematic occurs when a client completes two
+operations (which have side-effects i.e. writes), issuing one after the other
+with the per-operation leader replying success for both, but then some failure
+occurs and the recovery protocol incorrectly orders the second operation before
+the first.</p>
+
+<p>Suppose the first operation uses A as leader with C and D making up the other
+fast-path quorum members while the second operation uses B as leader with D and
+E as quorum members. Furthermore, let&rsquo;s say that A fast-path commits operation
+1, responding success to the client but crashing right before it sends &ldquo;commit&rdquo;
+messages to C and D. Then, B sends pre-accepts to D and E (without operation 1
+in the deps because B doesn&rsquo;t know about operation 1) and also crashes. The
+system has suffered two failures but must recover and continue operation since
+five replicas can tolerate two failures in EPaxos. However, the remaining
+replicas look like this (with subscripts representing which operation the
+replica has pre-accepted in its log):</p>
+
+<pre>
+        X   X
+      C_1 D_1 E_2
+</pre>
+
+
+<p>At this point, each replica knows about only one of the two operations but not
+whether it is committed, and both operations conflict with each other (see the
+tech report section 6.2 number 6 for exactly what &ldquo;conflicts&rdquo; means). But when
+C, D, or E initiates recovery for operations 1 and 2, how does it know which
+operation, if any, was fast-path committed and in which order?</p>
+
+<p>Turns out we can figure out this mess if we know the leaders for both
+operations &mdash; this is exactly what EPaxos does in this situation. If the leader
+of an operation, alpha, is in the fast-path quorum of a different operation,
+beta, then beta could not have been fast-path committed if the pre-accept
+messages for alpha do not contain beta in deps.</p>
+
+<p>The recovery would proceed as follows. Suppose C initiates recovery for
+operation 1. First, it asks the fast-path quorum what their logs contain. C
+observes that at least floor((F + 1)/2) replicas (C and D) have pre-accepted an
+operation with the identical default attributes, and then tries to convince
+other replicas to accept the operation until at least F + 1 have accepted it.
+When C asks E to accept operation 1, E refuses since operation 1 conflicts with
+operation 2 and E has already pre-accepted operation 2. Therefore, C will defer
+the recovery of operation 1 (section 6.2, step 7-e) and instead try to recover
+the operation it conflicts with, operation 2.</p>
+
+<p>For the recovery of operation 2, replicas C and D will not accept operation 2
+and will respond with the conflicting operation and the identity of the leader
+for the conflicting operation. The recovering replica will now observe that the
+leader for operation 1, replica A, is in the fast-path quorum for operation 2,
+but that A clearly didn&rsquo;t know about operation 2; otherwise it would have
+listed operation 2 as a dependency for operation 1 in the pre-accept messages.
+Thus operation 2 could not have been fast-path accepted. Operation 2 would then
+be filled with a no-op and the recovery of operation 1 would be resolved,
+concluding that operation 1 was fast-path committed (note that it is always
+safe to conclude that an operation was fast-path committed if there are no
+conflicts, even if the operation in question wasn&rsquo;t).</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sinfonia]]></title>

@@ -9,9 +9,10 @@
   <meta name="author" content="DSRG">
 
   
-  <meta name="description" content="Why did we read this paper? Sinfonia
-is a service that allows hosts to share application data in a
-fault-tolerent, scalable, and consistent manner &hellip;">
+  <meta name="description" content="EPaxos
+is a leaderless Paxos variant which tries to reduce latencies for
+a geo-distributed replica group by:
+1. enabling the client to use the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,6 +82,122 @@ fault-tolerent, scalable, and consistent manner &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/dsrg/blog/2014/01/10/epaxos/">EPaxos</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-10T13:04:00-05:00" pubdate data-updated="true">Jan 10<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="https://github.com/efficient/epaxos">EPaxos</a>
+is a leaderless Paxos variant which tries to reduce latencies for
+a geo-distributed replica group by:
+1. enabling the client to use the replica with the lowest round-trip latency as the operation leader
+2. optimistically skipping a round of replica communication by inter-operation conflict detection</p>
+
+<p>Instead of explaining EPaxos in this post, I will go over an example of how the
+recovery protocol works. This example confused me for a while since it is not
+actually addressed in the SOSP&#8217;13 paper &mdash; the full recovery protocol is in the
+<a href="http://www.pdl.cmu.edu/PDL-FTP/associated/CMU-PDL-13-111.pdf">tech report</a>.
+Therefore, I recommend you read the recovery protocol in the tech report before
+you start playing EPaxos with toy examples.</p>
+
+<h2>Failure and recovery scenario</h2>
+
+<p>Consider a replica group of five nodes. The fast-path quorum size for five
+replicas is 3 (F + floor((F + 1)/2)), making the EPaxos fast-path quorum the
+same size as a simple majority. Let us name the replicas like so:</p>
+
+<pre>
+        A   B
+      C   D   E
+</pre>
+
+
+<p>One situation that could be problematic occurs when a client completes two
+operations (which have side-effects i.e. writes), issuing one after the other
+with the per-operation leader replying success for both, but then some failure
+occurs and the recovery protocol incorrectly orders the second operation before
+the first.</p>
+
+<p>Suppose the first operation uses A as leader with C and D making up the other
+fast-path quorum members while the second operation uses B as leader with D and
+E as quorum members. Furthermore, let&rsquo;s say that A fast-path commits operation
+1, responding success to the client but crashing right before it sends &ldquo;commit&rdquo;
+messages to C and D. Then, B sends pre-accepts to D and E (without operation 1
+in the deps because B doesn&rsquo;t know about operation 1) and also crashes. The
+system has suffered two failures but must recover and continue operation since
+five replicas can tolerate two failures in EPaxos. However, the remaining
+replicas look like this (with subscripts representing which operation the
+replica has pre-accepted in its log):</p>
+
+<pre>
+        X   X
+      C_1 D_1 E_2
+</pre>
+
+
+<p>At this point, each replica knows about only one of the two operations but not
+whether it is committed, and both operations conflict with each other (see the
+tech report section 6.2 number 6 for exactly what &ldquo;conflicts&rdquo; means). But when
+C, D, or E initiates recovery for operations 1 and 2, how does it know which
+operation, if any, was fast-path committed and in which order?</p>
+
+<p>Turns out we can figure out this mess if we know the leaders for both
+operations &mdash; this is exactly what EPaxos does in this situation. If the leader
+of an operation, alpha, is in the fast-path quorum of a different operation,
+beta, then beta could not have been fast-path committed if the pre-accept
+messages for alpha do not contain beta in deps.</p>
+
+<p>The recovery would proceed as follows. Suppose C initiates recovery for
+operation 1. First, it asks the fast-path quorum what their logs contain. C
+observes that at least floor((F + 1)/2) replicas (C and D) have pre-accepted an
+operation with the identical default attributes, and then tries to convince
+other replicas to accept the operation until at least F + 1 have accepted it.
+When C asks E to accept operation 1, E refuses since operation 1 conflicts with
+operation 2 and E has already pre-accepted operation 2. Therefore, C will defer
+the recovery of operation 1 (section 6.2, step 7-e) and instead try to recover
+the operation it conflicts with, operation 2.</p>
+
+<p>For the recovery of operation 2, replicas C and D will not accept operation 2
+and will respond with the conflicting operation and the identity of the leader
+for the conflicting operation. The recovering replica will now observe that the
+leader for operation 1, replica A, is in the fast-path quorum for operation 2,
+but that A clearly didn&rsquo;t know about operation 2; otherwise it would have
+listed operation 2 as a dependency for operation 1 in the pre-accept messages.
+Thus operation 2 could not have been fast-path accepted. Operation 2 would then
+be filled with a no-op and the recovery of operation 1 would be resolved,
+concluding that operation 1 was fast-path committed (note that it is always
+safe to conclude that an operation was fast-path committed if there are no
+conflicts, even if the operation in question wasn&rsquo;t).</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1491,150 +1608,6 @@ has seens commits up to that request.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/dsrg/blog/2013/06/13/cheriton-and-skeen/">Cheriton and Skeen</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-13T16:21:00-04:00" pubdate data-updated="true">Jun 13<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Why did we read this paper?</h2>
-
-<p>Though from 1993, in its time <a href="http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf">this paper</a>
- sparked some controversy,
-provoking an impassioned <a href="http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf">response</a>.
-  We wanted to understand the debate
-about the question of providing ordering guarantees as part of the network.</p>
-
-<h2>What is CATOCS?</h2>
-
-<p>CATOCS stands for &ldquo;causally and totally ordered communication.&rdquo;  It means that
-messages are delivered in the order they are sent, as specified by a
-<em>happens-before</em> relationship.  A synonym for happens-before is
-<em>causally-precedes</em>.  The following is the definition of happens-before:</p>
-
-<p><em>Happens-before</em>: m1 happens before m2 if there exists a P such that
-m1 is sent or received at P before P sends m2.</p>
-
-<p>Under causal ordering, concurrent writes may be seen in different
-orders at different participants.</p>
-
-<p><em>Total ordering</em> is a stronger property; it ensures that messages are
-delivered to all participants in the same order.</p>
-
-<h2>What is wrong with CATOCS?</h2>
-
-<p>Cheriton and Skeen make the point that ensuring CATOCS in the network
-is prohibitively expensive, and since most applications need something
-stronger than CATOCS anyway (such as transactional consistency), there
-is no point in doing so.  They claim that CATOCS violates the
-<a href="http://en.wikipedia.org/wiki/End-to-end_principle">End To End principle</a>,
-which states that application-specific functionality should reside at
-the end nodes of a network, instead of the intermediary nodes.  It is
-worth noting that this principle is frequently misapplied.</p>
-
-<p>They identify the following limitations in CATOCS systems:</p>
-
-<ul>
-<li><p>Can&rsquo;t say &ldquo;for sure&rdquo;</p>
-
-<p>There are almost always hidden channels in a group of nodes, or
-methods of communication not captured by the network.  For example,
-processes might all write to a shared database, and writes seen at
-that database might not preserve CATOCS.  Similarly, threads on a
-single machine might share memory.</p>
-
-<p>They use a contrived example of an independent &ldquo;FIRE&rdquo; message
-appearing before an unrelated &ldquo;FIRE OUT&rdquo; message, and thus the
-system might appear to not be in a &ldquo;FIRE&rdquo; state, because it
-misapplied the unrelated &ldquo;FIRE OUT&rdquo;.</p></li>
-<li><p>Can&rsquo;t say &ldquo;together&rdquo;</p>
-
-<p>As stated above, applications often require transactional semantics.
-CATOCS does not help with the serialization or atomicity between
-<em>groups</em> of messages.  A system with this property obviates the need
-for CATOCS.</p></li>
-<li><p>Can&rsquo;t say &ldquo;whole story&rdquo;</p>
-
-<p>Happens-before might not be enough.  Applications might require
-linearizability or sequential consistency.</p></li>
-<li><p>Can&rsquo;t say &ldquo;efficiently&rdquo;</p>
-
-<p>They claim CATOCS protocols don&rsquo;t show any efficiency gains over
-state-level techniques, and in fact are very inefficient.
-Unfortunately the paper does not provide actuala measurements.</p>
-
-<p>False causality could be an issue; happens-before enforces ordering
-that the application might not care about.</p></li>
-</ul>
-
-
-<p>Cheriton and Skeen would prefer to see state-level and
-application-specific ordering techniques.</p>
-
-<h2>A Response</h2>
-
-<p>Birman sees this paper as a critique of Isis, and claims that Cheriton
-and Skeen misrepresented the true debate.  CATOCS should not be
-considered in isolation, but when transactional semantics are
-required, techniques like <em>virtual synchrony</em> should be used in
-conjunction with CATOCS.</p>
-
-<p>Birman makes the point that application developers should not even
-need to consider their semantic ordering needs, instead the network
-should provide guarantees for them, reducing user-visible design
-complexity.</p>
-
-<p>He also claims that their assumptions about overhead are completely off.</p>
-
-<h2>Conclusion</h2>
-
-<p>This seems founded in a more general debate &mdash; should systems developers aim
-for efficiency and performance first, giving application developers
-total control but leaving them to layer safety accordingly, or should they
-apply an unknown cost to all users, making strong semantics an
-indelible part of the system?</p>
-
-<p>In the space of datastores, the former argument seems to have &ldquo;won&rdquo;.
-Most application developers do not run their databases with
-serializability or even other forms of slightly weaker consistency.
-There is a move towards general key/value stores which do not provide
-transactions or any ordering guarantees and might not necessarily pay
-the penalty of writing to disk for durability.  It seems as though
-application developers have chosen performance over safety, and
-developed techniques to accomodate inconsistencies on their own (one
-of which might be simply ignoring them).</p>
-
-<p>We found it extremely difficult to reason about these two papers
-without looking at a real system with a concrete design.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/dsrg/blog/page/2/">&larr; Older</a>
@@ -1648,6 +1621,10 @@ without looking at a real system with a concrete design.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/dsrg/blog/2014/01/10/epaxos/">EPaxos</a>
+      </li>
     
       <li class="post">
         <a href="/dsrg/blog/2013/12/16/sinfonia/">Sinfonia</a>
