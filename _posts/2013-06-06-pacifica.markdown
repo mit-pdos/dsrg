@@ -5,8 +5,6 @@ date: 2013-06-06 18:00
 comments: true
 ---
 
-## Why are we reading PacificA?
-
 In the [PacificA
 paper](http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814),
 the authors describe very clearly how to properly implement a

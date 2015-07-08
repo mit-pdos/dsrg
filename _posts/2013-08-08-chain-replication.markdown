@@ -5,8 +5,6 @@ date: 2013-08-08 15:00
 comments: true
 ---
 
-## Why did we read this paper?
-
 [Chain
 Replication](http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf)
 is a paper from '04 by Renesse and Schneider. The system is interesting,

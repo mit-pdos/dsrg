@@ -5,8 +5,6 @@ date: 2013-09-30 16:00
 comments: true
 ---
 
-## Why did we read this paper?
-
 Several cloud providers provide storage in many data centers globally,
 and customers can use simple PUTs and GETs to store and retrieve data
 without dealing with the complexities of the storage infrastructure.

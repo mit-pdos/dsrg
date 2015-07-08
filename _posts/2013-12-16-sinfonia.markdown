@@ -5,8 +5,6 @@ date: 2013-12-16 15:52
 comments: true
 ---
 
-## Why did we read this paper?
-
 [Sinfonia](http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf)
 is a service that allows hosts to share application data in a
 fault-tolerant, scalable, and consistent manner using a novel

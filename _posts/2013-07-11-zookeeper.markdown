@@ -5,8 +5,6 @@ date: 2013-07-11 15:00
 comments: true
 ---
 
-## Why did we read this paper?
-
 [Zookeeper](http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf)
 is a practical system with replicated storage used by Yahoo!.  We are
 interested in understanding what replication protocol Zookeeper uses,

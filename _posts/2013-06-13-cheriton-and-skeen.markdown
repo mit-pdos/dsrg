@@ -5,8 +5,6 @@ date: 2013-06-13 16:21
 comments: true
 ---
 
-## Why did we read this paper?
-
 Though from 1993, in its time [this
 paper](http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf) sparked
 some controversy, provoking an impassioned

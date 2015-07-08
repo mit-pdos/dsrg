@@ -5,8 +5,6 @@ date: 2013-07-03 16:00
 comments: true
 ---
 
-## Why did we read this paper?
-
 Several of the papers we've read recently have focused on sophisticated,
 generic fault tolerance abstractions based on complex protocols.
 [Thialfi](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf)

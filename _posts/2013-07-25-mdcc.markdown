@@ -5,8 +5,6 @@ date: 2013-07-25 12:00
 comments: true
 ---
 
-## Why did we read about MDCC?
-
 There is a write performance trade off when consistently replicating
 across multiple data centers due to the high latency when sending
 messages between data centers (often > 100ms).  Existing protocols use

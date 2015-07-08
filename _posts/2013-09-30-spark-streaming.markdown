@@ -5,8 +5,6 @@ date: 2013-09-30 16:00
 comments: true
 ---
 
-## Why did we read this paper?
-
 [Discretized Streams: Fault Tolerant Computing at
 Scale](http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf) describes
 additions to the
