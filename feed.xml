@@ -4,10 +4,10 @@
     <title>Distributed Systems Reading Group</title>
     <description>DSRG is a Distributed Systems Reading Group at MIT. We meet once a week on the 9th floor of Stata to discuss distributed systems research papers, and cover papers from conferences like SOSP, OSDI, PODC, VLDB, and SIGMOD. We try to have a healthy mix of current systems papers and older seminal papers.
 </description>
-    <link>http://mit-pdos.github.io/dsrg/</link>
-    <atom:link href="http://mit-pdos.github.io/dsrg/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 08 Jul 2015 11:59:07 -0400</pubDate>
-    <lastBuildDate>Wed, 08 Jul 2015 11:59:07 -0400</lastBuildDate>
+    <link>http://mit-pdos.github.io/</link>
+    <atom:link href="http://mit-pdos.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 08 Jul 2015 12:48:48 -0400</pubDate>
+    <lastBuildDate>Wed, 08 Jul 2015 12:48:48 -0400</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -92,8 +92,8 @@ safe to conclude that an operation was fast-path committed if there are no
 conflicts, even if the operation in question wasn’t).&lt;/p&gt;
 </description>
         <pubDate>Fri, 10 Jan 2014 13:04:00 -0500</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2014/01/10/epaxos.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2014/01/10/epaxos.html</guid>
+        <link>http://mit-pdos.github.io/2014/01/10/epaxos.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2014/01/10/epaxos.html</guid>
         
         
       </item>
@@ -208,8 +208,8 @@ implement real-world applications.&lt;/p&gt;
 operations they do support can be efficiently executed.&lt;/p&gt;
 </description>
         <pubDate>Mon, 16 Dec 2013 15:52:00 -0500</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/12/16/sinfonia.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/12/16/sinfonia.html</guid>
+        <link>http://mit-pdos.github.io/2013/12/16/sinfonia.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/12/16/sinfonia.html</guid>
         
         
       </item>
@@ -285,8 +285,8 @@ for fault-recovery and stragglers. Also, this idea of discretizing streaming
 data could lead to interesting future work in the area.&lt;/p&gt;
 </description>
         <pubDate>Mon, 30 Sep 2013 16:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/09/30/spark-streaming.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/09/30/spark-streaming.html</guid>
+        <link>http://mit-pdos.github.io/2013/09/30/spark-streaming.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/09/30/spark-streaming.html</guid>
         
         
       </item>
@@ -357,8 +357,8 @@ reduce the complexity involved. A lot of the paper relies on the objective
 function, and there are not many new distributed system concepts.&lt;/p&gt;
 </description>
         <pubDate>Mon, 30 Sep 2013 16:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/09/30/spanstore.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/09/30/spanstore.html</guid>
+        <link>http://mit-pdos.github.io/2013/09/30/spanstore.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/09/30/spanstore.html</guid>
         
         
       </item>
@@ -404,8 +404,8 @@ The chain replication protocol is quite simple: All read requests are sent to th
 &lt;p&gt;The system still has some potential for improvement. As the experiments clearly show, performance decreases with every failure. This could easily be fixed by allowing for servers to be added not only as tail, but also as head or middle server.&lt;/p&gt;
 </description>
         <pubDate>Thu, 08 Aug 2013 15:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/08/08/chain-replication.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/08/08/chain-replication.html</guid>
+        <link>http://mit-pdos.github.io/2013/08/08/chain-replication.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/08/08/chain-replication.html</guid>
         
         
       </item>
@@ -729,8 +729,8 @@ violating safety.&lt;/p&gt;
 
 </description>
         <pubDate>Thu, 25 Jul 2013 12:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/07/25/mdcc.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/07/25/mdcc.html</guid>
+        <link>http://mit-pdos.github.io/2013/07/25/mdcc.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/07/25/mdcc.html</guid>
         
         
       </item>
@@ -820,8 +820,8 @@ This means that more than 70% of requests are served from local cache, with only
 
 </description>
         <pubDate>Thu, 18 Jul 2013 15:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/07/18/coralcdn.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/07/18/coralcdn.html</guid>
+        <link>http://mit-pdos.github.io/2013/07/18/coralcdn.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/07/18/coralcdn.html</guid>
         
         
       </item>
@@ -912,8 +912,8 @@ would work.&lt;/p&gt;
 
 </description>
         <pubDate>Thu, 11 Jul 2013 15:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/07/11/zookeeper.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/07/11/zookeeper.html</guid>
+        <link>http://mit-pdos.github.io/2013/07/11/zookeeper.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/07/11/zookeeper.html</guid>
         
         
       </item>
@@ -1038,8 +1038,8 @@ have generally scaled better, and we found it interesting to see this
 revisited and reinforced from a very different perspective.&lt;/p&gt;
 </description>
         <pubDate>Wed, 03 Jul 2013 16:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/07/03/thialfi.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/07/03/thialfi.html</guid>
+        <link>http://mit-pdos.github.io/2013/07/03/thialfi.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/07/03/thialfi.html</guid>
         
         
       </item>
@@ -1258,8 +1258,8 @@ then reads can be served at backups where a backup will reply to a client if it
 has seens commits up to that request.&lt;/p&gt;
 </description>
         <pubDate>Thu, 20 Jun 2013 18:00:00 -0400</pubDate>
-        <link>http://mit-pdos.github.io/dsrg/2013/06/20/vr-revisited.html</link>
-        <guid isPermaLink="true">http://mit-pdos.github.io/dsrg/2013/06/20/vr-revisited.html</guid>
+        <link>http://mit-pdos.github.io/2013/06/20/vr-revisited.html</link>
+        <guid isPermaLink="true">http://mit-pdos.github.io/2013/06/20/vr-revisited.html</guid>
         
         
       </item>
