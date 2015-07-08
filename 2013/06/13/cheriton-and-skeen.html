@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Cheriton and Skeen</title>
+  <meta name="description" content="Why did we read this paper?">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/06/13/cheriton-and-skeen.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Cheriton and Skeen</h1>
+    <p class="post-meta">Jun 13, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
+
+<p>Though from 1993, in its time <a href="http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf">this paper</a>
+ sparked some controversy,
+provoking an impassioned <a href="http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf">response</a>.
+  We wanted to understand the debate
+about the question of providing ordering guarantees as part of the network.</p>
+
+<h2 id="what-is-catocs">What is CATOCS?</h2>
+
+<p>CATOCS stands for “causally and totally ordered communication.”  It means that
+messages are delivered in the order they are sent, as specified by a
+<em>happens-before</em> relationship.  A synonym for happens-before is
+<em>causally-precedes</em>.  The following is the definition of happens-before:</p>
+
+<p><em>Happens-before</em>: m1 happens before m2 if there exists a P such that
+m1 is sent or received at P before P sends m2.</p>
+
+<p>Under causal ordering, concurrent writes may be seen in different
+orders at different participants.</p>
+
+<p><em>Total ordering</em> is a stronger property; it ensures that messages are
+delivered to all participants in the same order.</p>
+
+<h2 id="what-is-wrong-with-catocs">What is wrong with CATOCS?</h2>
+
+<p>Cheriton and Skeen make the point that ensuring CATOCS in the network
+is prohibitively expensive, and since most applications need something
+stronger than CATOCS anyway (such as transactional consistency), there
+is no point in doing so.  They claim that CATOCS violates the 
+<a href="http://en.wikipedia.org/wiki/End-to-end_principle">End To End principle</a>,
+which states that application-specific functionality should reside at
+the end nodes of a network, instead of the intermediary nodes.  It is
+worth noting that this principle is frequently misapplied.</p>
+
+<p>They identify the following limitations in CATOCS systems:</p>
+
+<ul>
+  <li>
+    <p>Can’t say “for sure”</p>
+
+    <p>There are almost always hidden channels in a group of nodes, or
+methods of communication not captured by the network.  For example,
+processes might all write to a shared database, and writes seen at
+that database might not preserve CATOCS.  Similarly, threads on a
+single machine might share memory.</p>
+
+    <p>They use a contrived example of an independent “FIRE” message
+appearing before an unrelated “FIRE OUT” message, and thus the
+system might appear to not be in a “FIRE” state, because it
+misapplied the unrelated “FIRE OUT”.</p>
+  </li>
+  <li>
+    <p>Can’t say “together”</p>
+
+    <p>As stated above, applications often require transactional semantics.
+CATOCS does not help with the serialization or atomicity between
+<em>groups</em> of messages.  A system with this property obviates the need
+for CATOCS.</p>
+  </li>
+  <li>
+    <p>Can’t say “whole story”</p>
+
+    <p>Happens-before might not be enough.  Applications might require
+linearizability or sequential consistency.</p>
+  </li>
+  <li>
+    <p>Can’t say “efficiently”</p>
+
+    <p>They claim CATOCS protocols don’t show any efficiency gains over
+state-level techniques, and in fact are very inefficient.
+Unfortunately the paper does not provide actuala measurements.</p>
+
+    <p>False causality could be an issue; happens-before enforces ordering
+that the application might not care about.</p>
+  </li>
+</ul>
+
+<p>Cheriton and Skeen would prefer to see state-level and
+application-specific ordering techniques.</p>
+
+<h2 id="a-response">A Response</h2>
+
+<p>Birman sees this paper as a critique of Isis, and claims that Cheriton
+and Skeen misrepresented the true debate.  CATOCS should not be
+considered in isolation, but when transactional semantics are
+required, techniques like <em>virtual synchrony</em> should be used in
+conjunction with CATOCS.</p>
+
+<p>Birman makes the point that application developers should not even
+need to consider their semantic ordering needs, instead the network
+should provide guarantees for them, reducing user-visible design
+complexity.</p>
+
+<p>He also claims that their assumptions about overhead are completely off.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>This seems founded in a more general debate – should systems developers aim
+for efficiency and performance first, giving application developers
+total control but leaving them to layer safety accordingly, or should they
+apply an unknown cost to all users, making strong semantics an
+indelible part of the system?</p>
+
+<p>In the space of datastores, the former argument seems to have “won”.
+Most application developers do not run their databases with
+serializability or even other forms of slightly weaker consistency.
+There is a move towards general key/value stores which do not provide
+transactions or any ordering guarantees and might not necessarily pay
+the penalty of writing to disk for durability.  It seems as though
+application developers have chosen performance over safety, and
+developed techniques to accomodate inconsistencies on their own (one
+of which might be simply ignoring them).</p>
+
+<p>We found it extremely difficult to reason about these two papers
+without looking at a real system with a concrete design.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

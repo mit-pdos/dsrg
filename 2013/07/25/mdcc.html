@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>MDCC</title>
+  <meta name="description" content="Overview">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">MDCC</h1>
+    <p class="post-meta">Jul 25, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="overview">Overview</h2>
+
+<h3 id="why-did-we-read-about-mdcc">Why did we read about MDCC?</h3>
+
+<p>There is a write performance trade off when consistently replicating
+across multiple data centers due to the high latency when sending
+messages between data centers (often &gt; 100ms).  Existing protocols
+use forms of two phase commit which incur 3 blocking round trips
+between data centers.</p>
+
+<p><a href="https://amplab.cs.berkeley.edu/wp-content/uploads/2013/03/mdcc-eurosys13.pdf">MDCC</a> 
+introduces a new cross data center transaction protocol for
+transactions over key-value stores (no range scans) that uses many
+forms of Paxos to achieve one synchronous cross-data center message
+in the common case.</p>
+
+<p>A similar system, Megastore, uses per-shard Paxos groups to replicate
+between datacenters.  Unfortunately, heavy conflicts in Megastore
+reduce performance to around four transactions per second.</p>
+
+<h3 id="mdcc-goals">MDCC Goals</h3>
+
+<p>MDCC aims to have the following properties:</p>
+
+<p><strong>Read-commited isolation</strong>: Transactions never read records
+that have not been fully committed.  The paper notes that this is
+the form that most commercial and open source databases provide,
+so ensuring this level of consistency is sufficient.</p>
+
+<p><strong>No lost updates</strong>: This is when transaction T1 reads a record X,
+another transaction T2 commits an update to X, then T1 commits a
+write to X which overwrites T2’s commit without having ever read
+it.</p>
+
+<p><strong>Non-stale reads</strong>: Be able to ensure that reads are always of the
+most recent value.</p>
+
+<p><strong>Low latency</strong>: Minimize number of <em>synchronous</em> roundtrips – in
+this case to one.</p>
+
+<p><strong>Costs scale to true transaction overlap</strong>: There should not be
+large fixed costs incurred for each transaction commit.  Rather,
+the costs should be proportional to the amount of actual contention
+between transactions.</p>
+
+<p><strong>Integrity Constraints</strong>: Support some forms of integrity Constraints.
+The paper discusses FIELD &gt;/=/&lt; VALUE type constraints.</p>
+
+<h3 id="key-ideas">Key Ideas</h3>
+
+<ul>
+  <li>Paxos per record
+    <ul>
+      <li>Awesome – could shuffle record ownership depending on access patterns!</li>
+    </ul>
+  </li>
+  <li>Optimistic concurrency control (keep write sets)</li>
+  <li>During Paxos, rather than propose the new value, propose an <em>option</em> to
+update the new value.  If the option succeeds, then a later write can safely
+set the value asynchronously.</li>
+  <li>Move more logic into quorum nodes than in regular Paxos
+    <ul>
+      <li>Decide write-write conflicts</li>
+      <li>Enforce integrity constraints</li>
+    </ul>
+  </li>
+  <li>Reduce roundtrips via
+    <ul>
+      <li>multi-Paxos: select master every N commits</li>
+      <li>Fast Paxos: clients directly talk to quorum nodes</li>
+    </ul>
+  </li>
+  <li>Reduce conflicts
+    <ul>
+      <li>Generalized Paxos: commutative operations</li>
+      <li>“Demarcation protocol” conservatively figures out how many conservativy ops are allowed</li>
+    </ul>
+  </li>
+  <li>Failure
+    <ul>
+      <li>Send client state to every node on commit (every record’s quorom)
+        <ul>
+          <li>write set, xact id</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="questions">Questions</h3>
+
+<ul>
+  <li>How does a per-record protocol affect/enable fine-grained tuple placement?</li>
+  <li>What to do to make repeatable reads work?</li>
+  <li>How does Fast Paxos work?</li>
+  <li>How powerful/efficient is the demarcation protocol?</li>
+  <li>How do you run range-queries or queries that need indexes?</li>
+</ul>
+
+<h2 id="how-mdcc-is-built-up">How MDCC is built up.</h2>
+
+<p>The MDCC paper flows by identifying issues with the best solution
+proposed so far, and introducing a new technique to resolve the
+issues.  This post will flow in a similar manner.</p>
+
+<h3 id="per-record-paxos">Per-record Paxos</h3>
+
+<p>Megastore is slow because it runs Paxos at a per shard granularity,
+causing false conflicts.  What if we ran Paxos per record?</p>
+
+<p>Paxos on a record runs as follows:</p>
+
+<ul>
+  <li>up to 1 roundtrip for client to tell master “I want to commit my transaction”</li>
+  <li>1 roundtrip to elect master for record</li>
+  <li>1 roundtrip to set the value (learn the value)</li>
+  <li>1 roundtrip to make value visible (can be async)</li>
+</ul>
+
+<h3 id="multi-record-transactions">Multi-record Transactions</h3>
+
+<p>The key idea is to add logic into the acceptor nodes to perform
+write-write detection.</p>
+
+<p>If I want to commit records A and B, I run Paxos for each record.<br />
+When running Paxos, instead of setting the values in the second round, 
+send an <em>option</em> containing the record’s read and write versions. 
+If there’s no write conflict, the node returns OK, otherwise NO</p>
+
+<p>If I hear OK for every record, I tell each record’s quorums to write
+“commit” into their option log.  Otherwise I write “abort”.  <strong>This
+is different than SQL transaction aborts!</strong>.</p>
+
+<p>Also, quorum nodes are only allowed to accept options if all previous
+options have been decided (written “commit” or “abort”).  Otherwise
+write-write conflicts can’t be correctly detected.</p>
+
+<h3 id="supporting-failures">Supporting Failures</h3>
+
+<p>The following sequence of actions could block all nodes participating
+in a transaction.</p>
+
+<ul>
+  <li>I send options to acceptors for records A and B.</li>
+  <li>They accept and respond to me.  The options are undecided, so they can’t accept
+anything else until I write a “commit” or “abort” in the options.</li>
+  <li>I go on vacation before writing anything.</li>
+</ul>
+
+<p>I was the only one that knew what other records were updated in my
+transaction!  So the participating nodes can’t make anymore progress
+until I’m back from vacation.</p>
+
+<p>The solution is to send my transaction state (transaction id and
+write set) along with the options.  That way if I disappear, each
+record’s quorum can make a clone of me using the transaction state.</p>
+
+<p><strong>At this point, multi-record transactions using per-record Paxos
+“works”.  Everything after this point is to make Paxos consensus run
+faster</strong></p>
+
+<h3 id="multi-paxos">Multi-Paxos</h3>
+
+<p>We still require 3 roundtrips to commit (send to master, elect master,
+pick option).  We can use Paxos to elect a master for a block of
+rounds which amortizes the cost of electing a master to 0 (assuming
+the masters are stable).</p>
+
+<p>The communication is now</p>
+
+<ul>
+  <li>up to 1 roundtrip for client to tell master “I want to commit my transaction”</li>
+  <li>0 roundtrips (amortized) to elect master for record</li>
+  <li>1 roundtrip to send option to acceptors</li>
+  <li>1 asynchronous roundtrip to write “commit”/”abort” on options</li>
+  <li>1 asynchronous roundtrip (can be bundled with other messages) to
+make commit visible</li>
+</ul>
+
+<h3 id="fast-paxos">Fast-Paxos</h3>
+
+<p>We still need two synchronous roundtrips – one to contact the master
+if it is in another datacenter, and one to send the options.  Can we
+avoid the former message?</p>
+
+<p>Yes! Fast Paxos is lets clients bypass the master to directly send
+options to the quorum nodes.  Recall that the master’s job is to
+serialize the log entries.  If we want to de away with the master,
+Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
+quorum responds OK, then the client can consider the option committed.
+Otherwise it falls back to normal Paxos with some details.</p>
+
+<p>None of us had read the 
+<a href="http://research.microsoft.com/pubs/64624/tr-2005-112.pdf">fast-Paxos paper</a> 
+so we were ill-equipped
+to work through why this section of the paper works. Read below for
+how we <em>think</em> Fast Paxos works based on first principles.  Read
+the fast-Paxos paper to actually understand how it works.</p>
+
+<h3 id="generalized-paxos">Generalized-Paxos</h3>
+
+<p>If my operations are all commutative, I want to avoid the cost of
+serialization.</p>
+
+<p>Normal Paxos only allows 1 value update per round.  Generalized Paxos
+allows M as long as those values are commutative.  For example, if in
+the same round David wants to increment record A by 1 and Jane wants
+to increment record A by 1, then the value of A is 2 regardless of the
+log order on any of the quorum nodes.</p>
+
+<p>What this means is the acceptors aren’t simply writing values
+anymore, they also understand “delta operations”, how they commute,
+and how to apply them.</p>
+
+<h3 id="integrity-constrains">Integrity constrains</h3>
+
+<p>If I want to support integrity constraints (e.g., A &gt;= 0) the
+acceptors need to understand and enforce them.</p>
+
+<p>The paper restricts the domains of the delta operations (e.g., can
+only add/subtract 1 or 2) and conservatively computes the maximum
+number of operations that are allowed before it is at all possible
+(on a single node and any combinations of transactions in a quorum)
+that the constraint is violated.</p>
+
+<p>This is useful because many transactions are simply updating counters.</p>
+
+<h3 id="thats-a-lot-of-steps-are-there-any-more-tricks">That’s a lot of steps, are there any more tricks?</h3>
+
+<p>We usually want reads to go fast, but if I’m reading record A and
+the A’s replica in my datacenter was not in the quorum, then it
+would give me stale data.  One way to get around this is to make
+sure the replica in my data center is <em>always</em> in the quorum.  This
+works if my data center is the only one reading this record.  For
+example, if each data center is collecting the local weather data
+and replicating the data, it can be pretty sure that only people
+living around the data center will want the local data.</p>
+
+<p>Fast-Paxos is really really bad (in terms of cross datacenter
+roundtrips) if a collision happens.  For those cases it makes more
+sense to stick with a master and use Multi-Paxos.  Figuring out
+when to use each is important.  The paper provides a heuristic that
+sticks with multi-Paxos and periodically tries to “upgrade” to
+fast-Paxos.</p>
+
+<p>That’s it!  MDCC collects a number of Paxos variants and puts them
+together into a nice cross data-center commit protocol.</p>
+
+<h2 id="a-note-on-fast-paxos">A Note on Fast Paxos</h2>
+
+<p>The following was derived from first principles.</p>
+
+<p>The fast-Paxos protocol was described (briefly) in the paper as</p>
+
+<blockquote>
+  <p>Any app-server can propose an option directly to the storage
+(quorum) nodes, which in turn
+promise only to accept the first proposed option.  Simple majority
+quorums, however, are
+no longer sufficient to leran a value and ensure safeness…
+If a proposer receives an acknowledgment from a fast quorum, the
+value is safe and
+guaranteed to be committed.</p>
+</blockquote>
+
+<p>A classical Paxos quorum requires the property that for any two
+quorums, <code>Qc1</code> and <code>Qc2</code>,</p>
+
+<p><code>Qc1 INTERSECT Qc2</code> != Empty set</p>
+
+<p>For Fast Paxos it has the requirement that for a fast quorums,
+<code>Qf1</code> and <code>Qf2</code> and regular quorum <qc>,</qc></p>
+
+<p><code>Qf1 INTERSECT Qf2 INTERSECT Qc</code> != empty set</p>
+
+<p>One of our questions was why a simple majority, <code>Qc</code>, is
+insufficient and we need a <code>Qf &gt; Qc</code>. The following is an
+example of when it fails.</p>
+
+<p>Safety, or correctness, in Paxos means that “At most one value can be
+learned”.  One example is that even with <em>f</em> failures, a committed log
+position stays committed.</p>
+
+<p>Lets say <code>Qf = Qc = majority</code>.  Consider the following logical
+proposals and their quorums where each column is the state of an
+acceptor (1-5), and each row is the state at one Paxos round.  C1, C2,
+C3 are clients (proposers).  C1 commits A and manages to communicate
+with acceptors 1-3, C2 commits B and so on.</p>
+
+<pre><code>    1 2 3 4 5
+C1  A A A
+C2      B B B
+C3  C C   C
+</code></pre>
+
+<p>Say C1 and C2 happen concurrently, and C3 happens later (as a normal
+Paxos round, or Fast Paxos).  Then the actual acceptances and what
+round each node thinks its in may be</p>
+
+<pre><code> 1 2 3 4 5 Round (as understood by local node)
+ A A A B B 1
+     B     2
+</code></pre>
+
+<p>Now if C3 tries to set C, its quorum could be 1,2,4 which don’t
+know that A won in round 1 and B “won” in round 2, because they
+have only seen values for round 1, so the nodes happily accept C
+in (what they think is) round 2.  This effectively overwrites B,
+violating safety.</p>
+
+<pre><code> 1 2 3 4 5 Round (as understood by local node)
+ A A A B B 1
+ C C B C   2
+</code></pre>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

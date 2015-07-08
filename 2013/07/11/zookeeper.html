@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Zookeeper</title>
+  <meta name="description" content="Why did we read this paper?">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Zookeeper</h1>
+    <p class="post-meta">Jul 11, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
+
+<p><a href="http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf">Zookeeper</a> 
+is a practical system with replicated storage used by Yahoo!. 
+We are interested in understanding what replication protocol Zookeeper uses, why they 
+needed a <em>new</em> replication protocol, what applications/services people build upon it,
+and what features are required to make such a replicated storage system
+practical.</p>
+
+<p>Also, Zookeeper has pretty good performance for a replication
+protocol. It is interesting to see how it works.</p>
+
+<h2 id="what-is-zookeeper">What is Zookeeper</h2>
+
+<p>The Zookeeper design consists of three components - replicated storage,
+relaxed consistent caching at clients, and detection of client failures.</p>
+
+<h2 id="replication">Replication</h2>
+
+<p>Zookeeper provides a key/value data model, where keys are named like the paths of
+a file system and values are arbitrary blobs. They call each key/value pair a
+<em>Znode</em>. Each Znode must be accessed with a full path so that Zookeeper doesn’t
+have to implement open/close. Each value has a version number and an internal
+sequence number, which they use a lot when building applications/services presented
+in the paper. Each Znode can have its own value, and a collection of children.</p>
+
+<p>Data can be accessed with get/set/create/delete methods. Zookeeper supports
+conditional versions of these operations too. For example, a client can say
+set the value of “/ds-reading/schedule” to “3pm,thursday” only if the Znode’s
+current version is 100. This feature is used widely in the the presented
+applications/services.</p>
+
+<p>Znodes are replicated via what they called Zab, an atomic broadcast protocol.
+Zab is their own replication protocol. It seems quite similar to viewstamped 
+replication (VR). The only difference I can tell is that Zab is special case
+of viewstamped based replication. Zab requires clients to send requests
+in order (thus they use TCP), but VR does not. Zab also requires the requests
+to be idempotent, so that a new leader can re-propose the most recent request
+without detecting duplicated requests.</p>
+
+<p>Despite Zab’s restriction for replication of only idempotent operations, Zookeeper does
+support non-idempotent operations. The trick is that for each potentially
+non-idempotent request, the leader converts it to idempotent requests by
+executing it locally.</p>
+
+<h2 id="relaxed-consisent-caching">Relaxed consisent caching</h2>
+
+<p>Another component of Zookeeper is relaxed consistent caching between clients
+and Zookeeper. When clients get data from Zookeeper, clients can cache it, and
+optionally register at Zookeeper to receive notifications if the accessed Znode
+changes.  Zookeeper will send notifications to caching clients ASYNCHRONOUSLY
+once the data is changed. The benefit of this is that updates don’t have to wait for
+invalidations to complete, thus they don’t suffer from the impact of client failure; 
+the downside is that now the client’s cache is not consistent with Zookeeper.</p>
+
+<p>The notification doesn’t contain the actual update, and each registration is
+triggered only once (the server deletes it once the notification is delivered).</p>
+
+<h2 id="detection-of-client-failures">Detection of client failures</h2>
+
+<p>Zookeeper supports a special Znode type called “ephemeral Znode” to detect the
+failure of clients.  If a session terminates, all ephemeral ZNodes created
+within that session are deleted. Services/applications can use it to detect
+failure. For example, Katta uses it to detect master failure.</p>
+
+<h2 id="other-design-choices">Other design choices</h2>
+
+<p>Zookeeper allows applications and services to choose their own level of consistency.  Zookeeper
+linearizes all writes. Reads are served from a local Zookeeper server, but a
+client can linearize reads using the sync() API.</p>
+
+<h2 id="comments">Comments</h2>
+
+<p>In all, we feel that ZooKeeper is cool. It provides building blocks that people
+can use to construct their own services with different consistency/performance
+requirements. It also simplifies the building of other services, as demonstrated
+in the paper.</p>
+
+<p>One thing we didn’t understand is why the paper makes the claim that
+ZooKeeper is not intended for general storage.  It seems like that
+would work.</p>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

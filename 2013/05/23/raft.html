@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>raft</title>
+  <meta name="description" content="Disclaimer:  This paper is still under submission.">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/05/23/raft.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">raft</h1>
+    <p class="post-meta">May 23, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <p>Disclaimer:  This paper is still under submission.</p>
+
+<h2 id="why-did-we-read-about-raft">Why did we read about Raft?</h2>
+
+<p><a href="ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf">Raft</a>
+ is a new consensus algorithm that is optimized for “ease of
+implementation”.  Its main purpose is to present a protocol that is
+more understandable than Paxos, which, for many practitioners, is
+difficult to implement correctly.  Viewstamped Replication is more
+similar to Raft, however it is far less popular than Paxos, so it is
+unfortunately not focused on in the paper.</p>
+
+<p>All of these consensus algorithms operate as long as a majority of
+servers are functioning.  So you would require 2f+1 servers to
+tolerate f failures.  Servers are assumed to fail by stopping, though
+they might recover with state from stable storage (such as disk).  We
+read this paper because there are very few consensus algorithms, and
+something that is easier to understand than Paxos sounds great!  Raft
+pros and cons</p>
+
+<p>The paper designs and ensures invariants around the data structure
+that Paxos, in practice, is used for – a replicated state machine
+log.  This abstraction is nice, because it is easier to think about
+operating on a sequential log and ensuring a small number of
+properties rather than running multiple independent instances of
+Paxos.  Raft assigns leaders on a per-term basis (i.e., epochs), and
+terms are used as an implicit coordination mechanism.  It also
+supports configuration changes (removing or adding nodes from the
+system) while still serving requests.</p>
+
+<p>The bulk of the paper is fairly digestible and it was nice that the
+mechanisms to ensure safety were concentrated in a small handful of
+subsections.  However distributed consensus is hard, so verifying
+Raft’s safety still took effort.  Many members of the reading group
+have a basic understanding of Paxos, so we didn’t necessarily feel
+that understanding Raft’s correctness was easier than understanding
+Paxos.</p>
+
+<p>One of the group members noted that he wrote an implementation of Raft
+from the paper and some basic tests “just worked”, which was
+surprising.  However, note that a production implementation of Raft
+would require many of the same things required to properly implement
+and run Paxos (see Paxos Made Live).  Namely, you’d have to consider
+and handle disk corruptions, safely implement snapshots, and use
+something like leases so that reads don’t always require running a
+round of the consensus algorithm.  These added features are necessary
+in a practical system, and would complicate a Raft implementation as
+much as a Paxos one.</p>
+
+<p>In terms of performance, Raft can add log entries with f+1 roundtrips
+total, whereas Paxos requires 2(f+1).  Paxos can be further optimized
+by using leaders, and both systems can benefit from batching log
+entries.  The space used for “understandability” experiments could
+have been better used to show more performance numbers or more
+explanation about correctness.</p>
+
+<h2 id="main-subtleties">Main Subtleties</h2>
+
+<p>One of the most interesting parts of the algorithm is the commit point
+for a log entry, or the point at which you can determine that even if
+f servers fail, the log entry will be present.  It turns out that
+because nodes perform leader election by consulting and sending only
+their log length and term number, a log entry that is simply on the
+majority of the nodes can still be overwritten when a new leader is
+elected.  The paper bolds the actual requirement:</p>
+
+<p>A log entry may only be considered committed if the entry is stored on
+a majority of the servers; in addition, at least one entry from the
+leader’s current term must also be stored on a majority of servers.</p>
+
+<p>Figure 7 shows how this can happen.  Consider this case with five
+servers, S1, S2, S3, S4, S5.  We use the notation Value:Term in each
+slot.  S1 is leader in term 2, and replicates an entry X for slot 2,
+it goes to 2 servers (S1, S2).</p>
+
+<pre>     
+slot    1     2
+S1     1:1  X:2
+S2     1:1  X:2
+S3     1:1
+S4     1:1
+S5     1:1
+</pre>
+
+<p>S1 crashes before it can finish replicating X:2, S5 is elected leader
+for term 3 (with votes from S3, S4, and S5) and stores Y in slot 2</p>
+
+<pre>
+slot    1     2
+S1     1:1  X:2
+S2     1:1  X:2
+S3     1:1
+S4     1:1
+S5     1:1  Y:3
+</pre>
+
+<p>S5 crashes before it can replicate Y, and S1 is elected leader again,
+now for term 4.  S1 finishes replicating X:2, and adds a new entry, Z
+in slot 3, but crashes before it can completely replicate it</p>
+
+<pre>
+slot    1     2     3
+S1     1:1  X:2   Z:4
+S2     1:1  X:2  
+S3     1:1  X:2
+S4     1:1
+S5     1:1  Y:3
+</pre>
+
+<p>S5 becomes leader for term 5 because it has the most recent term out
+of the remaining nodes.  S5 will force a Y into slot 2 (Note that S5
+has Y in slot 2 and S1,S2,S3 had an X in slot 2.)</p>
+
+<pre>
+slot    1     2     3
+S1     1:1  X:2   Z:4
+S2     1:1  Y:3 
+S3     1:1  Y:3
+S4     1:1
+S5     1:1  Y:3
+</pre>
+
+<p>Note that if S1 had gotten Z into two additional logs (two out of S2,
+S3, S4), then S5 could never have been elected leader, because its log
+was not long enough.</p>
+
+<p>We found this surprising.</p>
+
+<h2 id="conclusions">Conclusions</h2>
+
+<p>There are some nice aspects of Raft – the log as a first order
+primitive, the method of configuration changes, and only two RPCs
+(though one could argue AppendEntry is heavily overloaded).
+Unfortunately, the authors’ main point falls flat for two reasons:
+First, they primarily compare their system to Paxos while their system
+is much closer to Viewstamped Replication. They claim this is
+reasonable because Paxos is much more widely used. Second, they claim
+Raft is much simpler and easier to implement (compared to Paxos).
+However, in our reading, Raft didn’t appear to be any less subtle (it
+took effort to convince ourselves of the correctness of the example
+explained here) and several things that make Paxos difficult to
+implement are still evidenced in Raft.</p>
+
+<p>We don’t see many new consensus algorithms, so this was still very interesting to read and discuss.</p>
+
+<h2 id="open-questions">Open Questions</h2>
+
+<p>Did they make any comparisons between Raft and Paxos that couldn’t have been made between Paxos and VR?</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

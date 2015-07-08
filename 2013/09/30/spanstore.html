@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>SPANStore</title>
+  <meta name="description" content="Why did we read this paper?">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/09/30/spanstore.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">SPANStore</h1>
+    <p class="post-meta">Sep 30, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
+
+<p>Several cloud providers provide
+storage in many data centers globally, and customers can use simple PUTs and
+GETs to store and retrieve data without dealing with the complexities of the
+storage infrastructure. However, in reality, every storage system leaves
+replication across data centers to the application, and although replication
+across all data centers provides low latency, it is expensive.</p>
+
+<p><a href="http://doi.acm.org/10.1145/2517349.2522730">SPANStore: Cost-Effective Geo-Replicated Storage Spanning Multiple
+ Cloud Services</a> is the
+ first system that tries to solve this automatically, by minimizing the cost incurred by
+ latency-sensitive application providers.</p>
+
+<h2 id="what-is-spanstore">What is SPANStore?</h2>
+
+<p>SPANStore is a key-value store that provides a unified view of storage services
+present in several geographically distributed data centers. It spans data
+centers across multiple cloud providers and determines where to replicate every
+object and how to perform this replication. Finally, it reduces cost by
+minimizing the computing resources necessary to offer a global view of storage.</p>
+
+<h2 id="multi-cloud">Multi-Cloud</h2>
+
+<p>SPANStore uses multiple cloud providers to offer lower GET/PUT latencies.
+Also, this allows for lower cost by exploiting price decrepancies across
+providers to meet latency SLOs.</p>
+
+<h2 id="replication-policy">Replication Policy</h2>
+
+<p>PMan determines the replication policies in SPANStore. It requires 1) a
+characterization of SPANStore’s deployment, 2) the application’s latency, fault
+tolerance, and consistency requirements, and 3) a specification of the
+application’s workload as inputs.</p>
+
+<p>As output, PMan specifies 1) the set of data centers that maintain copies of all
+objects with that access set, and 2) at each data center in the access set,
+which of these copies SPANStore should read from and write to when an
+application VM issues a GET or PUT.</p>
+
+<h2 id="eventual-consistency">Eventual consistency</h2>
+
+<p>SPANStore can trade-off costs for storage, PUT/GET requests, and network
+transfers if the application requires only eventual consistency. SPANStore
+replicates objects at fewer data centers to reduce storage costs and PUT request
+costs. PMan address this trade-off between storage, networking, and PUT/GET
+request costs using a replication policy as a mixed integer program.</p>
+
+<h2 id="strong-consistency">Strong consistency</h2>
+
+<p>They rely on quorum consistency for strong consistency. They use asymmetric
+quorum sets and require an intersection of at least 2f + 1 data centers with the
+PUT replica set of every other data center in the access set.</p>
+
+<h2 id="comments">Comments</h2>
+
+<p>The main goal of this paper seems to be to minimize costs of deploying an application
+by trading off replication, network costs, storage costs, and latency. It seems
+that there is still a huge burden on developer to provide the correct inputs to
+PMan so that PMan can provide the best replication policy. This doesn’t seem to
+reduce the complexity involved. A lot of the paper relies on the objective
+function, and there are not many new distributed system concepts.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

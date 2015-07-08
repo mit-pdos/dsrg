@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CoralCDN</title>
+  <meta name="description" content="Why did we read this paper?">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/18/coralcdn.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">CoralCDN</h1>
+    <p class="post-meta">Jul 18, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
+
+<p><a href="http://www.coralcdn.org/docs/coral-nsdi04.pdf">CoralCDN</a>
+is a system that allows small websites or those with limited resources a method
+for remaining available in the face of flash-crowds. The system is interesting
+for a number of reasons: it is a live running system that the public can use,
+it’s peer to peer, self organizing, and also has a <a href="http://www.coralcdn.org/docs/coral-nsdi10.pdf">follow-up paper</a>
+that analyzes the system with five years of hindsight.</p>
+
+<h2 id="what-is-coralcdn">What is CoralCDN</h2>
+
+<p>CoralCDN is a content distribution network (CDN) built on top of the Coral
+indexing service.  The system can be described in its component parts: Coral
+DNS services, Coral HTTP proxy, and the Coral indexing service.</p>
+
+<h2 id="dns-functions">DNS Functions</h2>
+
+<p>Many of CoralCDN’s processes attempt to preserve locality in order to keep
+latency low. This starts with the DNS lookup by the end user’s browser.
+CoralCDN assumes that the resolver for the user’s browser is close to the
+end user on the network. It then picks a Coral HTTP proxy close to the source
+address of the DNS request.</p>
+
+<p>Specifically, CoralCDN keeps track of the latencies between the proxies and the
+user and creates levels.  The Coral DNS server can get a round trip time to the
+end user and only provide listings to proxies that fall within a given level.</p>
+
+<p>The DNS servers are also responsible for ensuring that the HTTP proxies that
+are returned to the end user are available, since a bad HTTP proxy will fail
+the user’s request. The DNS servers can do this by synchronously checking a
+proxy’s status with an RPC prior to releasing the DNS response.</p>
+
+<h2 id="the-http-proxy">The HTTP Proxy</h2>
+
+<p>The driving goal of the system is to shield origin servers from request
+stampedes. The Coral proxies therefore attempt to find the content within
+CoralCDN before going to the origin server. Additionally, when a proxy begins
+retrieval from the origin server, it inserts a short lived record into the
+Coral index so any additional servers that want the object will not
+simultaneously contact the origin.</p>
+
+<h2 id="the-indexing-service">The Indexing Service</h2>
+
+<p>One of the authors’ stated contributions of this work is the indexing system
+including a <em>distributed sloppy hash table</em> (DSHT).  Each node is given a 160 bit ID
+and holds key/value pairs with keys that are ‘close’ to the node’s ID.
+Additionally, each node maintains a routing table to other nodes. On a put or
+get, the request can be routed to successively closer nodes to toward the
+closest node.</p>
+
+<p>The service is considered <em>sloppy</em> because a key/value is not always stored at
+the closest node. The put process is completed in two phases. The first is a
+collection of hops to get to the closest node and forms a stack from the list
+of nodes. This phase ends when the storing node reaches the closest node or
+when it reaches one that is <em>full</em> and <em>loaded</em>. A full node is one that
+already stores <em>l</em> values for that key. A loaded node is one that is receiving
+more than <em>b</em> requests per minute.  In the second phase, the storing node
+attempts to place the value at the node on top of the stack. If that store
+fails for some reason, the storer pops the stack and tries again.</p>
+
+<p>Nodes are arranged in clusters based on their average pairwise latency. If that 
+latency is below a certain threshold, the cluster is said to be part of a
+specific level. A node can be part of multiple clusters but uses
+the same ID in each. This clustering allows a sequential search for a target
+value, beginning with low latency ‘close’ nodes and only proceeding to slower
+levels if needed.</p>
+
+<h2 id="comments">Comments</h2>
+
+<p>The idea of levels was interesting mostly because the latency thresholds allow
+the clusters to be self-organizing. Clearly, locality is important to a CDN.
+It does seem however, that simple static organization of nodes into clusters
+would be sufficient to allow latency locality.</p>
+
+<p>Though we didn’t technically read the follow-up paper, there is an interesting
+section on lessons learned. In the section on usage, the authors found
+that a small number of popular URLs account for a large percentage of the
+requests but that these requests take up relatively little room on the cache.
+This means that more than 70% of requests are served from local cache, with only
+7.1% retrieved from other Coral proxies.</p>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>

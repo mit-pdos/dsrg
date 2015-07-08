@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>PacificA</title>
+  <meta name="description" content="Why are we reading PacificA?">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/06/06/pacifica.html">
+  <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
+  <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Distributed Systems Reading Group</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/papers/">Papers</a>
+          
+        
+          
+          <a class="page-link" href="/schedule/">Schedule</a>
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+    <div class="page-content">
+      <div class="wrapper">
+        <aside class="recent-posts">
+  <h2>Recent posts</h2>
+  <ul>
+      
+        <li>
+          <span class="post-meta">Jan 10, 2014</span>
+          <h2>
+            <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Dec 16, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Sep 30, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Aug 8, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 25, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 18, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 11, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jul 3, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
+          </h2>
+        </li>
+      
+        <li>
+          <span class="post-meta">Jun 20, 2013</span>
+          <h2>
+            <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
+          </h2>
+        </li>
+      
+  </ul>
+</aside>
+<div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">PacificA</h1>
+    <p class="post-meta">Jun 6, 2013</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="why-are-we-reading-pacifica">Why are we reading PacificA?</h2>
+
+<p>In the <a href="http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814">PacificA paper</a>, 
+the authors describe very clearly how to
+properly implement a primary/backup replicated storage layer with
+strong consistency.</p>
+
+<p>At RICON East 2013, Kyle Kingsbury presented a performance evaluation
+of several commercial datastores. This evaluation is specifically
+geared toward assessing the correctness of distributed systems in the
+face of network partitions. Kyle has turned his talk into a <a href="http://aphyr.com/tags/jepsen">series of blog posts</a>
+describing the not-so-encouraging results.</p>
+
+<p>In previous weeks we have discussed consensus protocols like Paxos and
+Raft that provide strong consistency to clients and are provably safe
+in the event of a network partition. However, many commercial
+datastores use some variation of primary/backup replication, and
+according to the above mentioned evaluation, do not behave as one
+would hope when the network misbehaves. So is there a (provably)
+correct way to implement primary/backup replication? PacificA proposes
+such an algorithm and presents an evaluation of a distributed log
+built atop this protocol.</p>
+
+<h2 id="the-protocol">The Protocol</h2>
+
+<h3 id="configuration-and-data-management">Configuration and Data Management</h3>
+
+<p>The PacificA protocol separates the responsibility for data storage
+from the task of configuration management. From the perspective of the
+servers participating in the primary/backup protocol, the
+configuration of the storage cluster is handled by an authoritative
+3rd party (a separate Paxos cluster in their implementation).</p>
+
+<h3 id="replicating-data">Replicating Data</h3>
+
+<p>The server designated as the current primary is responsible for
+interacting with clients. It handles all reads (from its committed
+state) and writes. When a write is requested, the primary assigns a
+sequence number to the operation and sends a <code>prepare</code>
+message all replicas. When a replica receives a <code>prepare</code>
+message, it adds the operation to its log and acknowledges the
+primary. When the primary receives an acknowledgement from all
+replicas it commits the operation and responds to the client. The
+commit point on the replicas is advanced in a subsequent message from
+the primary. This protocol preserves the Commit Invariant, which
+guarantees the following properties of the logs on the primary
+<code>P</code> and replicas <code>R</code>:</p>
+
+<p><code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube; prepared<sub>P,R</sub></code></p>
+
+<p>Because of this invariant, during failover recovery it is possible for
+a new primary (which is always a previous replica) to bring its commit
+point up to (and possibly past) the commit point of the previous
+primary while guaranteeing that the operations in its log are
+consistent with the previous primary’s state.</p>
+
+<h3 id="detecting-failures">Detecting Failures</h3>
+
+<p>The PacificA protocol uses a lease mechanism to detect failures in the
+system. The primary and replicas all track how long it has been since
+communicating with the others (using normal message traffic or with
+heartbeat messages injected during idle periods) and assume a failure
+has occurred if no communication occurs within a given timeout
+period. When a server realizes a failure, it stops processing messages
+and requests a configuration change from the 3rd party configuration
+manager. To prevent a situation where two servers believe they are the
+primary, the timeout periods differ depending on the server’s current
+role. The primary will timeout if it has not heard from one of its
+replicas in a “lease period” of <code>T<sub>L</sub></code> seconds,
+whereas a replica will timeout if it has not heard from the primary in
+a “grace period” of <code>T<sub>G</sub></code> seconds. If
+<code>T<sub>L</sub> &lt; T<sub>G</sub></code> then the current primary
+will always realize the failure first (if it is still alive) and stop
+processing messages. It will also propose a new configuration first,
+allowing it to continue as the primary, which may mitigate disruptions
+to the service. Should the primary fail or become partitioned, the
+grace period will expire and one of the replicas will request to be
+the new primary.</p>
+
+<p>The appeal of this approach is its implementation simplicity.
+However, for a short period of time during our discussion we were
+convinced that this scheme could result in a situation where two
+servers believed they were the primary and could serve (possibly
+stale) reads, violating the strong consistency guarantee. The scenario
+involved a heartbeat <code>ACK</code> that was delayed by the network,
+extending the primary’s lease but not the replica’s grace period. It
+turns out we were wrong. A careful reading of the paper specifies that
+the lease period is measured from the <em>sending time</em> of the last
+acknowledged heartbeat. We had mistakenly used the reception time in
+our example, and had convinced ourselves that the protocol was
+flawed. While this is clearly our fault, it is a caution that even
+simple schemes can be implemented incorrectly, and would probably work
+under normal conditions before eventually causing big problems.</p>
+
+<h3 id="changing-configurations">Changing Configurations</h3>
+
+<p>When a new primary is selected it must reconcile the state of the
+system using its log. It does so by sending new prepare messages for
+any operations that were prepared by the previous primary but not (to
+its knowledge) committed. This will bring its commit point up to or
+past that of the previous primary before responding to clients,
+preserving strong consistency. In addition, the other replicas must
+truncate their logs to purge any prepared operations that extend
+beyond the log of the new primary.</p>
+
+<p>When a new replica is brought online it must obtain the current state
+from another server before it can participate in replication. If
+starting cold, this could halt progress in the system for a long time,
+so replicas are allowed to join as candidates (their acks are not
+required for committing at the primary) while they catch up.</p>
+
+<p>As far as configuration changes go, this strategy appears to be fairly
+straightforward (especially after working through some of the
+subtleties in Raft).</p>
+
+<h2 id="implementing-a-distributed-log">Implementing a Distributed Log</h2>
+
+<p>The paper shifts focus and includes an explanation of how to implement
+three variations of a distributed log with features similar to
+Bigtable. We find this portion of the paper to be somewhat superfluous
+in the context of the primary/backup protocol.</p>
+
+<h2 id="evaluation">Evaluation</h2>
+
+<p>The most interesting part of the evaluation is Figure 5. There are two
+portions of this graph that sparked discussion, from time 60-90 and
+160-300. The first occurs after the primary is killed and the second
+occurs after a replica is added.</p>
+
+<p>We were a bit shocked by the amount of time that the system was
+unavailable during failover (time 60-90). Part of this downtime is due
+to the reconciliation process of the new primary, but we suspect this
+is relatively short. Certainly, part of the problem is failure
+detection, which relies on timeouts. In this case, the lease period
+was 10 seconds and the grace period was 15 seconds. This means a good
+portion of that downtime is likely due to the replicas waiting to
+timeout and propose a new configuration. It prompted one reviewer to
+exclaim “wow, timeouts are a real bummer”.</p>
+
+<p>While the timeout scheme is simple to implement, it also must be
+tuned. You want the timeout to be long enough so that temporary
+hiccups in the network do not cause undue reconfigurations, but short
+enough so that a real failure is detected in a reasonable amount of
+time. It seems like the type of tuning parameter that may be hard to
+get right. It would have been nice to see an evaluation in which
+various lease/grace periods were tried in a failure scenario.</p>
+
+<p>During time 160-300 the server that was previously the primary (and
+was killed) rejoins the group as a secondary. What surprised us was
+the drop in client-perceived throughput by the addition of a replica,
+and how long it took for the system to recover. This re-emphasizes the
+need to set the timeouts correctly so that there is not a lot of churn
+in the configuration. Even when there is no change of primary, a
+reconfiguration causes a significant performance penalty (though it is
+still available).</p>
+
+<p>We were also curious about the read throughput in Figure 4. The total
+throughput seems shockingly low, but we reason this is due to disk
+throughput. The experiment performs random reads on a large dataset,
+which is partially contained in memory, several checkpoint files, and
+an on-disk image.</p>
+
+<h2 id="discussion">Discussion</h2>
+
+<p>We spent some time discussing when a primary/backup scheme might be
+used instead of a consensus algorithm like Paxos. The authors provide
+some pros and cons in the paper, most of which seem to be a wash
+(serving reads from a single server, external configuration) or in
+favor of Paxos (not bottlenecked by slowest server). The main reasons
+for preferring primary backup are simplicity and availability.</p>
+
+<p>The simplicity argument is easy to understand (Paxos can be confusing)
+but only to a certain extent. Paxos has become more accessible over
+time, with simpler explanations, available implementations, and
+variations that make it more practical. In addition, if the
+primary/backup protocol in this paper is implemented as suggested by
+the authors, then Paxos should be used to implement the configuration
+manager, requiring the need to implement Paxos anyway.</p>
+
+<p>The authors make an availability argument (versus consensus) in favor
+of their scheme. They claim, rightfully so, that their system can
+survive <em>n-1</em> failures within a replica group and still make progress
+(the remaining server is the primary with no backups). On the other
+hand, a consensus algorithm cannot make progress when a majority of
+the servers are unavailable. This is a valid argument if the service
+values availability over durability; that is, it prefers to make
+progress even if writes are only persisted to one server. If, however,
+the service is deployed for durability (e.g. with a QoS that requires
+writes are persisted to 3 servers) then a replica group of 5 servers
+would have the same availability as a Paxos group of the same size.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-968607-14']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+  </body>
+
+</html>
