@@ -13,3 +13,7 @@ url: "http://dsrg.pdos.csail.mit.edu"
 markdown: kramdown
 
 exclude: [vendor]
+
+gems:
+  - octopress-solarized
+  - octopress-codefence
