@@ -73,6 +73,15 @@
         <h2>
           <a class="post-link" href="/2014/01/10/epaxos.html">EPaxos</a>
         </h2>
+	<p>
+	  <p><a href="https://github.com/efficient/epaxos">EPaxos</a> is a leaderless Paxos
+variant which tries to reduce latencies for a geo-distributed replica
+group by enabling the client to use the replica with the lowest
+round-trip latency as the operation leader, and optimistically skipping
+a round of replica communication by inter-operation conflict detection</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -80,6 +89,16 @@
         <h2>
           <a class="post-link" href="/2013/12/16/sinfonia.html">Sinfonia</a>
         </h2>
+	<p>
+	  <p><a href="http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf">Sinfonia</a>
+is a service that allows hosts to share application data in a
+fault-tolerant, scalable, and consistent manner using a novel
+mini-transaction primitive. We read this paper because it provides an
+interesting alternative to message passing for building distributed
+systems.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -87,6 +106,20 @@
         <h2>
           <a class="post-link" href="/2013/09/30/spark-streaming.html">Discretized Streams</a>
         </h2>
+	<p>
+	  <p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at
+Scale</a> describes
+additions to the
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
+system to handle streaming data. Compared to other streaming systems,
+Spark Streaming offers a more robust fault recovery and straggler
+handling strategies using the Resilient Distributed Dataset (RDD) memory
+abstraction. In addition to allowing parallel recovery, Spark Streaming
+is one of the first systems which can incorporate batch and interactive
+query models all within the same system.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -94,6 +127,16 @@
         <h2>
           <a class="post-link" href="/2013/09/30/spanstore.html">SPANStore</a>
         </h2>
+	<p>
+	  <p>Several cloud providers provide storage in many data centers globally,
+and customers can use simple PUTs and GETs to store and retrieve data
+without dealing with the complexities of the storage infrastructure.
+However, in reality, every storage system leaves replication across data
+centers to the application, and although replication across all data
+centers provides low latency, it is expensive.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -101,6 +144,16 @@
         <h2>
           <a class="post-link" href="/2013/08/08/chain-replication.html">Chain Replication</a>
         </h2>
+	<p>
+	  <p><a href="http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf">Chain
+Replication</a>
+is a paper from ‘04 by Renesse and Schneider. The system is interesting,
+because it is a primary-backup system with an unconventional
+architecture that aimed to achieve high throughput and availability
+while maintaining strong consistency.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -108,6 +161,15 @@
         <h2>
           <a class="post-link" href="/2013/07/25/mdcc.html">MDCC</a>
         </h2>
+	<p>
+	  <p>There is a write performance trade off when consistently replicating
+across multiple data centers due to the high latency when sending
+messages between data centers (often &gt; 100ms).  Existing protocols use
+forms of two phase commit which incur 3 blocking round trips between
+data centers.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -115,6 +177,17 @@
         <h2>
           <a class="post-link" href="/2013/07/18/coralcdn.html">CoralCDN</a>
         </h2>
+	<p>
+	  <p><a href="http://www.coralcdn.org/docs/coral-nsdi04.pdf">CoralCDN</a> is a system
+that allows small websites or those with limited resources a method for
+remaining available in the face of flash-crowds. The system is
+interesting for a number of reasons: it is a live running system that
+the public can use, it’s peer to peer, self organizing, and also has a
+<a href="http://www.coralcdn.org/docs/coral-nsdi10.pdf">follow-up paper</a> that
+analyzes the system with five years of hindsight.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -122,6 +195,16 @@
         <h2>
           <a class="post-link" href="/2013/07/11/zookeeper.html">Zookeeper</a>
         </h2>
+	<p>
+	  <p><a href="http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf">Zookeeper</a>
+is a practical system with replicated storage used by Yahoo!.  We are
+interested in understanding what replication protocol Zookeeper uses,
+why they needed a <em>new</em> replication protocol, what applications/services
+people build upon it, and what features are required to make such a
+replicated storage system practical.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -129,6 +212,18 @@
         <h2>
           <a class="post-link" href="/2013/07/03/thialfi.html">Thialfi</a>
         </h2>
+	<p>
+	  <p>Several of the papers we’ve read recently have focused on sophisticated,
+generic fault tolerance abstractions based on complex protocols.
+<a href="http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf">Thialfi</a>
+offers a contrast: its approach to fault tolerance is intentionally
+simple, while at the same time being resilient to arbitrary (halting)
+failure, including entire data centers.  Thialfi’s approach to fault
+tolerance permeates the design of its abstraction, unlike Raft and VR,
+which provide general-purpose state machine replication.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -136,6 +231,17 @@
         <h2>
           <a class="post-link" href="/2013/06/20/vr-revisited.html">VR Revisited</a>
         </h2>
+	<p>
+	  <p><a href="http://pmg.csail.mit.edu/papers/vr-revisited.pdf">Viewstamped
+Replication</a> is a
+mechanism for providing replication through a Primary / Backup scheme.
+This paper provides a distilled view of this technique along with
+several optimizations that can be applied. In particular, this paper
+focuses solely on the Viewstamped Replication protocol, without looking
+at any specific implementation or uses.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -143,6 +249,16 @@
         <h2>
           <a class="post-link" href="/2013/06/13/cheriton-and-skeen.html">Cheriton and Skeen</a>
         </h2>
+	<p>
+	  <p>Though from 1993, in its time <a href="http://cs3.ist.unomaha.edu/~stanw/papers/93-catocs.pdf">this
+paper</a> sparked
+some controversy, provoking an impassioned
+<a href="http://www.csie.fju.edu.tw/~yeh/research/papers/os-reading-list/birman93response-to-cheriton.pdf">response</a>.
+We wanted to understand the debate about the question of providing
+ordering guarantees as part of the network.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -150,6 +266,14 @@
         <h2>
           <a class="post-link" href="/2013/06/06/pacifica.html">PacificA</a>
         </h2>
+	<p>
+	  <p>In the <a href="http://research.microsoft.com/apps/mobile/Publication.aspx?id=66814">PacificA
+paper</a>,
+the authors describe very clearly how to properly implement a
+primary/backup replicated storage layer with strong consistency.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -157,6 +281,15 @@
         <h2>
           <a class="post-link" href="/2013/05/30/spanner.html">Spanner</a>
         </h2>
+	<p>
+	  <p><a href="https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf">Spanner</a>
+is a highly distributed, externally consistent database developed by
+Google.  It provides replication and transactions over a geographically
+distributed set of servers.  Spanner uses time bounds, Paxos, and
+two-phase commit to ensure external consistency.</p>
+
+
+	</p>
       </li>
     
       <li>
@@ -164,6 +297,17 @@
         <h2>
           <a class="post-link" href="/2013/05/23/raft.html">Raft</a>
         </h2>
+	<p>
+	  <p><a href="ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf">Raft</a>
+is a new consensus algorithm that is optimized for “ease of
+implementation”.  Its main purpose is to present a protocol that is more
+understandable than Paxos, which, for many practitioners, is difficult
+to implement correctly.  Viewstamped Replication is more similar to
+Raft, however it is far less popular than Paxos, so it is unfortunately
+not focused on in the paper.</p>
+
+
+	</p>
       </li>
     
   </ul>

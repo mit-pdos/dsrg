@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>MDCC</title>
-  <meta name="description" content="Why did we read about MDCC?">
+  <meta name="description" content="There is a write performance trade off when consistently replicatingacross multiple data centers due to the high latency when sendingmessages between data ce...">
 
   <base href="/" />
   <link rel="stylesheet" href="/css/main.css">
@@ -147,9 +147,7 @@
   </header>
 
   <article class="post-content">
-    <h2 id="why-did-we-read-about-mdcc">Why did we read about MDCC?</h2>
-
-<p>There is a write performance trade off when consistently replicating
+    <p>There is a write performance trade off when consistently replicating
 across multiple data centers due to the high latency when sending
 messages between data centers (often &gt; 100ms).  Existing protocols use
 forms of two phase commit which incur 3 blocking round trips between

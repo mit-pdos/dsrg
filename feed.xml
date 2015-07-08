@@ -6,8 +6,8 @@
 </description>
     <link>http://dsrg.pdos.csail.mit.edu/</link>
     <atom:link href="http://dsrg.pdos.csail.mit.edu/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 08 Jul 2015 16:51:11 -0400</pubDate>
-    <lastBuildDate>Wed, 08 Jul 2015 16:51:11 -0400</lastBuildDate>
+    <pubDate>Wed, 08 Jul 2015 16:58:19 -0400</pubDate>
+    <lastBuildDate>Wed, 08 Jul 2015 16:58:19 -0400</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -104,9 +104,7 @@ there are no conflicts, even if the operation in question wasn’t).&lt;/p&gt;
     
       <item>
         <title>Sinfonia</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf&quot;&gt;Sinfonia&lt;/a&gt;
+        <description>&lt;p&gt;&lt;a href=&quot;http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf&quot;&gt;Sinfonia&lt;/a&gt;
 is a service that allows hosts to share application data in a
 fault-tolerant, scalable, and consistent manner using a novel
 mini-transaction primitive. We read this paper because it provides an
@@ -230,9 +228,7 @@ perform, but the operations they do support can be efficiently executed.&lt;/p&g
     
       <item>
         <title>Discretized Streams</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf&quot;&gt;Discretized Streams: Fault Tolerant Computing at
+        <description>&lt;p&gt;&lt;a href=&quot;http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf&quot;&gt;Discretized Streams: Fault Tolerant Computing at
 Scale&lt;/a&gt; describes
 additions to the
 &lt;a href=&quot;http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf&quot;&gt;Spark&lt;/a&gt;
@@ -313,9 +309,7 @@ area.&lt;/p&gt;
     
       <item>
         <title>SPANStore</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;Several cloud providers provide storage in many data centers globally,
+        <description>&lt;p&gt;Several cloud providers provide storage in many data centers globally,
 and customers can use simple PUTs and GETs to store and retrieve data
 without dealing with the complexities of the storage infrastructure.
 However, in reality, every storage system leaves replication across data
@@ -394,9 +388,7 @@ many new distributed system concepts.&lt;/p&gt;
     
       <item>
         <title>Chain Replication</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf&quot;&gt;Chain
+        <description>&lt;p&gt;&lt;a href=&quot;http://db2.usenix.org/events/osdi04/tech/full_papers/renesse/renesse.pdf&quot;&gt;Chain
 Replication&lt;/a&gt;
 is a paper from ‘04 by Renesse and Schneider. The system is interesting,
 because it is a primary-backup system with an unconventional
@@ -503,9 +495,7 @@ but also as head or middle server.&lt;/p&gt;
     
       <item>
         <title>MDCC</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-about-mdcc&quot;&gt;Why did we read about MDCC?&lt;/h2&gt;
-
-&lt;p&gt;There is a write performance trade off when consistently replicating
+        <description>&lt;p&gt;There is a write performance trade off when consistently replicating
 across multiple data centers due to the high latency when sending
 messages between data centers (often &amp;gt; 100ms).  Existing protocols use
 forms of two phase commit which incur 3 blocking round trips between
@@ -823,9 +813,7 @@ think is) round 2.  This effectively overwrites B, violating safety.&lt;/p&gt;
     
       <item>
         <title>CoralCDN</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://www.coralcdn.org/docs/coral-nsdi04.pdf&quot;&gt;CoralCDN&lt;/a&gt; is a system
+        <description>&lt;p&gt;&lt;a href=&quot;http://www.coralcdn.org/docs/coral-nsdi04.pdf&quot;&gt;CoralCDN&lt;/a&gt; is a system
 that allows small websites or those with limited resources a method for
 remaining available in the face of flash-crowds. The system is
 interesting for a number of reasons: it is a live running system that
@@ -919,9 +907,7 @@ proxies.&lt;/p&gt;
     
       <item>
         <title>Zookeeper</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf&quot;&gt;Zookeeper&lt;/a&gt;
+        <description>&lt;p&gt;&lt;a href=&quot;http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf&quot;&gt;Zookeeper&lt;/a&gt;
 is a practical system with replicated storage used by Yahoo!.  We are
 interested in understanding what replication protocol Zookeeper uses,
 why they needed a &lt;em&gt;new&lt;/em&gt; replication protocol, what applications/services
@@ -1017,9 +1003,7 @@ work.&lt;/p&gt;
     
       <item>
         <title>Thialfi</title>
-        <description>&lt;h2 id=&quot;why-did-we-read-this-paper&quot;&gt;Why did we read this paper?&lt;/h2&gt;
-
-&lt;p&gt;Several of the papers we’ve read recently have focused on sophisticated,
+        <description>&lt;p&gt;Several of the papers we’ve read recently have focused on sophisticated,
 generic fault tolerance abstractions based on complex protocols.
 &lt;a href=&quot;http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf&quot;&gt;Thialfi&lt;/a&gt;
 offers a contrast: its approach to fault tolerance is intentionally
@@ -1140,9 +1124,7 @@ reinforced from a very different perspective.&lt;/p&gt;
     
       <item>
         <title>VR Revisited</title>
-        <description>&lt;h2 id=&quot;why-are-we-reading-viewstamped-replication-revisited&quot;&gt;Why are we reading Viewstamped Replication Revisited?&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://pmg.csail.mit.edu/papers/vr-revisited.pdf&quot;&gt;Viewstamped
+        <description>&lt;p&gt;&lt;a href=&quot;http://pmg.csail.mit.edu/papers/vr-revisited.pdf&quot;&gt;Viewstamped
 Replication&lt;/a&gt; is a
 mechanism for providing replication through a Primary / Backup scheme.
 This paper provides a distilled view of this technique along with
