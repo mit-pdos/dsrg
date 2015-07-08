@@ -6,8 +6,8 @@
 </description>
     <link>http://dsrg.pdos.csail.mit.edu/</link>
     <atom:link href="http://dsrg.pdos.csail.mit.edu/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 08 Jul 2015 16:58:19 -0400</pubDate>
-    <lastBuildDate>Wed, 08 Jul 2015 16:58:19 -0400</lastBuildDate>
+    <pubDate>Wed, 08 Jul 2015 17:18:20 -0400</pubDate>
+    <lastBuildDate>Wed, 08 Jul 2015 17:18:20 -0400</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -96,8 +96,8 @@ always safe to conclude that an operation was fast-path committed if
 there are no conflicts, even if the operation in question wasn’t).&lt;/p&gt;
 </description>
         <pubDate>Fri, 10 Jan 2014 13:04:00 -0500</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2014/01/10/epaxos.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2014/01/10/epaxos.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2014/01/10/epaxos/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2014/01/10/epaxos/</guid>
         
         
       </item>
@@ -220,8 +220,8 @@ real-world applications.&lt;/p&gt;
 perform, but the operations they do support can be efficiently executed.&lt;/p&gt;
 </description>
         <pubDate>Mon, 16 Dec 2013 15:52:00 -0500</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia/</guid>
         
         
       </item>
@@ -301,8 +301,8 @@ discretizing streaming data could lead to interesting future work in the
 area.&lt;/p&gt;
 </description>
         <pubDate>Mon, 30 Sep 2013 16:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/09/30/spark-streaming.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/09/30/spark-streaming.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/09/30/spark-streaming/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/09/30/spark-streaming/</guid>
         
         
       </item>
@@ -380,8 +380,8 @@ A lot of the paper relies on the objective function, and there are not
 many new distributed system concepts.&lt;/p&gt;
 </description>
         <pubDate>Mon, 30 Sep 2013 16:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/09/30/spanstore.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/09/30/spanstore.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/09/30/spanstore/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/09/30/spanstore/</guid>
         
         
       </item>
@@ -487,8 +487,8 @@ easily be fixed by allowing for servers to be added not only as tail,
 but also as head or middle server.&lt;/p&gt;
 </description>
         <pubDate>Thu, 08 Aug 2013 15:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/08/08/chain-replication.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/08/08/chain-replication.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/08/08/chain-replication/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/08/08/chain-replication/</guid>
         
         
       </item>
@@ -805,8 +805,8 @@ think is) round 2.  This effectively overwrites B, violating safety.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;
 </description>
         <pubDate>Thu, 25 Jul 2013 12:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc/</guid>
         
         
       </item>
@@ -899,8 +899,8 @@ served from local cache, with only 7.1% retrieved from other Coral
 proxies.&lt;/p&gt;
 </description>
         <pubDate>Thu, 18 Jul 2013 15:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/07/18/coralcdn.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/18/coralcdn.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/07/18/coralcdn/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/18/coralcdn/</guid>
         
         
       </item>
@@ -995,8 +995,8 @@ ZooKeeper is not intended for general storage.  It seems like that would
 work.&lt;/p&gt;
 </description>
         <pubDate>Thu, 11 Jul 2013 15:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper/</guid>
         
         
       </item>
@@ -1116,8 +1116,8 @@ scaled better, and we found it interesting to see this revisited and
 reinforced from a very different perspective.&lt;/p&gt;
 </description>
         <pubDate>Wed, 03 Jul 2013 16:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi/</guid>
         
         
       </item>
@@ -1349,8 +1349,8 @@ a backup will reply to a client if it has seen commits up to that
 request.&lt;/p&gt;
 </description>
         <pubDate>Thu, 20 Jun 2013 18:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited.html</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited.html</guid>
+        <link>http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited/</guid>
         
         
       </item>
