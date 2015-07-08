@@ -53,6 +53,24 @@ $on-laptop:        45em;
     position: relative;
 }
 
+.post-list {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+
+    li {
+        flex: 0 0 50%;
+        padding: .5em;
+        box-sizing: border-box;
+        margin-bottom: 0;
+
+        h2 {
+            margin-bottom: 0;
+        }
+    }
+}
+
 .recent-posts {
     position: absolute;
     min-width: 10em;
