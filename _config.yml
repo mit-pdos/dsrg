@@ -7,7 +7,7 @@ description: >
   cover papers from conferences like SOSP, OSDI, PODC, VLDB, and SIGMOD. We try
   to have a healthy mix of current systems papers and older seminal papers.
 baseurl: ""
-url: "http://mit-pdos.github.io"
+url: "http://dsrg.pdos.csail.mit.edu"
 
 # Build settings
 markdown: kramdown
