@@ -9,6 +9,7 @@ description: >
 baseurl: ""
 url: "http://dsrg.pdos.csail.mit.edu"
 permalink: pretty
+disqus_short_name: "dsrg"
 
 # Build settings
 markdown: kramdown
