@@ -8,7 +8,7 @@ build:
 
 preview:
 	bundle install
-	bundle exec jekyll serve --watch
+	bundle exec jekyll serve --baseurl '' --watch
 
 deploy: build
 	mv vendor $(TEMPDIR)/vendor

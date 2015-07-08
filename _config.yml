@@ -6,8 +6,8 @@ description: >
   the 9th floor of Stata to discuss distributed systems research papers, and
   cover papers from conferences like SOSP, OSDI, PODC, VLDB, and SIGMOD. We try
   to have a healthy mix of current systems papers and older seminal papers.
-baseurl: ""
-url: "http://dsrg.pdos.csail.mit.edu"
+baseurl: "/dsrg"
+url: "http://mit-pdos.github.io"
 
 # Build settings
 markdown: kramdown
