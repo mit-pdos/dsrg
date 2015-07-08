@@ -3,8 +3,6 @@ layout: post
 title: "Discretized Streams"
 date: 2013-09-30 16:00
 comments: true
-categories:
-published: true
 ---
 
 ## Why did we read this paper?

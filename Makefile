@@ -17,7 +17,7 @@ deploy: build
 	git stash --include-untracked
 	git checkout gh-pages
 	rm -rf *
-	rm -rf .sass-cache .gitignore .lvimrc
+	rm -rf .sass-cache .gitignore .lvimrc .code-highlighter-cache
 	mv $(TEMPDIR)/_site/* .
 	rm -rf $(TEMPDIR)/_site
 	git add .

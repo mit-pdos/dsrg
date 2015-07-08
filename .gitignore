@@ -1,3 +1,4 @@
 _site
 .sass-cache
+.code-highlighter-cache
 vendor/

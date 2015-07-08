@@ -3,12 +3,9 @@ layout: post
 title: "MDCC"
 date: 2013-07-25 12:00
 comments: true
-categories:
 ---
 
-## Overview 
-
-###Why did we read about MDCC?
+## Why did we read about MDCC?
 
 There is a write performance trade off when consistently replicating
 across multiple data centers due to the high latency when sending
@@ -26,65 +23,60 @@ A similar system, Megastore, uses per-shard Paxos groups to replicate
 between datacenters.  Unfortunately, heavy conflicts in Megastore
 reduce performance to around four transactions per second.
 
-
-###MDCC Goals
+## MDCC Goals
 
 MDCC aims to have the following properties:
 
-**Read-commited isolation**: Transactions never read records
-that have not been fully committed.  The paper notes that this is
-the form that most commercial and open source databases provide,
-so ensuring this level of consistency is sufficient.
+ - **Read-commited isolation**: Transactions never read records that
+   have not been fully committed.  The paper notes that this is the form
+   that most commercial and open source databases provide, so ensuring
+   this level of consistency is sufficient.
+ - **No lost updates**: This is when transaction $$T_1$$ reads a record
+   $$X$$, another transaction $$T_2$$ commits an update to $$X$$, then
+   $$T_1$$ commits a write to $$X$$ which overwrites $$T_2$$'s commit
+   without having ever read it.
+ - **Non-stale reads**: Be able to ensure that reads are always of the
+   most recent value.
+ - **Low latency**: Minimize number of *synchronous* round-trips --- in
+   this case to one.
+ - **Costs scale to true transaction overlap**: There should not be
+   large, fixed costs incurred for each transaction commit.  Rather, the
+   costs should be proportional to the amount of actual contention
+   between transactions.
+ - **Integrity Constraints**: Support some forms of integrity
+   Constraints.  The paper discusses `FIELD >/=/< VALUE` type
+   constraints.
 
-**No lost updates**: This is when transaction T1 reads a record X,
-another transaction T2 commits an update to X, then T1 commits a
-write to X which overwrites T2's commit without having ever read
-it.
-
-**Non-stale reads**: Be able to ensure that reads are always of the
-most recent value.
-
-**Low latency**: Minimize number of *synchronous* roundtrips -- in
-this case to one.
-
-**Costs scale to true transaction overlap**: There should not be
-large fixed costs incurred for each transaction commit.  Rather,
-the costs should be proportional to the amount of actual contention
-between transactions.
-
-**Integrity Constraints**: Support some forms of integrity Constraints.
-The paper discusses FIELD >/=/< VALUE type constraints.
-
-### Key Ideas
+## Key Ideas
 
 * Paxos per record
-  * Awesome -- could shuffle record ownership depending on access patterns!
+  * Awesome --- could shuffle record ownership depending on access patterns!
 * Optimistic concurrency control (keep write sets)
-* During Paxos, rather than propose the new value, propose an _option_ to
+* During Paxos, rather than propose the new value, propose an *option* to
   update the new value.  If the option succeeds, then a later write can safely
   set the value asynchronously.
 * Move more logic into quorum nodes than in regular Paxos
   * Decide write-write conflicts
   * Enforce integrity constraints
-* Reduce roundtrips via
-  * multi-Paxos: select master every N commits
-  * Fast Paxos: clients directly talk to quorum nodes
+* Reduce round-trips via
+  * Multi-Paxos: select master every $$N$$ commits
+  * Fast-Paxos: clients directly talk to quorum nodes
 * Reduce conflicts
   * Generalized Paxos: commutative operations
-  * "Demarcation protocol" conservatively figures out how many conservativy ops are allowed
+  * "Demarcation protocol" conservatively figures out how many conservative ops are allowed
 * Failure
-  * Send client state to every node on commit (every record's quorom)
-    * write set, xact id
+  * Send client state to every node on commit (every record's quorum)
+    * write set + xact id
 
-### Questions
+## Questions
 
 * How does a per-record protocol affect/enable fine-grained tuple placement?
 * What to do to make repeatable reads work?
-* How does Fast Paxos work?
+* How does Fast-Paxos work?
 * How powerful/efficient is the demarcation protocol?
 * How do you run range-queries or queries that need indexes?
 
-## How MDCC is built up.
+## Overview of MDCC.
 
 The MDCC paper flows by identifying issues with the best solution
 proposed so far, and introducing a new technique to resolve the
@@ -97,10 +89,10 @@ causing false conflicts.  What if we ran Paxos per record?
 
 Paxos on a record runs as follows:
 
-* up to 1 roundtrip for client to tell master "I want to commit my transaction"
-* 1 roundtrip to elect master for record
-* 1 roundtrip to set the value (learn the value)
-* 1 roundtrip to make value visible (can be async)
+* up to 1 round-trip for client to tell master "I want to commit my transaction"
+* 1 round-trip to elect master for record
+* 1 round-trip to set the value (learn the value)
+* 1 round-trip to make value visible (can be asynchronous)
 
 ### Multi-record Transactions
 
@@ -144,40 +136,39 @@ faster**
 
 ### Multi-Paxos
 
-We still require 3 roundtrips to commit (send to master, elect master,
+We still require 3 round-trips to commit (send to master, elect master,
 pick option).  We can use Paxos to elect a master for a block of
 rounds which amortizes the cost of electing a master to 0 (assuming
 the masters are stable).
 
 The communication is now
 
-* up to 1 roundtrip for client to tell master "I want to commit my transaction"
-* 0 roundtrips (amortized) to elect master for record
-* 1 roundtrip to send option to acceptors
-* 1 asynchronous roundtrip to write "commit"/"abort" on options
-* 1 asynchronous roundtrip (can be bundled with other messages) to
+* up to 1 round-trip for client to tell master "I want to commit my transaction"
+* 0 round-trips (amortized) to elect master for record
+* 1 round-trip to send option to acceptors
+* 1 asynchronous round-trip to write "commit"/"abort" on options
+* 1 asynchronous round-trip (can be bundled with other messages) to
   make commit visible
-
 
 ### Fast-Paxos
 
-We still need two synchronous roundtrips -- one to contact the master
+We still need two synchronous round-trips --- one to contact the master
 if it is in another datacenter, and one to send the options.  Can we
 avoid the former message?
 
-Yes! Fast Paxos is lets clients bypass the master to directly send
+Yes! Fast-Paxos lets clients bypass the master to directly send
 options to the quorum nodes.  Recall that the master's job is to
 serialize the log entries.  If we want to de away with the master,
-Fast Paxos needs a larger quorum size (a fast quorum).  If a fast
+Fast-Paxos needs a larger quorum size (a fast quorum).  If a fast
 quorum responds OK, then the client can consider the option committed.
 Otherwise it falls back to normal Paxos with some details.
 
 None of us had read the 
-[fast-Paxos paper](http://research.microsoft.com/pubs/64624/tr-2005-112.pdf) 
+[Fast-Paxos paper](http://research.microsoft.com/pubs/64624/tr-2005-112.pdf) 
 so we were ill-equipped
 to work through why this section of the paper works. Read below for
-how we *think* Fast Paxos works based on first principles.  Read
-the fast-Paxos paper to actually understand how it works.
+how we *think* Fast-Paxos works based on first principles.  Read
+the Fast-Paxos paper to actually understand how it works.
 
 ### Generalized-Paxos
 
@@ -196,7 +187,7 @@ and how to apply them.
 
 ### Integrity constrains
 
-If I want to support integrity constraints (e.g., A >= 0) the
+If I want to support integrity constraints (e.g., `A >= 0`), the
 acceptors need to understand and enforce them.
 
 The paper restricts the domains of the delta operations (e.g., can
@@ -207,11 +198,10 @@ that the constraint is violated.
 
 This is useful because many transactions are simply updating counters.
 
-
 ### That's a lot of steps, are there any more tricks?
 
 We usually want reads to go fast, but if I'm reading record A and
-the A's replica in my datacenter was not in the quorum, then it
+A's replica in my datacenter was not in the quorum, then it
 would give me stale data.  One way to get around this is to make
 sure the replica in my data center is *always* in the quorum.  This
 works if my data center is the only one reading this record.  For
@@ -220,50 +210,49 @@ and replicating the data, it can be pretty sure that only people
 living around the data center will want the local data.
 
 Fast-Paxos is really really bad (in terms of cross datacenter
-roundtrips) if a collision happens.  For those cases it makes more
+round-trips) if a collision happens.  For those cases it makes more
 sense to stick with a master and use Multi-Paxos.  Figuring out
 when to use each is important.  The paper provides a heuristic that
-sticks with multi-Paxos and periodically tries to "upgrade" to
-fast-Paxos.
+sticks with Multi-Paxos and periodically tries to "upgrade" to
+Fast-Paxos.
 
 That's it!  MDCC collects a number of Paxos variants and puts them
 together into a nice cross data-center commit protocol.
 
-
-## A Note on Fast Paxos
+## A Note on Fast-Paxos
 
 The following was derived from first principles.
 
-The fast-Paxos protocol was described (briefly) in the paper as
+The Fast-Paxos protocol was described (briefly) in the paper as
 
 > Any app-server can propose an option directly to the storage
 > (quorum) nodes, which in turn
 > promise only to accept the first proposed option.  Simple majority
 > quorums, however, are
-> no longer sufficient to leran a value and ensure safeness...
+> no longer sufficient to learn a value and ensure safeness…
 > If a proposer receives an acknowledgment from a fast quorum, the
 > value is safe and
 > guaranteed to be committed.
 
 A classical Paxos quorum requires the property that for any two
-quorums, <code>Qc1</code> and <code>Qc2</code>,
+quorums, $$Qc_1$$ and $$Qc_2$$,
 
-  <code>Qc1 INTERSECT Qc2</code> != Empty set
+$$Qc_1 \cap Qc_2 \neq \emptyset$$
 
-For Fast Paxos it has the requirement that for a fast quorums,
-<code>Qf1</code> and <code>Qf2</code> and regular quorum <Qc>,
+For Fast-Paxos it has the requirement that for any two fast quorums,
+$$Qf_1$$ and $$Qf_2$$, and regular quorum $$Qc$$,
 
-  <code>Qf1 INTERSECT Qf2 INTERSECT Qc</code> != empty set
+$$Qf_1 \cap QF_2 \cap Qc \neq \emptyset$$
 
-One of our questions was why a simple majority, <code>Qc</code>, is
-insufficient and we need a <code>Qf > Qc</code>. The following is an
+One of our questions was why a simple majority, $$Qc$$, is
+insufficient and we need a $$Qf \supset Qc$$. The following is an
 example of when it fails.
 
 Safety, or correctness, in Paxos means that "At most one value can be
-learned".  One example is that even with *f* failures, a committed log
+learned".  One example is that even with $$f$$ failures, a committed log
 position stays committed.
 
-Lets say <code>Qf = Qc = majority</code>.  Consider the following logical
+Lets say $$Qf = Qc$$ is a majority.  Consider the following logical
 proposals and their quorums where each column is the state of an
 acceptor (1-5), and each row is the state at one Paxos round.  C1, C2,
 C3 are clients (proposers).  C1 commits A and manages to communicate
@@ -276,7 +265,7 @@ with acceptors 1-3, C2 commits B and so on.
     C3  C C   C
 
 Say C1 and C2 happen concurrently, and C3 happens later (as a normal
-Paxos round, or Fast Paxos).  Then the actual acceptances and what
+Paxos round, or Fast-Paxos).  Then the actual acceptances and what
 round each node thinks its in may be
 
      1 2 3 4 5 Round (as understood by local node)
@@ -292,4 +281,3 @@ violating safety.
      1 2 3 4 5 Round (as understood by local node)
      A A A B B 1
      C C B C   2
-

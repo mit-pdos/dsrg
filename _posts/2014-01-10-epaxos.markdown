@@ -3,32 +3,32 @@ layout: post
 title: "EPaxos"
 date: 2014-01-10 13:04
 comments: true
-categories: 
-published: true
 ---
 
 [EPaxos](https://github.com/efficient/epaxos)
 is a leaderless Paxos variant which tries to reduce latencies for
-a geo-distributed replica group by:
-1. enabling the client to use the replica with the lowest round-trip latency as the operation leader
-2. optimistically skipping a round of replica communication by inter-operation conflict detection
+a geo-distributed replica group by enabling the client to use the
+replica with the lowest round-trip latency as the operation leader, and
+optimistically skipping a round of replica communication by
+inter-operation conflict detection
 
 Instead of explaining EPaxos in this post, I will go over an example of how the
 recovery protocol works. This example confused me for a while since it is not
-actually addressed in the SOSP'13 paper -- the full recovery protocol is in the
+actually addressed in the SOSP'13 paper --- the full recovery protocol is in the
 [tech report](http://www.pdl.cmu.edu/PDL-FTP/associated/CMU-PDL-13-111.pdf).
 Therefore, I recommend you read the recovery protocol in the tech report before
 you start playing EPaxos with toy examples.
 
 ## Failure and recovery scenario
+
 Consider a replica group of five nodes. The fast-path quorum size for five
-replicas is 3 (F + floor((F + 1)/2)), making the EPaxos fast-path quorum the
+replicas is $$3 \left(F + \lfloor\frac{F + 1}{2}\rfloor\right)$$, making the EPaxos fast-path quorum the
 same size as a simple majority. Let us name the replicas like so:
 
-<pre>
-        A   B
-      C   D   E
-</pre>
+```
+  A   B
+C   D   E
+```
 
 One situation that could be problematic occurs when a client successfully
 completes one operation (which has side-effects i.e. writes), then issues
@@ -47,10 +47,10 @@ five replicas can tolerate two failures in EPaxos. However, the remaining
 replicas look like this (with subscripts representing which operation the
 replica has pre-accepted in its log):
 
-<pre>
-        X   X
-      C_1 D_1 E_2
-</pre>
+```
+  X   X
+C_1 D_1 E_2
+```
 
 At this point, each replica knows about only one of the two operations but not
 whether it is committed, and both operations conflict with each other (see the
@@ -59,16 +59,16 @@ C, D, or E initiates recovery for operations 1 and 2, how does it know which
 operation, if any, was fast-path committed and in which order?
 
 Turns out we can figure out this mess if we know the leaders for both
-operations -- this is exactly what EPaxos does in this situation. If the leader
+operations --- this is exactly what EPaxos does in this situation. If the leader
 of an operation, alpha, is in the fast-path quorum of a different operation,
 beta, then beta could not have been fast-path committed if the pre-accept
 messages for alpha do not contain beta in deps.
 
 The recovery would proceed as follows. Suppose C initiates recovery for
 operation 1. First, it asks the fast-path quorum what their logs contain. C
-observes that at least floor((F + 1)/2) replicas (C and D) have pre-accepted an
+observes that at least $$\lfloor\frac{F+1}{2}\rfloor$$ replicas (C and D) have pre-accepted an
 operation with the identical default attributes, and then tries to convince
-other replicas to accept the operation until at least F + 1 have accepted it.
+other replicas to accept the operation until at least $$F + 1$$ have accepted it.
 When C asks E to accept operation 1, E refuses since operation 1 conflicts with
 operation 2 and E has already pre-accepted operation 2. Therefore, C will defer
 the recovery of operation 1 (section 6.2, step 7-e) and instead try to recover

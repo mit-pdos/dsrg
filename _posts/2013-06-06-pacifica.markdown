@@ -1,10 +1,8 @@
 ---
 layout: post
-title: "PacificA"
+title: PacificA
 date: 2013-06-06 18:00
 comments: true
-categories: 
-published: true
 ---
 
 ## Why are we reading PacificA?
@@ -17,9 +15,9 @@ strong consistency.
 At RICON East 2013, Kyle Kingsbury presented a performance evaluation
 of several commercial datastores. This evaluation is specifically
 geared toward assessing the correctness of distributed systems in the
-face of network partitions. Kyle has turned his talk into a <a
-href="http://aphyr.com/tags/jepsen">series of blog posts</a>
-describing the not-so-encouraging results.
+face of network partitions. Kyle has turned his talk into a [series of
+blog posts](http://aphyr.com/tags/jepsen) describing the
+not-so-encouraging results.
 
 In previous weeks we have discussed consensus protocols like Paxos and
 Raft that provide strong consistency to clients and are provably safe
@@ -46,17 +44,17 @@ configuration of the storage cluster is handled by an authoritative
 The server designated as the current primary is responsible for
 interacting with clients. It handles all reads (from its committed
 state) and writes. When a write is requested, the primary assigns a
-sequence number to the operation and sends a <code>prepare</code>
-message all replicas. When a replica receives a <code>prepare</code>
+sequence number to the operation and sends a `prepare`
+message to all replicas. When a replica receives a `prepare`
 message, it adds the operation to its log and acknowledges the
 primary. When the primary receives an acknowledgement from all
-replicas it commits the operation and responds to the client. The
+replicas, it commits the operation and responds to the client. The
 commit point on the replicas is advanced in a subsequent message from
-the primary. This protocol preserves the Commit Invariant, which
+the primary. This protocol preserves the *Commit Invariant*, which
 guarantees the following properties of the logs on the primary
-<code>P</code> and replicas <code>R</code>:
+$$P$$ and replicas $$R$$:
 
-<code>commited<sub>R</sub> &sube; committed<sub>P</sub> &sube; prepared<sub>P,R</sub></code>
+$$committed_R \subseteq committed_P \subseteq prepared_{P,R}$$
 
 Because of this invariant, during failover recovery it is possible for
 a new primary (which is always a previous replica) to bring its commit
@@ -76,10 +74,10 @@ and requests a configuration change from the 3rd party configuration
 manager. To prevent a situation where two servers believe they are the
 primary, the timeout periods differ depending on the server's current
 role. The primary will timeout if it has not heard from one of its
-replicas in a "lease period" of <code>T<sub>L</sub></code> seconds,
+replicas in a "lease period" of $$T_L$$ seconds,
 whereas a replica will timeout if it has not heard from the primary in
-a "grace period" of <code>T<sub>G</sub></code> seconds. If
-<code>T<sub>L</sub> < T<sub>G</sub></code> then the current primary
+a "grace period" of $$T_G$$ seconds. If
+$$T_L < T_G$$ then the current primary
 will always realize the failure first (if it is still alive) and stop
 processing messages. It will also propose a new configuration first,
 allowing it to continue as the primary, which may mitigate disruptions
@@ -92,7 +90,7 @@ However, for a short period of time during our discussion we were
 convinced that this scheme could result in a situation where two
 servers believed they were the primary and could serve (possibly
 stale) reads, violating the strong consistency guarantee. The scenario
-involved a heartbeat <code>ACK</code> that was delayed by the network,
+involved a heartbeat `ACK` that was delayed by the network,
 extending the primary's lease but not the replica's grace period. It
 turns out we were wrong. A careful reading of the paper specifies that
 the lease period is measured from the *sending time* of the last
@@ -155,7 +153,7 @@ time. It seems like the type of tuning parameter that may be hard to
 get right. It would have been nice to see an evaluation in which
 various lease/grace periods were tried in a failure scenario.
 
-During time 160-300 the server that was previously the primary (and
+During time 160-300, the server that was previously the primary (and
 was killed) rejoins the group as a secondary. What surprised us was
 the drop in client-perceived throughput by the addition of a replica,
 and how long it took for the system to recover. This re-emphasizes the
@@ -189,7 +187,7 @@ manager, requiring the need to implement Paxos anyway.
 
 The authors make an availability argument (versus consensus) in favor
 of their scheme. They claim, rightfully so, that their system can
-survive *n-1* failures within a replica group and still make progress
+survive $$n-1$$ failures within a replica group and still make progress
 (the remaining server is the primary with no backups). On the other
 hand, a consensus algorithm cannot make progress when a majority of
 the servers are unavailable. This is a valid argument if the service

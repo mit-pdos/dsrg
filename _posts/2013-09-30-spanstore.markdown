@@ -3,8 +3,6 @@ layout: post
 title: SPANStore
 date: 2013-09-30 16:00
 comments: true
-categories:
-published: true
 ---
 
 ## Why did we read this paper?
@@ -29,25 +27,27 @@ centers across multiple cloud providers and determines where to replicate every
 object and how to perform this replication. Finally, it reduces cost by
 minimizing the computing resources necessary to offer a global view of storage.
 
-## Multi-Cloud
+### Multi-Cloud
 
 SPANStore uses multiple cloud providers to offer lower GET/PUT latencies.
-Also, this allows for lower cost by exploiting price decrepancies across
+Also, this allows for lower cost by exploiting price discrepancies across
 providers to meet latency SLOs.
 
-## Replication Policy
+### Replication Policy
 
-PMan determines the replication policies in SPANStore. It requires 1) a
-characterization of SPANStore's deployment, 2) the application's latency, fault
-tolerance, and consistency requirements, and 3) a specification of the
-application's workload as inputs.
+PMan determines the replication policies in SPANStore. It takes a
+three-part specification as input:
 
-As output, PMan specifies 1) the set of data centers that maintain copies of all
-objects with that access set, and 2) at each data center in the access set,
-which of these copies SPANStore should read from and write to when an
-application VM issues a GET or PUT.
+1. a characterization of SPANStore's deployment
+2. the application's latency, fault tolerance, and consistency requirements
+3. a specification of the application's workload as inputs
 
-## Eventual consistency
+and in return, it provides the set of data centers that maintain copies
+of all objects with that access set, and, at each data center in the
+access set, which of these copies SPANStore should read from and write
+to when an application VM issues a GET or PUT.
+
+### Eventual consistency
 
 SPANStore can trade-off costs for storage, PUT/GET requests, and network
 transfers if the application requires only eventual consistency. SPANStore
@@ -55,10 +55,10 @@ replicates objects at fewer data centers to reduce storage costs and PUT request
 costs. PMan address this trade-off between storage, networking, and PUT/GET
 request costs using a replication policy as a mixed integer program.
 
-## Strong consistency
+### Strong consistency
 
 They rely on quorum consistency for strong consistency. They use asymmetric
-quorum sets and require an intersection of at least 2f + 1 data centers with the
+quorum sets and require an intersection of at least $$2f + 1$$ data centers with the
 PUT replica set of every other data center in the access set.
 
 ## Comments

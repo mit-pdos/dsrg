@@ -11,6 +11,9 @@ url: "http://dsrg.pdos.csail.mit.edu"
 
 # Build settings
 markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
 
 exclude: ['vendor', 'Makefile', 'Gemfile.lock', 'Gemfile']
 
