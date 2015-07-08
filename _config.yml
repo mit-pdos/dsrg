@@ -8,6 +8,7 @@ description: >
   to have a healthy mix of current systems papers and older seminal papers.
 baseurl: ""
 url: "http://dsrg.pdos.csail.mit.edu"
+permalink: pretty
 
 # Build settings
 markdown: kramdown
