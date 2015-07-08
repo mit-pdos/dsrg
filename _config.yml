@@ -12,7 +12,7 @@ url: "http://dsrg.pdos.csail.mit.edu"
 # Build settings
 markdown: kramdown
 
-exclude: [vendor]
+exclude: ['vendor', 'Makefile', 'Gemfile.lock', 'Gemfile']
 
 gems:
   - octopress-solarized
