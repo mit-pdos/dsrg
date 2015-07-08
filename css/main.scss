@@ -22,10 +22,10 @@ $grey-color-light: lighten($grey-color, 40%);
 $grey-color-dark:  darken($grey-color, 25%);
 
 // Width of the content area
-$content-width:    800px;
+$content-width:    45em;
 
-$on-palm:          600px;
-$on-laptop:        800px;
+$on-palm:          100%;
+$on-laptop:        45em;
 
 
 
@@ -42,11 +42,36 @@ $on-laptop:        800px;
     }
 }
 
-
-
 // Import partials from `sass_dir` (defaults to `_sass`)
 @import
         "base",
         "layout",
         "syntax-highlighting"
 ;
+
+.wrapper {
+    position: relative;
+}
+
+.recent-posts {
+    position: absolute;
+    min-width: 10em;
+    left: 45rem;
+
+    font-size: .8em;
+
+    border-left: 2px solid #D3D3D3;
+    padding: 1em;
+
+    ul {
+        list-style-type: none;
+        margin-left: 0;
+        padding-left: 0;
+    }
+    .post-link {
+        font-size: 1em;
+    }
+    .post-meta {
+        font-size: 1em;
+    }
+}
