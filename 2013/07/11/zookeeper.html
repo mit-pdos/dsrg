@@ -14,6 +14,7 @@
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper.html">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
   <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
   <body>
@@ -148,86 +149,92 @@
   <article class="post-content">
     <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
 
-<p><a href="http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf">Zookeeper</a> 
-is a practical system with replicated storage used by Yahoo!. 
-We are interested in understanding what replication protocol Zookeeper uses, why they 
-needed a <em>new</em> replication protocol, what applications/services people build upon it,
-and what features are required to make such a replicated storage system
-practical.</p>
+<p><a href="http://static.usenix.org/event/usenix10/tech/full_papers/Hunt.pdf">Zookeeper</a>
+is a practical system with replicated storage used by Yahoo!.  We are
+interested in understanding what replication protocol Zookeeper uses,
+why they needed a <em>new</em> replication protocol, what applications/services
+people build upon it, and what features are required to make such a
+replicated storage system practical.</p>
 
-<p>Also, Zookeeper has pretty good performance for a replication
-protocol. It is interesting to see how it works.</p>
+<p>Also, Zookeeper has pretty good performance for a replication protocol.
+It is interesting to see how it works.</p>
 
 <h2 id="what-is-zookeeper">What is Zookeeper</h2>
 
 <p>The Zookeeper design consists of three components - replicated storage,
 relaxed consistent caching at clients, and detection of client failures.</p>
 
-<h2 id="replication">Replication</h2>
+<h3 id="replication">Replication</h3>
 
-<p>Zookeeper provides a key/value data model, where keys are named like the paths of
-a file system and values are arbitrary blobs. They call each key/value pair a
-<em>Znode</em>. Each Znode must be accessed with a full path so that Zookeeper doesn’t
-have to implement open/close. Each value has a version number and an internal
-sequence number, which they use a lot when building applications/services presented
-in the paper. Each Znode can have its own value, and a collection of children.</p>
+<p>Zookeeper provides a key/value data model, where keys are named like the
+paths of a file system and values are arbitrary blobs. They call each
+key/value pair a <em>Znode</em>. Each Znode must be accessed with a full path
+so that Zookeeper doesn’t have to implement open/close. Each value has a
+version number and an internal sequence number, which they use a lot
+when building applications/services presented in the paper. Each Znode
+can have its own value, and a collection of children.</p>
 
-<p>Data can be accessed with get/set/create/delete methods. Zookeeper supports
-conditional versions of these operations too. For example, a client can say
-set the value of “/ds-reading/schedule” to “3pm,thursday” only if the Znode’s
-current version is 100. This feature is used widely in the the presented
-applications/services.</p>
+<p>Data can be accessed with get/set/create/delete methods. Zookeeper
+supports conditional versions of these operations too. For example, a
+client can say set the value of <code>/ds-reading/schedule</code> to <code>3pm,thursday</code>
+only if the Znode’s current version is 100. This feature is used widely
+in the presented applications/services.</p>
 
-<p>Znodes are replicated via what they called Zab, an atomic broadcast protocol.
-Zab is their own replication protocol. It seems quite similar to viewstamped 
-replication (VR). The only difference I can tell is that Zab is special case
-of viewstamped based replication. Zab requires clients to send requests
-in order (thus they use TCP), but VR does not. Zab also requires the requests
-to be idempotent, so that a new leader can re-propose the most recent request
-without detecting duplicated requests.</p>
+<p>Znodes are replicated via what they called Zab, an atomic broadcast
+protocol.  Zab is their own replication protocol. It seems quite similar
+to viewstamped replication (VR). The only difference I can tell is that
+Zab is special case of viewstamp-based replication. Zab requires clients
+to send requests in order (thus they use TCP), but VR does not. Zab also
+requires the requests to be idempotent, so that a new leader can
+re-propose the most recent request without detecting duplicated
+requests.</p>
 
-<p>Despite Zab’s restriction for replication of only idempotent operations, Zookeeper does
-support non-idempotent operations. The trick is that for each potentially
-non-idempotent request, the leader converts it to idempotent requests by
-executing it locally.</p>
+<p>Despite Zab’s restriction for replication of only idempotent operations,
+Zookeeper does support non-idempotent operations. The trick is that for
+each potentially non-idempotent request, the leader converts it to
+idempotent requests by executing it locally.</p>
 
-<h2 id="relaxed-consisent-caching">Relaxed consisent caching</h2>
+<h3 id="relaxed-consistent-caching">Relaxed consistent caching</h3>
 
-<p>Another component of Zookeeper is relaxed consistent caching between clients
-and Zookeeper. When clients get data from Zookeeper, clients can cache it, and
-optionally register at Zookeeper to receive notifications if the accessed Znode
-changes.  Zookeeper will send notifications to caching clients ASYNCHRONOUSLY
-once the data is changed. The benefit of this is that updates don’t have to wait for
-invalidations to complete, thus they don’t suffer from the impact of client failure; 
-the downside is that now the client’s cache is not consistent with Zookeeper.</p>
+<p>Another component of Zookeeper is relaxed consistent caching between
+clients and Zookeeper. When clients get data from Zookeeper, clients can
+cache it, and optionally register at Zookeeper to receive notifications
+if the accessed Znode changes.  Zookeeper will send notifications to
+caching clients <em>asynchronously</em> once the data is changed. The benefit
+of this is that updates don’t have to wait for invalidations to
+complete, thus they don’t suffer from the impact of client failure; the
+downside is that now the client’s cache is not consistent with
+Zookeeper.</p>
 
-<p>The notification doesn’t contain the actual update, and each registration is
-triggered only once (the server deletes it once the notification is delivered).</p>
+<p>The notification doesn’t contain the actual update, and each
+registration is triggered only once (the server deletes it once the
+notification is delivered).</p>
 
-<h2 id="detection-of-client-failures">Detection of client failures</h2>
+<h3 id="detection-of-client-failures">Detection of client failures</h3>
 
-<p>Zookeeper supports a special Znode type called “ephemeral Znode” to detect the
-failure of clients.  If a session terminates, all ephemeral ZNodes created
-within that session are deleted. Services/applications can use it to detect
-failure. For example, Katta uses it to detect master failure.</p>
+<p>Zookeeper supports a special Znode type called an “ephemeral Znode” to
+detect the failure of clients.  If a session terminates, all ephemeral
+ZNodes created within that session are deleted. Services/applications
+can use it to detect failure. For example, Katta uses it to detect
+master failure.</p>
 
 <h2 id="other-design-choices">Other design choices</h2>
 
-<p>Zookeeper allows applications and services to choose their own level of consistency.  Zookeeper
-linearizes all writes. Reads are served from a local Zookeeper server, but a
-client can linearize reads using the sync() API.</p>
+<p>Zookeeper allows applications and services to choose their own level of
+consistency.  Zookeeper linearizes all writes. Reads are served from a
+local Zookeeper server, but a client can linearize reads using the
+<code>sync()</code> API.</p>
 
 <h2 id="comments">Comments</h2>
 
-<p>In all, we feel that ZooKeeper is cool. It provides building blocks that people
-can use to construct their own services with different consistency/performance
-requirements. It also simplifies the building of other services, as demonstrated
-in the paper.</p>
+<p>In all, we feel that ZooKeeper is cool. It provides building blocks that
+people can use to construct their own services with different
+consistency/performance requirements. It also simplifies the building of
+other services, as demonstrated in the paper.</p>
 
 <p>One thing we didn’t understand is why the paper makes the claim that
-ZooKeeper is not intended for general storage.  It seems like that
-would work.</p>
-
+ZooKeeper is not intended for general storage.  It seems like that would
+work.</p>
 
   </article>
 

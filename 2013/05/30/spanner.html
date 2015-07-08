@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>spanner</title>
+  <title>Spanner</title>
   <meta name="description" content="What is Spanner?">
 
   <base href="/" />
@@ -14,6 +14,7 @@
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/05/30/spanner.html">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
   <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
   <body>
@@ -141,7 +142,7 @@
 <div class="post">
 
   <header class="post-header">
-    <h1 class="post-title">spanner</h1>
+    <h1 class="post-title">Spanner</h1>
     <p class="post-meta">May 30, 2013</p>
   </header>
 
@@ -149,58 +150,52 @@
     <h2 id="what-is-spanner">What is Spanner?</h2>
 
 <p><a href="https://www.usenix.org/system/files/conference/osdi12/osdi12-final-16.pdf">Spanner</a>
- is a highly distributed, externally consistent database
-developed by Google.  It provides replication and transactions over a
-geographically distributed set of servers.  Spanner uses time bounds,
-Paxos, and two-phase commit to ensure external consistency.</p>
+is a highly distributed, externally consistent database developed by
+Google.  It provides replication and transactions over a geographically
+distributed set of servers.  Spanner uses time bounds, Paxos, and
+two-phase commit to ensure external consistency.</p>
 
 <h2 id="interesting-ideas">Interesting Ideas</h2>
 
-<p>Spanner uses clocks with bounded uncertainty to provide synchrony between
-servers. It also shards an application’s data to provide fine-grained load
-distribution.</p>
+<p>Spanner uses clocks with bounded uncertainty to provide synchrony
+between servers. It also shards an application’s data to provide
+fine-grained load distribution.</p>
 
-<p>Spanner uses the TrueTime API (TT) to synchronize time between
-servers. A call to <code>TT.now()</code> gives a range guaranteed to
-contain the actual time.</p>
+<p>Spanner uses the <em>TrueTime API</em> (TT) to synchronize time between
+servers. A call to <code>TT.now()</code> gives a range guaranteed to contain the
+actual time.</p>
 
-<p>Spanner has two kind of reads.  The first reads the most recent value
-of a key or set of keys, called a read-only transaction.  The second
-is a snapshot read which is executed at a specific timestamp in the
-past.  Using a combination of Paxos leases and TrueTime guarantees to
-agree on a timestamp, Spanner can execute snapshot reads and read-only
+<p>Spanner has two kind of reads.  The first reads the most recent value of
+a key or set of keys, called a read-only transaction.  The second is a
+snapshot read which is executed at a specific timestamp in the past.
+Using a combination of Paxos leases and TrueTime guarantees to agree on
+a timestamp, Spanner can execute snapshot reads and read-only
 transactions without locks or two-phase commit.</p>
 
-<p>Spanner peforms schema changes atomically without blocking, by picking
+<p>Spanner performs schema changes atomically without blocking, by picking
 a future time for the change to occur. Other read and write operations
 choose a timestamp so that at each replica, the operation performs
 either before or after the schema change.</p>
 
 <h2 id="subtleties">Subtleties</h2>
 
-<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code>
-is true, we are guaranteed that from now on <code>TT.now.latest()</code> will
-always be larger than the commited timestamp on all servers.</p>
+<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we
+are guaranteed that from now on <code>TT.now.latest()</code> will always be larger
+than the committed timestamp on all servers.</p>
 
-<p>Spanner very carefully chooses timestamps for RW transactions to ensure when
-they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
+<p>Spanner very carefully chooses timestamps for RW transactions to ensure
+when they are safely visible.  They call this the <em>commit-wait rule</em>.</p>
 
 <h2 id="questions">Questions</h2>
 
 <ul>
-  <li>
-    <p><strong>Why is the write throughput so low?</strong> 4K ops/sec for 50 paxos
- servers of one replica each (so not running Paxos), not waiting for
- any other commit times, seems very low.</p>
-  </li>
-  <li>
-    <p><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></p>
-  </li>
-  <li>
-    <p><strong>What happens if we use logical time(which preserves causality)
+  <li><strong>Why is the write throughput so low?</strong> 4K ops/sec for 50 paxos
+servers of one replica each (so not running Paxos), not waiting for
+any other commit times, seems very low.</li>
+  <li><strong>Why is the throughput experiment in 5.1 CPU bound?</strong></li>
+  <li><strong>What happens if we use logical time(which preserves causality)
 rather than the true time?</strong> Maybe external consistency breaks, but
-the system is still sequentially consistent.</p>
-  </li>
+the system is still sequentially consistent.</li>
 </ul>
 
 <p><a href="http://pdos.csail.mit.edu/6.824/notes/l07.txt">6.824 notes</a></p>

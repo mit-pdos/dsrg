@@ -14,6 +14,7 @@
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia.html">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
   <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
   <body>
@@ -150,108 +151,118 @@
 
 <p><a href="http://www.cs.princeton.edu/courses/archive/fall08/cos597B/papers/sinfonia.pdf">Sinfonia</a>
 is a service that allows hosts to share application data in a
-fault-tolerent, scalable, and consistent manner using a novel
-minitransaction primitive. We read this paper because it provides
-an interesting alternative to message passing for building distributed
+fault-tolerant, scalable, and consistent manner using a novel
+mini-transaction primitive. We read this paper because it provides an
+interesting alternative to message passing for building distributed
 systems.</p>
 
 <h2 id="data-layout">Data Layout</h2>
 
-<p>At a high level, Sinfonia provides multiple independent linear address spaces that live on “memory nodes.” No structure is imposed on these address spaces, and they can contain arbitrary bytes of data. Data in Sinfonia is referenced using a pair: (memory-node-id, offset). Sinfonia does not perform automatic load balancing, and data placement is left to the application.</p>
+<p>At a high level, Sinfonia provides multiple independent linear address
+spaces that live on <em>memory nodes</em>. No structure is imposed on these
+address spaces, and they can contain arbitrary bytes of data. Data in
+Sinfonia is referenced using a pair: <code>(memory-node-id, offset)</code>.
+Sinfonia does not perform automatic load balancing, and data placement
+is left to the application.</p>
 
-<h2 id="minitransactions">Minitransactions</h2>
+<h2 id="mini-transactions">Mini-transactions</h2>
 
-<p>Operations on data take the form of “minitransactions,” which are
-basically distributed compare and swap/read operations. A minitransaction
-consists of a triple (compare-set, write-set, read-set). Elements in the compare-set are tuples: (memory-node-id, offset, length, data) where the first three fields describe the location and size of the data to compare, and the last field is the value expected at that location. The write-set is the same, except that the last field is the value to write to the location. Elements in the read-set are similar, but they omit the data field.</p>
+<p>Operations on data take the form of <em>mini-transactions</em>, which are
+basically distributed compare and swap/read operations. A
+mini-transaction consists of a triple <code>(compare-set, write-set,
+read-set)</code>. Elements in the compare-set are tuples: <code>(memory-node-id,
+offset, length, data)</code> where the first three fields describe the
+location and size of the data to compare, and the last field is the
+value expected at that location. The write-set is the same, except that
+the last field is the value to write to the location. Elements in the
+read-set are similar, but they omit the data field.</p>
 
-<p>The minitransaction performs the following operation atomically:</p>
+<p>The mini-transaction performs the following operation atomically:</p>
 
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">if</span> <span class="n">compare</span><span class="o">-</span><span class="n">set</span> <span class="n">comparisons</span> <span class="n">match</span> <span class="n">expected</span> <span class="n">data</span> <span class="p">{</span>
-  <span class="n">Perform</span> <span class="n">each</span> <span class="n">write</span> <span class="n">in</span> <span class="n">write</span><span class="o">-</span><span class="n">set</span>
-  <span class="n">Return</span> <span class="n">each</span> <span class="n">read</span> <span class="n">in</span> <span class="n">read</span><span class="o">-</span><span class="n">set</span>
-<span class="p">}</span></code></pre></div>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="k">if</span> <span class="n">compare</span><span class="o">-</span><span class="n">set</span> <span class="n">comparisons</span> <span class="n">match</span> <span class="n">expected</span> <span class="n">data</span> <span class="p">&#x7b;</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">Perform</span> <span class="n">each</span> <span class="n">write</span> <span class="n">in</span> <span class="n">write</span><span class="o">-</span><span class="n">set</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">  <span class="n">Return</span> <span class="n">each</span> <span class="n">read</span> <span class="n">in</span> <span class="n">read</span><span class="o">-</span><span class="n">set</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="p">&#x7d;</span></div></div></pre></div></figure>
 
-<p>For example, an atomic compare and swap operation on the first byte at memory node 0 (where the expected value is “5” and the new value is “6”) would be:</p>
+<p>For example, an atomic compare and swap operation on the first byte at
+memory node 0 (where the expected value is “5” and the new value is “6”)
+would be:</p>
 
-<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">(</span>
-    <span class="p">{</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="p">},</span>
-    <span class="p">{</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="p">},</span>
-    <span class="p">{}</span>
-<span class="p">)</span></code></pre></div>
+<figure class="code-highlight-figure"><div class="code-highlight"><pre class="code-highlight-pre"><div data-line="1" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="p">(</span>
+</div></div><div data-line="2" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="p">&#x7b;</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="p">&#x7d;,</span>
+</div></div><div data-line="3" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="p">&#x7b;</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="p">&#x7d;,</span>
+</div></div><div data-line="4" class="code-highlight-row numbered"><div class="code-highlight-line">    <span class="p">&#x7b;&#x7d;</span>
+</div></div><div data-line="5" class="code-highlight-row numbered"><div class="code-highlight-line"><span class="p">)</span></div></div></pre></div></figure>
 
-<p>Minitransactions are committed using a 2-phase commit protocol where
+<p>Mini-transactions are committed using a 2-phase commit protocol where
 application nodes are coordinators and memory nodes are participants,
-but minitransactions operating on a single participant use only a
+but mini-transactions operating on a single participant use only a
 single phase. This allows for operations that perform writes on one
-memory node as a result of a compare on another memory node. The
-paper gives several examples of powerful operations that can be
-implemented using minitransactions, including: atomic reads across
-multiple memory nodes, compare and swap, acquiring multiple leases
-atomically, and changing data if a lease is held.</p>
+memory node as a result of a compare on another memory node. The paper
+gives several examples of powerful operations that can be implemented
+using mini-transactions, including: atomic reads across multiple memory
+nodes, compare and swap, acquiring multiple leases atomically, and
+changing data if a lease is held.</p>
 
-<p>Minitransactions were designed so that the operation itself can
-piggyback on the commit protocol for added performance.  This does
-not work for arbitrary transactions, but the restricted operations
-available for minitransactions allows this optimization.  For
-example, a participant can vote “no” to commit a transaction if it
-knows that the coordinator will abort the transaction as a result
-of a value it is reading (this occurs when a comparison in the
-compare-set fails). Additionally, the results for reads in
-minitransactions are included with the vote for committing in the
-first phase.</p>
+<p>Mini-transactions were designed so that the operation itself can
+piggyback on the commit protocol for added performance.  This does not
+work for arbitrary transactions, but the restricted operations available
+for mini-transactions allows this optimization.  For example, a
+participant can vote “no” to commit a transaction if it knows that the
+coordinator will abort the transaction as a result of a value it is
+reading (this occurs when a comparison in the compare-set fails).
+Additionally, the results for reads in mini-transactions are included
+with the vote for committing in the first phase.</p>
 
-<p>The design of minitransactions permits this kind of optimization,
-but it makes certain operations impossible to fit in a single
-minitransaction. For example, reading and copying data between
-memory nodes requires two minitransactions (one to read the data
-and another that atomically checks that the data is still valid and
-writes the data to another memory node).</p>
+<p>The design of mini-transactions permits this kind of optimization, but
+it makes certain operations impossible to fit in a single
+mini-transaction. For example, reading and copying data between memory
+nodes requires two mini-transactions (one to read the data and another
+that atomically checks that the data is still valid and writes the data
+to another memory node).</p>
 
 <h2 id="design">Design</h2>
 
 <p>Overall, Sinfonia provides an alternative to message passing for
 implementing distributed systems. Rather than explicitly sending
-messages, applications describe operations on shared data in terms
-of minitransactions that are executed atomically using 2-phase
-commit.</p>
+messages, applications describe operations on shared data in terms of
+mini-transactions that are executed atomically using 2-phase commit.</p>
 
-<p>Sinfonia uses logging and replication to provide fault tolerance
-and reduce downtime. The design of Sinfonia, however, does not
-support automatic load-balancing or caching. Load-balancing and
-caching are left to the application developer who is given some
-load information by the system.</p>
+<p>Sinfonia uses logging and replication to provide fault tolerance and
+reduce downtime. The design of Sinfonia, however, does not support
+automatic load-balancing or caching. Load-balancing and caching are left
+to the application developer who is given some load information by the
+system.</p>
 
-<p>Coordinator crashes are handled using a recovery coordinator, which
-is triggered when a transaction has not been committed or aborted
-after some timeout. The recovery coordinator asks each participant
-how it voted on that transaction, and the participant replies with
-its original vote if it had already voted or “ABORT” if it had not
-(remembering that it must abort this transaction in the future if
-the original coordinator reappears).</p>
+<p>Coordinator crashes are handled using a recovery coordinator, which is
+triggered when a transaction has not been committed or aborted after
+some timeout. The recovery coordinator asks each participant how it
+voted on that transaction, and the participant replies with its original
+vote if it had already voted or <code>ABORT</code> if it had not (remembering that
+it must abort this transaction in the future if the original coordinator
+reappears).</p>
 
 <p>Sinfonia uses a write-ahead redo-log for performance and fault-tolerance
 for the participants.  When a participant votes to commit, the
 transaction data is added to the redo-log which is replayed if the
 participant crashes. Participants also keep track of decided
-transactions so they know if they can commit the changes or not.
-Other participants must be contacted for their votes if the
-recovered participant does not know how the transaction was
-decided.</p>
+transactions so they know if they can commit the changes or not.  Other
+participants must be contacted for their votes if the recovered
+participant does not know how the transaction was decided.</p>
 
 <h2 id="comments">Comments</h2>
 
 <p>Sinfonia provides an interesting alternative to message passing in
-distributed systems, but requires application developer intervention
-to provide data locality, caching, and data placement. The paper
-details several optimizations, which are especially important for
-minitransaction performance. The paper also includes interesting
+distributed systems, but requires application developer intervention to
+provide data locality, caching, and data placement. The paper details
+several optimizations, which are especially important for
+mini-transaction performance. The paper also includes interesting
 applications built on top of Sinfonia: a file system and a group
-communication service, which show how Sinfonia can be used to
-implement real-world applications.</p>
+communication service, which show how Sinfonia can be used to implement
+real-world applications.</p>
 
-<p>Minitransactions are somewhat limited in what operations they can perform, but the 
-operations they do support can be efficiently executed.</p>
+<p>Mini-transactions are somewhat limited in what operations they can
+perform, but the operations they do support can be efficiently executed.</p>
 
   </article>
 

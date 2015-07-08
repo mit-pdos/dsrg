@@ -14,6 +14,7 @@
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/09/30/spark-streaming.html">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
   <link href='/stylesheets/all-b5d41f4fa671ec94597e984da68527b0.css' media='all' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
   <body>
@@ -148,14 +149,16 @@
   <article class="post-content">
     <h2 id="why-did-we-read-this-paper">Why did we read this paper?</h2>
 
-<p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at Scale</a> 
-describes additions to the
-<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a> system to
-handle streaming data. Compared to other streaming systems, Spark Streaming
-offers a more robust fault recovery and straggler handling strategies using the Resilient
-Distributed Dataset (RDD) memory abstraction. In addition to allowing parallel
-recovery, Spark Streaming is one of the first systems which can
-incorporate batch and interactive query models all within the same system.</p>
+<p><a href="http://sigops.org/sosp/sosp13/papers/p423-zaharia.pdf">Discretized Streams: Fault Tolerant Computing at
+Scale</a> describes
+additions to the
+<a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
+system to handle streaming data. Compared to other streaming systems,
+Spark Streaming offers a more robust fault recovery and straggler
+handling strategies using the Resilient Distributed Dataset (RDD) memory
+abstraction. In addition to allowing parallel recovery, Spark Streaming
+is one of the first systems which can incorporate batch and interactive
+query models all within the same system.</p>
 
 <h2 id="what-are-rdds">What are RDDs?</h2>
 
@@ -163,56 +166,60 @@ incorporate batch and interactive query models all within the same system.</p>
 <a href="http://www.cs.berkeley.edu/~matei/papers/2012/nsdi_spark.pdf">Spark</a>
 paper.  They are immutable and only allow a specified set of
 functional-like transformations to be operated on them. However, these
-seemingly constraining properties allow the computation done on RDDs
-to be completely deterministic, and RDDs can be computed in parallel
+seemingly constraining properties allow the computation done on RDDs to
+be completely deterministic, and RDDs can be computed in parallel
 without having to worry about synchronization. Another really
 interesting aspect of RDDs are their resilience to faults. By tracking
-the lineage of transformations done on RDDs, we can reconstruct any
-lost RDDs by simply retracing the lineage and recomputing from the
-source RDDs.</p>
+the lineage of transformations done on RDDs, we can reconstruct any lost
+RDDs by simply retracing the lineage and recomputing from the source
+RDDs.</p>
 
 <h2 id="stream-discretization">Stream Discretization</h2>
 
 <p>Spark Streaming is different from other streaming systems in that it
-discretizes streaming input using a sliding window. The discretized input are
-turned into RDDs and Spark Streaming can then perform small batch operations on
-them as it would have in general batched mode. By converting the input streaming
-data into batched RDDs, Spark Streaming can easily intermix between the
-streaming model and the general batched model because it operates over the same
-RDD abstraction.</p>
+discretizes streaming input using a sliding window. The discretized
+input are turned into RDDs and Spark Streaming can then perform small
+batch operations on them as it would have in general batched mode. By
+converting the input streaming data into batched RDDs, Spark Streaming
+can easily intermix between the streaming model and the general batched
+model because it operates over the same RDD abstraction.</p>
 
 <h2 id="tracking">Tracking</h2>
 
-<p>Typically, streaming systems employ a constant operator model in which several
-constantly running workers wait for streaming data, operate on them, and output
-the data. Spark Streaming differs from this model in that it expresses all the
-operations done on the data through the RDDs. The worker nodes maintain no
-state of their own. If state is needed to operate on the data, Spark Streaming
-employs a special track operation, which provides access to a key-value store
-(structured as an RDD). The state for any data can be stored as a value in the
-key-value store and can be accessed again using the same key.</p>
+<p>Typically, streaming systems employ a constant operator model in which
+several constantly running workers wait for streaming data, operate on
+them, and output the data. Spark Streaming differs from this model in
+that it expresses all the operations done on the data through the RDDs.
+The worker nodes maintain no state of their own. If state is needed to
+operate on the data, Spark Streaming employs a special track operation,
+which provides access to a key-value store (structured as an RDD). The
+state for any data can be stored as a value in the key-value store and
+can be accessed again using the same key.</p>
 
 <h2 id="parallel-recovery">Parallel Recovery</h2>
 
-<p>When a fault occurs, the Spark Streaming model simply recalculates the RDDs that
-have been destroyed by retracing through the lineage of the graph. However,
-because the RDDs are immutable and deterministic, recomputation can be performed
-in parallel both in time and partition. This allows Spark Streaming model to
-have fault-recovery times on the order of seconds and tens of seconds, while
-existing systems take minutes.</p>
+<p>When a fault occurs, the Spark Streaming model simply recalculates the
+RDDs that have been destroyed by retracing through the lineage of the
+graph. However, because the RDDs are immutable and deterministic,
+recomputation can be performed in parallel both in time and partition.
+This allows Spark Streaming model to have fault-recovery times on the
+order of seconds and tens of seconds, while existing systems take
+minutes.</p>
 
 <h2 id="stragglers">Stragglers</h2>
 
-<p>Once again because RDDs are immutable and deterministic, Spark Streaming can
-perform speculative replication to handle any stragglers. It is not a problem if
-an RDD is computed twice because transformations on an RDD is deterministic, so
-no synchronization needs to take place when actually storing the RDD.</p>
+<p>Once again because RDDs are immutable and deterministic, Spark Streaming
+can perform speculative replication to handle any stragglers. It is not
+a problem if an RDD is computed twice because transformations on an RDD
+is deterministic, so no synchronization needs to take place when
+actually storing the RDD.</p>
 
 <h2 id="comments">Comments</h2>
 
-<p>Overall, using RDDs to operate on streaming data provides a nice clean solution
-for fault-recovery and stragglers. Also, this idea of discretizing streaming
-data could lead to interesting future work in the area.</p>
+<p>Overall, using RDDs to operate on streaming data provides a nice clean
+solution for fault-recovery and stragglers. Also, this idea of
+discretizing streaming data could lead to interesting future work in the
+area.</p>
 
   </article>
 
