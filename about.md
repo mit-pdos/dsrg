@@ -11,10 +11,12 @@ distributed systems research papers, and cover papers from conferences
 like SOSP, OSDI, PODC, VLDB, and SIGMOD. We try to have a healthy mix of
 current systems papers and older seminal papers.
 
-You can join our mailing list
-[here](https://lists.csail.mit.edu/mailman/listinfo/ds-reading).  We
-welcome non-MIT attendees who want to participate.  We will also
+You can join our mailing list,
+[dsrg@csail.mit.edu](mailto:dsrg@csail.mit.edu)
+[here](https://lists.csail.mit.edu/mailman/listinfo/dsrg).
+We welcome non-MIT attendees who want to participate. We will also
 broadcast the meetings via Google Hangout by request, but we've decided
 not to record them.
 
-Email jfrg@mit.edu with any questions.
+Email the mailing list or [jfrg@mit.edu](mailto:jfrg@mit.edu) with any
+questions.
