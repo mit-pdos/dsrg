@@ -1,0 +1,118 @@
+---
+layout: post
+title: "Thialfi"
+date: 2013-07-03 16:00
+comments: true
+---
+
+Several of the papers we've read recently have focused on sophisticated,
+generic fault tolerance abstractions based on complex protocols.
+[Thialfi](http://www.cs.columbia.edu/~lierranli/coms6998-11Fall2012/papers/thia_sosp2011.pdf)
+offers a contrast: its approach to fault tolerance is intentionally
+simple, while at the same time being resilient to arbitrary (halting)
+failure, including entire data centers.  Thialfi's approach to fault
+tolerance permeates the design of its abstraction, unlike Raft and VR,
+which provide general-purpose state machine replication.
+
+Thialfi is also a real, massively deployed system, but is simple enough
+to explain in more depth within the constraints of a conference paper
+than most production systems.
+
+## What is Thialfi?
+
+The paper calls Thialfi a "notification service", but really it's an
+object update signaling service.  When an application server updates an
+object, it notifies Thialfi, and Thialfi notifies end-user clients on
+the Internet that have registered for the object.  Critically, these
+"notifications" contain no information about how the object
+changed---the client has to query the application server to get its
+updated state---which means Thialfi is free to combine notifications and
+to generate spurious notifications, as long as clients interested in an
+object eventually get at least one notification that the object has
+changed if the client's last seen version is not the object's current
+version.
+
+Under normal operation, Thialfi delivers timely update notifications to
+connected clients, without any polling (clients must send periodic
+heartbeats to maintain the connection, but these are infrequent, small,
+and efficient to process).  When a client goes offline and later
+returns, Thialfi remembers its previous object registrations and sends
+only notifications for objects that changed while the client was
+offline.  Similarly, the client only needs to resend its registrations
+if they have changed since it was last online or if it was offline for
+over two weeks (after which Thialfi garbage collects its state).
+
+## Designing for fault tolerance
+
+There are a few core ideas in Thialfi's design that help it achieve
+fault tolerance.  These are not necessarily unique to Thialfi, but they
+work well in concert.
+
+Thialfi's abstraction is carefully chosen to enable simple fault
+tolerance.  Thialfi is *always* allowed to respond to clients with "I
+don't know"; in the worst case, the client will fall back to polling the
+application server.  This is a key choice because it means Thialfi is
+free to drop any and all state, as long as it never incorrectly claims
+to know the version of an object.  In fact, the initial design presented
+by the paper (4.1) is entirely in-memory, yet can survive data center
+failures.  At first, this may seem like an undesirable abstraction to
+build a client application atop, but, in fact, clients already have to
+deal with this when they first run.
+
+Since the only thing Thialfi can tell a client is "object X might have
+changed", it's free to coalesce, repeat, and generate spurious
+notifications.  The only thing it's not allowed to do is drop a
+notification entirely.  Since, faced with arbitrary faults, there's no
+way to know whether or not a notification was dropped, Thialfi
+conservatively generates spurious notifications whenever a failure
+*might* have caused a notification to be dropped.
+
+Responsibility for hard state is colocated with the nodes that care
+about that hard state.  A client is responsible for its object
+registrations, because if the client dies, its registrations don't
+matter.  Likewise, an application server is responsible for application
+data, because it has to persist that anyway (and if it dies, there's
+nothing to send notifications about).
+
+Regular paths and error handling paths are the same wherever possible.
+This means they don't have to distinguish errors from regular operation
+and that the code is more likely to be correct (error handling code is
+notoriously buggy largely because it doesn't get exercised).  For
+example, initial registration, modifications to registrations, handling
+server loss of registration state, and re-registering after migration
+are all handled in the same way: the client and server exchange digests
+of what they think the registration state is in every heartbeat; if
+these are out of sync, the client simply resends its entire set of
+registrations.  This extends to the user of the client API as well: as
+mentioned above, client cold-start and the loss of version state in
+Thialfi are handled identically at an API level.
+
+Ultimately, Thialfi makes recovering from failure the responsibility of
+application servers and clients, keeping itself off the critical path
+for anything.  This seems simple, but achieving this without burdening
+application servers and clients requires careful and conscious design.
+
+## Discussion
+
+We felt there was one dark corner of Thialfi's design that makes it
+difficult to completely understand its fault tolerance properties.
+Application servers post version changes to Thialfi via Google's
+reliable pub-sub system, about which the paper is devoid of details.
+It's difficult to tell how the pub-sub system could fail and how this
+would affect Thialfi.  Furthermore, if Thialfi bootstraps off a reliable
+pub-sub system, what would have happened if Google had simply exposed a
+client API to subscribe to the pub-sub system?  Our best guess is that
+it wouldn't have scaled to millions of clients like Thialfi does, but we
+can only guess.
+
+Thialfi's approach of signaling rather than notification reprises the
+long debate between "level-triggered" and "edge-triggered" interfaces in
+OS and hardware design.  Level-triggered interfaces like `poll()` and
+PCI interrupts have very similar properties to Thialfi's API (e.g., like
+a Thialfi notification, `poll()` only tells the caller that data is
+available on an FD, not what the data is, or how many times the FD was
+written to).  On the other hand, edge-triggered interfaces more closely
+resemble the reliable pub-sub interface that Thialfi explicitly
+rejected.  Historically, level-triggered interfaces have generally
+scaled better, and we found it interesting to see this revisited and
+reinforced from a very different perspective.

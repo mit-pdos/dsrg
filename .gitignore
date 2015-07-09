@@ -1,3 +1,4 @@
-.preview-mode
-*~
-#*
+_site
+.sass-cache
+.code-highlighter-cache
+vendor/
