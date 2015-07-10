@@ -1,6 +1,7 @@
 ---
 layout: post
 title: PacificA
+author: Bryan Kate
 date: 2013-06-06 18:00
 comments: true
 ---

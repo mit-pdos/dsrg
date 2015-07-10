@@ -1,6 +1,7 @@
 ---
 layout: post
 title: SPANStore
+author: Frank Wang
 date: 2013-09-30 16:00
 comments: true
 ---

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "CoralCDN"
+author: Michael S. Kester
 date: 2013-07-18 15:00
 comments: true
 ---

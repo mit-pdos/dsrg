@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Chain Replication"
+author: Jonas Helfer
 date: 2013-08-08 15:00
 comments: true
 ---

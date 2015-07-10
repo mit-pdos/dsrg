@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Sinfonia"
+author: Christopher R. Johnson
 date: 2013-12-16 15:52
 comments: true
 ---

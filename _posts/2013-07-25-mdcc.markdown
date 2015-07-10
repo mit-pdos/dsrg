@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "MDCC"
+author: Eugene Wu
 date: 2013-07-25 12:00
 comments: true
 ---

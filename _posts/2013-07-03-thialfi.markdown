@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Thialfi"
+author: Austin Clements
 date: 2013-07-03 16:00
 comments: true
 ---

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "VR Revisited"
+author: Charles Gruenwald
 date: 2013-06-20 18:00
 comments: true
 ---
