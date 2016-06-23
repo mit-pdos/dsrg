@@ -5,11 +5,12 @@ comments: false
 permalink: /about/
 ---
 
-DSRG is a Distributed Systems Reading Group at MIT. We meet once a week on
-the 9th floor of [Stata](http://goo.gl/maps/IgVd5) to discuss
-distributed systems research papers, and cover papers from conferences
-like SOSP, OSDI, PODC, VLDB, and SIGMOD. We try to have a healthy mix of
-current systems papers and older seminal papers.
+DSRG is a Distributed Systems Reading Group at MIT. We meet once every
+other week in [Stata](http://goo.gl/maps/IgVd5) (room is announced on
+the mailing list) to discuss distributed systems research papers, and
+cover papers from conferences like SOSP, OSDI, PODC, VLDB, and SIGMOD.
+We try to have a healthy mix of current systems papers and older seminal
+papers.
 
 You can join our mailing list,
 [dsrg@csail.mit.edu](mailto:dsrg@csail.mit.edu)
