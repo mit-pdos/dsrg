@@ -6,9 +6,206 @@
 </description>
     <link>http://dsrg.pdos.csail.mit.edu/</link>
     <atom:link href="http://dsrg.pdos.csail.mit.edu/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 23 Jun 2016 11:19:05 -0400</pubDate>
-    <lastBuildDate>Thu, 23 Jun 2016 11:19:05 -0400</lastBuildDate>
+    <pubDate>Sun, 26 Jun 2016 12:15:01 -0400</pubDate>
+    <lastBuildDate>Sun, 26 Jun 2016 12:15:01 -0400</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Scalability! But what is the COST?</title>
+        <description>&lt;p&gt;After a long break, we made our first paper &lt;a href=&quot;http://www.frankmcsherry.org/assets/COST.pdf&quot;&gt;Scalability! But at what
+COST?&lt;/a&gt; by Frank McSherry,
+Michael Isard, and Derek Murray. It is fairly short paper published in
+HotOS’15 which raises some interesting questions about distributed
+systems research, and the focus on scalability as the holy grail of
+performance.&lt;/p&gt;
+
+&lt;p&gt;In this post, I’ll go over some of the paper’s main arguments, and then
+give a summary of the reading group’s thoughts and questions about the
+paper. We are hoping to get around to another paper in two weeks’ time,
+but after that we might take a summer break and return in September.&lt;/p&gt;
+
+&lt;h2 id=&quot;paper-summary&quot;&gt;Paper summary&lt;/h2&gt;
+
+&lt;p&gt;The paper is, at its heart, a criticism of how the performance of
+current research systems are evaluated. The authors focus on the field
+of graph processing, but their arguments extend to most distributed
+computation research where performance is a key factor. They observe
+that most systems are currently evaluated in terms of their
+&lt;em&gt;scalability&lt;/em&gt;, how their performance changes as more compute resources
+are used, but that this metric is often both useless and misleading.&lt;/p&gt;
+
+&lt;p&gt;Without going into too much detail (you can find that in the paper), the
+crux of their argument is that if a system has significant, but easily
+&lt;em&gt;parallelizeable overhead&lt;/em&gt;, the system will appear to scale well, even
+if its absolute performance is quite poor. To demonstrate this point,
+the authors write single-threaded implementations for algorithms that
+are commonly used to evaluate state-of-the-art graph processing systems.
+They then run these implementations on the same datasets as those used
+to evaluate several well-known systems in the field (Spark, GraphLab,
+GraphX, etc.), and compare the total runtime against the numbers
+published for those other systems.&lt;/p&gt;
+
+&lt;p&gt;In almost all cases, the single-threaded implementation outperforms all
+the others, sometimes by an order of magnitude, despite the distributed
+systems using 16-128 cores. Several hundred cores were generally needed
+for state-of-the-art systems to rival the performance of their
+single-threaded program. This threshold is what the authors refer to as
+a system’s COST. Some systems &lt;em&gt;never&lt;/em&gt; got better than the authors’
+implementations, giving them effectively infinite COST.&lt;/p&gt;
+
+&lt;p&gt;It is clear that the authors are not trying to pick on these systems in
+particular. Instead, they seek to highlight a shortcoming in how current
+research into distributed systems is evaluated. It is not merely enough
+for a system to be better than its predecessors — it needs to be
+faster or “better” compared to some &lt;em&gt;sensible baseline&lt;/em&gt; that represents
+what someone skilled in the field would come up with. For example,
+Hilbert curves and Union-Find are examples of tricks that it seems
+reasonable for a well-versed author to employ. Crucially, this is not
+just about researchers reporting these kinds of results, but also about
+reviewers demanding them. A system that is twice as fast as some
+previous system, but slower than a much simpler system, should probably
+not be accepted.&lt;/p&gt;
+
+&lt;h2 id=&quot;discussion&quot;&gt;Discussion&lt;/h2&gt;
+
+&lt;p&gt;This paper spawned a fair bit of discussion at our meeting, though we
+were mostly in agreement with each other, and with the authors. Broadly
+speaking, we talked about three main aspects of the paper: how did we
+get here, will this trigger any changes, and what other fields are
+affected? I’ll summarize each one below:&lt;/p&gt;
+
+&lt;h3 id=&quot;how-did-we-get-here&quot;&gt;How did we get here?&lt;/h3&gt;
+
+&lt;p&gt;As far as we understand it, this paper came about following a sense of
+annoyance with state-of-the-art graph research — the graph most people
+operate on just aren’t that large. As long as the data fits on a couple
+of SSDs, single-machine, or even single-thread programs can be
+sufficient. Crucially, the data doesn’t need to fit in RAM to outperform
+a distributed system (which has to pay network communication cost
+despite keeping all the data in memory).&lt;/p&gt;
+
+&lt;p&gt;The results also follow from Amdahl’s law. The law states that, given
+&lt;code&gt;s&lt;/code&gt; compute resources, and &lt;code&gt;p&lt;/code&gt; as the fraction of the computation that
+is parallelizeable, the expected system speedup is:&lt;/p&gt;
+
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;S_\text{latency}(s) = \frac{1}{(1 - p) + \frac{p}{s}}&lt;/script&gt; &lt;!-- __$_ --&gt;&lt;/p&gt;
+
+&lt;p&gt;Given this, it should be clear that the way to achieve a higher speedup
+as the number of compute resources increases is to increase the fraction
+of the program that is parallelizeable. However, there are two ways of
+doing this. You can either &lt;em&gt;change&lt;/em&gt; the program such that more of it is
+parallelizeable, or you can &lt;em&gt;slow down&lt;/em&gt; or blow up the amount of
+parallelizeable code, so that it accounts for a larger fraction. This
+latter technique would “improve” the correlation between &lt;code&gt;s&lt;/code&gt; and
+speed-up, but does not actually make the program any faster than the
+original.&lt;/p&gt;
+
+&lt;p&gt;Usually, it is pretty sensible to compare research systems to prior
+systems. The transitive argument that “we’re good because they’re good
+and we’re better” is generally sufficient. However, this is only true if
+one of those prior systems have been shown to be good for the use-case
+you are trying to solve. In graph processing, the stage was set by
+Google using Map/Reduce to compute PageRank over the web graph (which is
+arguably one of the few real, large graphs out there). Due to the
+graph’s sheer size, distribution was necessary, but this also meant the
+system was fairly slow if you didn’t have access to the same amount of
+compute resources as Google does.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, the systems that then followed all compared themselves to
+PageRank on M/R, &lt;em&gt;even for smaller problems&lt;/em&gt;. The Twitter graph, or the
+&lt;code&gt;uk-2007-05&lt;/code&gt; graph referred to in the paper, which have been used to
+evaluate countless graph processing systems, simply do not require
+distribution anywhere near the scale of the web graph. By sacrificing
+scalability (i.e., distribution), &lt;em&gt;better algorithms&lt;/em&gt; can be used,
+which can speed up the computation significantly, but the follow-up
+systems did not compare themselves against that. And neither did the
+systems that followed on from those.&lt;/p&gt;
+
+&lt;h3 id=&quot;are-things-going-to-change&quot;&gt;Are things going to change?&lt;/h3&gt;
+
+&lt;p&gt;One might argue that the reviewers of these papers should have caught
+the “lie” — that they should have demanded to see &lt;em&gt;why&lt;/em&gt; the massive
+scalability was necessary, and why a smaller, but “smarter” solution
+wasn’t the right choice instead. We suspect that part of the reason they
+didn’t is that it can be quite hard to judge just how large a problem
+is. If a graph has 100 million edges, is that big? Does it fit in RAM?
+Does it fit on a single disk? If it doesn’t fit in RAM, is the
+computation going to be excruciatingly slow? The reviewers assumed that
+the researchers were right about the problem necessitating the use of
+many machines, possibly because they knew it was true for PageRank on
+the web graph. And then the transitive argument was applied from there.&lt;/p&gt;
+
+&lt;p&gt;The authors are trying to argue, among other things, that researchers
+should think more carefully about the algorithm they use. In many cases,
+that is much more important than whether you can use a given graph
+processing framework. Restricting yourself to “think like a vertex” can
+make you lose out on significant performance gains, which could in turn
+mean you can make do with a single machine, rather than a
+hundred-machine cluster.&lt;/p&gt;
+
+&lt;p&gt;Despite this, the paper is not really targeted at end-users. It is
+targeted at researchers and reviewers, and trying to make them apply
+more rigorous standards to their work. Given that this might introduce
+substantial work for researchers, we suspect that the process will need
+to be reviewer driven. A researcher might be hesitant to invest lots of
+time into writing a single-threaded implementation just for baseline
+comparison, but if the reviewers start demanding it, they will be forced
+to. At the very least, reviewers should require that the paper argues
+why a simple, relatively naïve implementation is not good enough for the
+problem at hand. One should not add a requirement to have access to a
+huge compute cluster lightly, just because a few companies have access
+to them!&lt;/p&gt;
+
+&lt;p&gt;One good compromise might be for researchers to look at the algorithms
+that exist, and visit the papers that introduced them. They will
+generally give the &lt;em&gt;real&lt;/em&gt; complexity of the algorithm (i.e., not just
+the big-O upper bound), which could be used as an interesting comparison
+for the system’s scaling properties.&lt;/p&gt;
+
+&lt;!--
+ - It&#39;s probably hard to write a framework that has both high
+   performance *and* is super scalable.
+ - We&#39;d like a single number for performance + scalability to evaluate.
+--&gt;
+
+&lt;h3 id=&quot;where-else-does-this-problem-appear&quot;&gt;Where else does this problem appear?&lt;/h3&gt;
+
+&lt;p&gt;The authors make their point in the context of graph processing systems,
+but their COST metric also applies to a variety of other distributed
+systems. One that immediately came to mind is distributed storage
+systems such as GFS. It would be interesting to see what performance a
+system that targeted GFS-like features (concurrent writers with
+append-record semantics) on a single machine with many disks could
+achieve, and how that translates into overhead incurred by the
+distribution in, say, GFS. Many users, though obviously not the likes of
+Google or Facebook, could probably get away with using such a system,
+and might be able to reap significant benefits.&lt;/p&gt;
+
+&lt;p&gt;There are also contexts in which we believe the argument does &lt;em&gt;not&lt;/em&gt;
+apply. For example, for long-running, incremental-computation systems
+(such as databases) that have request-side scalability (e.g., support
+many concurrent readers), it is not clear that comparing to a system
+that only supports one-request-at-the-time is an apples-to-apples
+comparison.&lt;/p&gt;
+
+&lt;p&gt;In systems with strict requirements for latency, it might also be
+necessary to pay the COST in order to hit the latency target. It could
+be that a single-threaded implementation simply cannot achieve the
+required latency, whereas a scalable system can reach it with hundreds
+or thousands of cores. The price may be steep (and knowing what it is is
+important), but it might be one that you are required to pay.&lt;/p&gt;
+
+&lt;!--
+ - What about pre-processing? Can be expensive? Is it fair to only
+   distribute the pre-processing? Probably not.
+--&gt;
+</description>
+        <pubDate>Sun, 26 Jun 2016 12:14:00 -0400</pubDate>
+        <link>http://dsrg.pdos.csail.mit.edu/2016/06/26/scalability-cost/</link>
+        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2016/06/26/scalability-cost/</guid>
+        
+        
+      </item>
     
       <item>
         <title>EPaxos</title>
@@ -1118,239 +1315,6 @@ reinforced from a very different perspective.&lt;/p&gt;
         <pubDate>Wed, 03 Jul 2013 16:00:00 -0400</pubDate>
         <link>http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi/</link>
         <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>VR Revisited</title>
-        <description>&lt;p&gt;&lt;a href=&quot;http://pmg.csail.mit.edu/papers/vr-revisited.pdf&quot;&gt;Viewstamped
-Replication&lt;/a&gt; is a
-mechanism for providing replication through a Primary / Backup scheme.
-This paper provides a distilled view of this technique along with
-several optimizations that can be applied. In particular, this paper
-focuses solely on the Viewstamped Replication protocol, without looking
-at any specific implementation or uses.&lt;/p&gt;
-
-&lt;p&gt;While a general Primary / Backup replication scheme may seem easy to get
-right, considering how to handle view changes and the many optimizations
-that others have come up with over the years, this paper provides a
-go-to source for building such a system.&lt;/p&gt;
-
-&lt;p&gt;Previously we have looked at the Paxos protocol for consensus as well as
-Spanner which is an externally consistent distributed storage system.
-This paper sits in-between these two extremes in that it is a technique
-used for replication, thus being more complete than one-time consensus,
-while eliding the details of a full storage system like Spanner.&lt;/p&gt;
-
-&lt;h2 id=&quot;what-is-viewstamped-replication&quot;&gt;What is Viewstamped Replication?&lt;/h2&gt;
-
-&lt;p&gt;Viewstamped Replication (referred to as VR in the remainder of this
-post) is a replication protocol that uses consensus to support a
-replicated state machine.  The replication state machine allows clients
-using this service to run operations that either view or modify the
-state, upon which other services can be built such as a distributed
-key-value store.&lt;/p&gt;
-
-&lt;p&gt;One goal of VR is to support &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; failures using &lt;script type=&quot;math/tex&quot;&gt;2f + 1&lt;/script&gt; nodes, so
-it should be used in a distributed system where failures may occur.
-Beyond normal operation, the system handles two scenarios: changing the
-primary between the current list of members in a &lt;em&gt;view change&lt;/em&gt;, as well
-as changing the set of participating members in a &lt;em&gt;reconfiguration&lt;/em&gt;.
-This paper assumes that state replicated on many machines can be used
-for durability, thus avoiding a potential latency of writing to
-persistent storage.  Unfortunately, if VR is run in one datacenter, all
-the machines may be on the same power source and thus in the same
-failure domain, so this might not be practical without a UPS.&lt;/p&gt;
-
-&lt;h2 id=&quot;architecture&quot;&gt;Architecture&lt;/h2&gt;
-
-&lt;p&gt;Some number of clients will be interacting directly with a service such
-as a key-value store. The clients use a VR library or proxy that will
-abstract away the details of the replication so that client code will
-use the abstraction of “read” and “write” like operations on client
-defined state. Clients will use a monotonically increasing request
-number which will allow the system to detect duplicate requests.&lt;/p&gt;
-
-&lt;p&gt;Some number of servers (&lt;script type=&quot;math/tex&quot;&gt;2f + 1&lt;/script&gt; when trying to support &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt;
-failures) will run the VR code as well as the service code. The VR code
-on the server will determine when to apply operations on the service
-data and push these operations up to the service code. Note that these
-servers can return after a failure (or network partition) and will only
-result in a view change which would require getting the failed /
-partitioned node(s) up to date.&lt;/p&gt;
-
-&lt;p&gt;Note that in VR as presented in this paper, the operations are performed
-on several different replicas (instead of shipping the data around after
-the operation has been performed). As a result, the operations  must be
-deterministic.  It is mentioned in the paper that particular techniques
-can be used to ensure this property.&lt;/p&gt;
-
-&lt;p&gt;As this is a Primary / Backup based system, the ordering is decided by
-the primary, however &lt;script type=&quot;math/tex&quot;&gt;f + 1&lt;/script&gt; replicas must know about a request before
-executing it to ensure durability despite failures and that ordering is
-guaranteed.&lt;/p&gt;
-
-&lt;h2 id=&quot;system-operation&quot;&gt;System Operation&lt;/h2&gt;
-
-&lt;p&gt;The system is in one of three states: normal operation, view changes
-when the system needs a new primary, and reconfiguration when membership
-is changing. The primary node is deterministically chosen based on the
-configuration (list of servers) and the view numbers. As a result this
-system does not need to rely on voting or consensus (e.g. longest log)
-to determine the next leader to take over.&lt;/p&gt;
-
-&lt;h3 id=&quot;normal-operation&quot;&gt;Normal Operation&lt;/h3&gt;
-
-&lt;p&gt;Replicas use a view number to determine if they are in the correct
-state. If the sender is behind, the receiver will drop the message,
-whereas if the sender is ahead, the receiver must update itself first,
-and then process the message.&lt;/p&gt;
-
-&lt;p&gt;A client sends a request to perform an operation at the server. The
-server then sends &lt;code&gt;Prepare&lt;/code&gt; messages to each of the backups and waits
-for &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; &lt;code&gt;PrepareOk&lt;/code&gt; responses. Once it has received these responses it
-can assume that the message will persist and it applies the operation by
-making an upcall to the service code, which finally replies to the
-client. A backup will perform the same operation but does not reply to
-the client.&lt;/p&gt;
-
-&lt;h3 id=&quot;view-changes&quot;&gt;View Changes&lt;/h3&gt;
-
-&lt;p&gt;View changes occur when the system needs to elect a new leader. A key
-correctness requirement for the protocol is that every operation
-executed by an upcall to the service code must make it into the new view
-in the same order as the original execution. To achieve this
-requirement, &lt;script type=&quot;math/tex&quot;&gt;f + 1&lt;/script&gt; logs are obtained and merged using the view
-number to break conflicts in op number ordering.&lt;/p&gt;
-
-&lt;p&gt;Protocol:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Replica sends &lt;code&gt;StartViewChange&lt;/code&gt; to all other replicas&lt;/li&gt;
-  &lt;li&gt;Receives &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; responses, sends &lt;code&gt;DoViewChange&lt;/code&gt; to new primary&lt;/li&gt;
-  &lt;li&gt;New primary waits for &lt;script type=&quot;math/tex&quot;&gt;f + 1&lt;/script&gt; &lt;code&gt;DoViewChange&lt;/code&gt; messages before
-assuming new view&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Note that sending a suffix of the log (e.g. 1-2 entries) in the
-&lt;code&gt;DoViewChange&lt;/code&gt; message will likely bring the new server up to date
-without requiring any additional state transfer from the replicas.&lt;/p&gt;
-
-&lt;h3 id=&quot;recovery&quot;&gt;Recovery&lt;/h3&gt;
-
-&lt;p&gt;Server recovery has the correctness requirement that a replica must be
-as up to date as it was when it crashed, otherwise it may forget about
-ops that it prepared. This is achieved by receiving state from other
-replicas using the following recovery protocol (note that nodes do not
-participate in request processing or view changes during the recovery
-phase):&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Recovering node send &lt;code&gt;Recovery&lt;/code&gt; message to all&lt;/li&gt;
-  &lt;li&gt;All reply with &lt;code&gt;RecoveryResponse&lt;/code&gt;, view number and a nonce (and log,
-etc if primary)&lt;/li&gt;
-  &lt;li&gt;Replica waits for &lt;script type=&quot;math/tex&quot;&gt;f + 1&lt;/script&gt; responses (and primary), applies log and
-begins normal processing&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Note that in the theoretical solution, logs may be prohibitively big,
-however optimizations exist to trim the log (e.g. snapshots).&lt;/p&gt;
-
-&lt;p&gt;Client recovery is simply achieved by starting any new request with the
-old request number (obtained from replicas) + 2.&lt;/p&gt;
-
-&lt;h3 id=&quot;reconfiguration&quot;&gt;Reconfiguration&lt;/h3&gt;
-
-&lt;p&gt;Though reconfiguration is discussed later in the paper, it fits the flow
-here in that it is essentially the last mode of operation. Beyond that,
-several optimizations are considered to speed up various parts of the
-system.&lt;/p&gt;
-
-&lt;p&gt;Reconfiguration is used to add/remove nodes to the system (thus changing
-the &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; failures that the system can handle), or to upgrade or
-relocate machines (for long running systems). A reconfiguration is
-instantiated by an administrator of the system. In this paper, the term
-“epoch” refers to a configuration number and the “transitioning” state
-refers to a node that is currently changing configurations. The
-reconfiguration is started similarly to other operations by sending the
-operation to the leader, however included in this operation is the new
-configuration (list of participating machines). The primary will then
-send the &lt;code&gt;StartEpoch&lt;/code&gt; message and wait for &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; responses.&lt;/p&gt;
-
-&lt;p&gt;Any new replicas will be brought up to date before the epoch change (by
-sending them a list of operations or a snapshot + diff). Once a new
-replica is up to date it will send an &lt;code&gt;EpochStarted&lt;/code&gt; message to old
-replicas. Thus, once an old replica (that is not in the new
-configuration) has received &lt;script type=&quot;math/tex&quot;&gt;f + 1&lt;/script&gt; &lt;code&gt;EpochStarted&lt;/code&gt; messages, it is
-free to shut down. Note that one particular optimization is to bring new
-machines up to date (e.g. warm-up) before performing the reconfiguration
-to minimize the down time during transition as nodes will not respond to
-messages for earlier epochs or while transitioning.&lt;/p&gt;
-
-&lt;p&gt;The administrator can determine status of old replicas by sending out
-&lt;code&gt;CheckEpoch&lt;/code&gt; messages and then know when it is safe to shut down old
-machine(s).&lt;/p&gt;
-
-&lt;p&gt;One issue for this system is rendezvous, however the solution provided
-in the paper is to simply publish it somewhere out-of-band.&lt;/p&gt;
-
-&lt;h4 id=&quot;efficient-recovery&quot;&gt;Efficient Recovery&lt;/h4&gt;
-
-&lt;p&gt;One concern is achieving efficient recovery of failed server machines.
-As presented previously, sending the missing log could result in the
-transfer of a substantial amount of data. One way to solve this is to
-store application state as a “checkpoint” that represents a log prefix,
-thus allowing the transfer of a potentially much more compressed state +
-some log diff.&lt;/p&gt;
-
-&lt;p&gt;After a server creates a checkpoint, it can mark any modification as
-“dirty”, and provide those as the diff over the last created checkpoint.
-A perhaps generic way of accomplishing this diff is to use merkle trees
-to efficiently determine which pages are dirty to avoid sending the
-entire checkpoint.  Finally, if the state is too large to transfer then
-the paper suggests an out-of-band mechanism (e.g. sneakernet).&lt;/p&gt;
-
-&lt;p&gt;Note that checkpoints allow garbage collection of the log, but the log
-may still be required to bring back a recovering node, so it is
-beneficial to keep some of it, else the system will suffer the cost of
-state transfer between servers.&lt;/p&gt;
-
-&lt;h3 id=&quot;state-transfer&quot;&gt;State Transfer&lt;/h3&gt;
-
-&lt;p&gt;State transfer between two replicas can exist in essentially two cases.
-One being that there are missing operations in the current view. To
-solve this, the replica will simply obtain said operations from another
-replica. The second, and more difficult, situation is that there was a
-view change. In this case, the replica sets its op-number to the latest
-commit-number, and obtains updates from another replica. If there is a
-gap in this replica’s log, it will need to fast-forward using
-application state (such as a checkpoint).&lt;/p&gt;
-
-&lt;h3 id=&quot;other-optimizations&quot;&gt;Other Optimizations&lt;/h3&gt;
-
-&lt;p&gt;There are a handful of optimizations that others have come up with since
-the original VR procool was presented. One example is using Witnesses
-that aren’t performing the operations. This is a simple extension to the
-system by having &lt;script type=&quot;math/tex&quot;&gt;f&lt;/script&gt; replicas act as log keepers that are only used
-for view changes and recovery.&lt;/p&gt;
-
-&lt;p&gt;Another optimization is to batch operations which simply implies that if
-the system is busy then piggy-back several operations in a single
-message.&lt;/p&gt;
-
-&lt;p&gt;Finally, &lt;em&gt;fast reads&lt;/em&gt; is a technique used in several replication
-systems.  This essentially allows the primary to respond to a read
-request without going through the full protocol. These can be performed
-at the Primary, though the use of leases and loosely synchronized clocks
-are required to maintain consistency. Additionally, if the user of the
-system is ok with stale data, then reads can be served at backups where
-a backup will reply to a client if it has seen commits up to that
-request.&lt;/p&gt;
-</description>
-        <pubDate>Thu, 20 Jun 2013 18:00:00 -0400</pubDate>
-        <link>http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited/</link>
-        <guid isPermaLink="true">http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited/</guid>
         
         
       </item>
