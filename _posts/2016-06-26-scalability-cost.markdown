@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Scalability! But what is the COST?"
+title: "Scalability! But at what COST?"
 author: Jon Gjengset
 date: 2016-06-26 12:14
 comments: true
