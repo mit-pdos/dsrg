@@ -6,9 +6,9 @@
 </description>
     <link>http://dsrg.pdos.csail.mit.edu/</link>
     <atom:link href="http://dsrg.pdos.csail.mit.edu/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 26 Jun 2016 12:17:34 -0400</pubDate>
-    <lastBuildDate>Sun, 26 Jun 2016 12:17:34 -0400</lastBuildDate>
-    <generator>Jekyll v2.5.3</generator>
+    <pubDate>Tue, 28 Nov 2017 18:04:26 -0500</pubDate>
+    <lastBuildDate>Tue, 28 Nov 2017 18:04:26 -0500</lastBuildDate>
+    <generator>Jekyll v3.6.2</generator>
     
       <item>
         <title>Scalability! But at what COST?</title>
@@ -85,7 +85,7 @@ a distributed system (which has to pay network communication cost
 despite keeping all the data in memory).&lt;/p&gt;
 
 &lt;p&gt;The results also follow from Amdahl’s law. The law states that, given
-&lt;code&gt;s&lt;/code&gt; compute resources, and &lt;code&gt;p&lt;/code&gt; as the fraction of the computation that
+&lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt; compute resources, and &lt;code class=&quot;highlighter-rouge&quot;&gt;p&lt;/code&gt; as the fraction of the computation that
 is parallelizeable, the expected system speedup is:&lt;/p&gt;
 
 &lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;S_\text{latency}(s) = \frac{1}{(1 - p) + \frac{p}{s}}&lt;/script&gt; &lt;!-- __$_ --&gt;&lt;/p&gt;
@@ -96,7 +96,7 @@ of the program that is parallelizeable. However, there are two ways of
 doing this. You can either &lt;em&gt;change&lt;/em&gt; the program such that more of it is
 parallelizeable, or you can &lt;em&gt;slow down&lt;/em&gt; or blow up the amount of
 parallelizeable code, so that it accounts for a larger fraction. This
-latter technique would “improve” the correlation between &lt;code&gt;s&lt;/code&gt; and
+latter technique would “improve” the correlation between &lt;code class=&quot;highlighter-rouge&quot;&gt;s&lt;/code&gt; and
 speed-up, but does not actually make the program any faster than the
 original.&lt;/p&gt;
 
@@ -113,7 +113,7 @@ compute resources as Google does.&lt;/p&gt;
 
 &lt;p&gt;Unfortunately, the systems that then followed all compared themselves to
 PageRank on M/R, &lt;em&gt;even for smaller problems&lt;/em&gt;. The Twitter graph, or the
-&lt;code&gt;uk-2007-05&lt;/code&gt; graph referred to in the paper, which have been used to
+&lt;code class=&quot;highlighter-rouge&quot;&gt;uk-2007-05&lt;/code&gt; graph referred to in the paper, which have been used to
 evaluate countless graph processing systems, simply do not require
 distribution anywhere near the scale of the web graph. By sacrificing
 scalability (i.e., distribution), &lt;em&gt;better algorithms&lt;/em&gt; can be used,
@@ -163,9 +163,9 @@ the big-O upper bound), which could be used as an interesting comparison
 for the system’s scaling properties.&lt;/p&gt;
 
 &lt;!--
- - It&#39;s probably hard to write a framework that has both high
+ - It's probably hard to write a framework that has both high
    performance *and* is super scalable.
- - We&#39;d like a single number for performance + scalability to evaluate.
+ - We'd like a single number for performance + scalability to evaluate.
 --&gt;
 
 &lt;h3 id=&quot;where-else-does-this-problem-appear&quot;&gt;Where else does this problem appear?&lt;/h3&gt;
@@ -313,7 +313,7 @@ systems.&lt;/p&gt;
 &lt;p&gt;At a high level, Sinfonia provides multiple independent linear address
 spaces that live on &lt;em&gt;memory nodes&lt;/em&gt;. No structure is imposed on these
 address spaces, and they can contain arbitrary bytes of data. Data in
-Sinfonia is referenced using a pair: &lt;code&gt;(memory-node-id, offset)&lt;/code&gt;.
+Sinfonia is referenced using a pair: &lt;code class=&quot;highlighter-rouge&quot;&gt;(memory-node-id, offset)&lt;/code&gt;.
 Sinfonia does not perform automatic load balancing, and data placement
 is left to the application.&lt;/p&gt;
 
@@ -321,8 +321,8 @@ is left to the application.&lt;/p&gt;
 
 &lt;p&gt;Operations on data take the form of &lt;em&gt;mini-transactions&lt;/em&gt;, which are
 basically distributed compare and swap/read operations. A
-mini-transaction consists of a triple &lt;code&gt;(compare-set, write-set,
-read-set)&lt;/code&gt;. Elements in the compare-set are tuples: &lt;code&gt;(memory-node-id,
+mini-transaction consists of a triple &lt;code class=&quot;highlighter-rouge&quot;&gt;(compare-set, write-set,
+read-set)&lt;/code&gt;. Elements in the compare-set are tuples: &lt;code class=&quot;highlighter-rouge&quot;&gt;(memory-node-id,
 offset, length, data)&lt;/code&gt; where the first three fields describe the
 location and size of the data to compare, and the last field is the
 value expected at that location. The write-set is the same, except that
@@ -390,7 +390,7 @@ system.&lt;/p&gt;
 triggered when a transaction has not been committed or aborted after
 some timeout. The recovery coordinator asks each participant how it
 voted on that transaction, and the participant replies with its original
-vote if it had already voted or &lt;code&gt;ABORT&lt;/code&gt; if it had not (remembering that
+vote if it had already voted or &lt;code class=&quot;highlighter-rouge&quot;&gt;ABORT&lt;/code&gt; if it had not (remembering that
 it must abort this transaction in the future if the original coordinator
 reappears).&lt;/p&gt;
 
@@ -729,7 +729,7 @@ large, fixed costs incurred for each transaction commit.  Rather, the
 costs should be proportional to the amount of actual contention
 between transactions.&lt;/li&gt;
   &lt;li&gt;&lt;strong&gt;Integrity Constraints&lt;/strong&gt;: Support some forms of integrity
-Constraints.  The paper discusses &lt;code&gt;FIELD &amp;gt;/=/&amp;lt; VALUE&lt;/code&gt; type
+Constraints.  The paper discusses &lt;code class=&quot;highlighter-rouge&quot;&gt;FIELD &amp;gt;/=/&amp;lt; VALUE&lt;/code&gt; type
 constraints.&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -907,7 +907,7 @@ apply them.&lt;/p&gt;
 
 &lt;h3 id=&quot;integrity-constrains&quot;&gt;Integrity constrains&lt;/h3&gt;
 
-&lt;p&gt;If I want to support integrity constraints (e.g., &lt;code&gt;A &amp;gt;= 0&lt;/code&gt;), the
+&lt;p&gt;If I want to support integrity constraints (e.g., &lt;code class=&quot;highlighter-rouge&quot;&gt;A &amp;gt;= 0&lt;/code&gt;), the
 acceptors need to understand and enforce them.&lt;/p&gt;
 
 &lt;p&gt;The paper restricts the domains of the delta operations (e.g., can only
@@ -976,30 +976,30 @@ acceptor (1-5), and each row is the state at one Paxos round.  C1, C2,
 C3 are clients (proposers).  C1 commits A and manages to communicate
 with acceptors 1-3, C2 commits B and so on.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;    1 2 3 4 5
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    1 2 3 4 5
 C1  A A A
 C2      B B B
 C3  C C   C
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Say C1 and C2 happen concurrently, and C3 happens later (as a normal
 Paxos round, or Fast-Paxos).  Then the actual acceptances and what round
 each node thinks its in may be&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt; 1 2 3 4 5 Round (as understood by local node)
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; 1 2 3 4 5 Round (as understood by local node)
  A A A B B 1
      B     2
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Now if C3 tries to set C, its quorum could be 1,2,4 which don’t know
 that A won in round 1 and B “won” in round 2, because they have only
 seen values for round 1, so the nodes happily accept C in (what they
 think is) round 2.  This effectively overwrites B, violating safety.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt; 1 2 3 4 5 Round (as understood by local node)
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; 1 2 3 4 5 Round (as understood by local node)
  A A A B B 1
  C C B C   2
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </description>
         <pubDate>Thu, 25 Jul 2013 12:00:00 -0400</pubDate>
         <link>http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc/</link>
@@ -1131,7 +1131,7 @@ can have its own value, and a collection of children.&lt;/p&gt;
 
 &lt;p&gt;Data can be accessed with get/set/create/delete methods. Zookeeper
 supports conditional versions of these operations too. For example, a
-client can say set the value of &lt;code&gt;/ds-reading/schedule&lt;/code&gt; to &lt;code&gt;3pm,thursday&lt;/code&gt;
+client can say set the value of &lt;code class=&quot;highlighter-rouge&quot;&gt;/ds-reading/schedule&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;3pm,thursday&lt;/code&gt;
 only if the Znode’s current version is 100. This feature is used widely
 in the presented applications/services.&lt;/p&gt;
 
@@ -1178,7 +1178,7 @@ master failure.&lt;/p&gt;
 &lt;p&gt;Zookeeper allows applications and services to choose their own level of
 consistency.  Zookeeper linearizes all writes. Reads are served from a
 local Zookeeper server, but a client can linearize reads using the
-&lt;code&gt;sync()&lt;/code&gt; API.&lt;/p&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;sync()&lt;/code&gt; API.&lt;/p&gt;
 
 &lt;h2 id=&quot;comments&quot;&gt;Comments&lt;/h2&gt;
 
@@ -1302,9 +1302,9 @@ can only guess.&lt;/p&gt;
 
 &lt;p&gt;Thialfi’s approach of signaling rather than notification reprises the
 long debate between “level-triggered” and “edge-triggered” interfaces in
-OS and hardware design.  Level-triggered interfaces like &lt;code&gt;poll()&lt;/code&gt; and
+OS and hardware design.  Level-triggered interfaces like &lt;code class=&quot;highlighter-rouge&quot;&gt;poll()&lt;/code&gt; and
 PCI interrupts have very similar properties to Thialfi’s API (e.g., like
-a Thialfi notification, &lt;code&gt;poll()&lt;/code&gt; only tells the caller that data is
+a Thialfi notification, &lt;code class=&quot;highlighter-rouge&quot;&gt;poll()&lt;/code&gt; only tells the caller that data is
 available on an FD, not what the data is, or how many times the FD was
 written to).  On the other hand, edge-triggered interfaces more closely
 resemble the reliable pub-sub interface that Thialfi explicitly

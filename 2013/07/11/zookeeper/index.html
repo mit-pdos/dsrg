@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/11/zookeeper/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -174,7 +174,7 @@ can have its own value, and a collection of children.</p>
 
 <p>Data can be accessed with get/set/create/delete methods. Zookeeper
 supports conditional versions of these operations too. For example, a
-client can say set the value of <code>/ds-reading/schedule</code> to <code>3pm,thursday</code>
+client can say set the value of <code class="highlighter-rouge">/ds-reading/schedule</code> to <code class="highlighter-rouge">3pm,thursday</code>
 only if the Znode’s current version is 100. This feature is used widely
 in the presented applications/services.</p>
 
@@ -221,7 +221,7 @@ master failure.</p>
 <p>Zookeeper allows applications and services to choose their own level of
 consistency.  Zookeeper linearizes all writes. Reads are served from a
 local Zookeeper server, but a client can linearize reads using the
-<code>sync()</code> API.</p>
+<code class="highlighter-rouge">sync()</code> API.</p>
 
 <h2 id="comments">Comments</h2>
 

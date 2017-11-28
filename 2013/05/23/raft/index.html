@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/05/23/raft/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -212,7 +212,7 @@ majority of the servers; in addition, at least one entry from the
 leader’s current term must also be stored on a majority of servers.</p>
 
 <p>Figure 7 shows how this can happen.  Consider this case with five
-servers, S1, S2, S3, S4, and S5 (we use the notation <code>Value:Term</code> in
+servers, S1, S2, S3, S4, and S5 (we use the notation <code class="highlighter-rouge">Value:Term</code> in
 each slot).  S1 is leader in term 2, and replicates an entry X for slot
 2, it goes to 2 servers (S1, S2).</p>
 
@@ -265,7 +265,7 @@ was not long enough.</p>
 
 <p>There are some nice aspects of Raft – the log as a first order
 primitive, the method of configuration changes, and only two RPCs
-(though one could argue <code>AppendEntry</code> is heavily overloaded).
+(though one could argue <code class="highlighter-rouge">AppendEntry</code> is heavily overloaded).
 Unfortunately, the authors’ main point falls flat for two reasons:
 First, they primarily compare their system to Paxos while their system
 is much closer to Viewstamped Replication. They claim this is reasonable

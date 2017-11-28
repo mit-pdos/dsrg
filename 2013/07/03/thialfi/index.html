@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/03/thialfi/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -249,9 +249,9 @@ can only guess.</p>
 
 <p>Thialfi’s approach of signaling rather than notification reprises the
 long debate between “level-triggered” and “edge-triggered” interfaces in
-OS and hardware design.  Level-triggered interfaces like <code>poll()</code> and
+OS and hardware design.  Level-triggered interfaces like <code class="highlighter-rouge">poll()</code> and
 PCI interrupts have very similar properties to Thialfi’s API (e.g., like
-a Thialfi notification, <code>poll()</code> only tells the caller that data is
+a Thialfi notification, <code class="highlighter-rouge">poll()</code> only tells the caller that data is
 available on an FD, not what the data is, or how many times the FD was
 written to).  On the other hand, edge-triggered interfaces more closely
 resemble the reliable pub-sub interface that Thialfi explicitly

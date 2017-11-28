@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/07/25/mdcc/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -184,7 +184,7 @@ large, fixed costs incurred for each transaction commit.  Rather, the
 costs should be proportional to the amount of actual contention
 between transactions.</li>
   <li><strong>Integrity Constraints</strong>: Support some forms of integrity
-Constraints.  The paper discusses <code>FIELD &gt;/=/&lt; VALUE</code> type
+Constraints.  The paper discusses <code class="highlighter-rouge">FIELD &gt;/=/&lt; VALUE</code> type
 constraints.</li>
 </ul>
 
@@ -362,7 +362,7 @@ apply them.</p>
 
 <h3 id="integrity-constrains">Integrity constrains</h3>
 
-<p>If I want to support integrity constraints (e.g., <code>A &gt;= 0</code>), the
+<p>If I want to support integrity constraints (e.g., <code class="highlighter-rouge">A &gt;= 0</code>), the
 acceptors need to understand and enforce them.</p>
 
 <p>The paper restricts the domains of the delta operations (e.g., can only
@@ -431,30 +431,30 @@ acceptor (1-5), and each row is the state at one Paxos round.  C1, C2,
 C3 are clients (proposers).  C1 commits A and manages to communicate
 with acceptors 1-3, C2 commits B and so on.</p>
 
-<pre><code>    1 2 3 4 5
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    1 2 3 4 5
 C1  A A A
 C2      B B B
 C3  C C   C
-</code></pre>
+</code></pre></div></div>
 
 <p>Say C1 and C2 happen concurrently, and C3 happens later (as a normal
 Paxos round, or Fast-Paxos).  Then the actual acceptances and what round
 each node thinks its in may be</p>
 
-<pre><code> 1 2 3 4 5 Round (as understood by local node)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> 1 2 3 4 5 Round (as understood by local node)
  A A A B B 1
      B     2
-</code></pre>
+</code></pre></div></div>
 
 <p>Now if C3 tries to set C, its quorum could be 1,2,4 which don’t know
 that A won in round 1 and B “won” in round 2, because they have only
 seen values for round 1, so the nodes happily accept C in (what they
 think is) round 2.  This effectively overwrites B, violating safety.</p>
 
-<pre><code> 1 2 3 4 5 Round (as understood by local node)
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> 1 2 3 4 5 Round (as understood by local node)
  A A A B B 1
  C C B C   2
-</code></pre>
+</code></pre></div></div>
 
   </article>
 

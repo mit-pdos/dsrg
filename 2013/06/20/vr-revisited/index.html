@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/06/20/vr-revisited/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -231,8 +231,8 @@ whereas if the sender is ahead, the receiver must update itself first,
 and then process the message.</p>
 
 <p>A client sends a request to perform an operation at the server. The
-server then sends <code>Prepare</code> messages to each of the backups and waits
-for <script type="math/tex">f</script> <code>PrepareOk</code> responses. Once it has received these responses it
+server then sends <code class="highlighter-rouge">Prepare</code> messages to each of the backups and waits
+for <script type="math/tex">f</script> <code class="highlighter-rouge">PrepareOk</code> responses. Once it has received these responses it
 can assume that the message will persist and it applies the operation by
 making an upcall to the service code, which finally replies to the
 client. A backup will perform the same operation but does not reply to
@@ -250,14 +250,14 @@ number to break conflicts in op number ordering.</p>
 <p>Protocol:</p>
 
 <ul>
-  <li>Replica sends <code>StartViewChange</code> to all other replicas</li>
-  <li>Receives <script type="math/tex">f</script> responses, sends <code>DoViewChange</code> to new primary</li>
-  <li>New primary waits for <script type="math/tex">f + 1</script> <code>DoViewChange</code> messages before
+  <li>Replica sends <code class="highlighter-rouge">StartViewChange</code> to all other replicas</li>
+  <li>Receives <script type="math/tex">f</script> responses, sends <code class="highlighter-rouge">DoViewChange</code> to new primary</li>
+  <li>New primary waits for <script type="math/tex">f + 1</script> <code class="highlighter-rouge">DoViewChange</code> messages before
 assuming new view</li>
 </ul>
 
 <p>Note that sending a suffix of the log (e.g. 1-2 entries) in the
-<code>DoViewChange</code> message will likely bring the new server up to date
+<code class="highlighter-rouge">DoViewChange</code> message will likely bring the new server up to date
 without requiring any additional state transfer from the replicas.</p>
 
 <h3 id="recovery">Recovery</h3>
@@ -270,8 +270,8 @@ participate in request processing or view changes during the recovery
 phase):</p>
 
 <ul>
-  <li>Recovering node send <code>Recovery</code> message to all</li>
-  <li>All reply with <code>RecoveryResponse</code>, view number and a nonce (and log,
+  <li>Recovering node send <code class="highlighter-rouge">Recovery</code> message to all</li>
+  <li>All reply with <code class="highlighter-rouge">RecoveryResponse</code>, view number and a nonce (and log,
 etc if primary)</li>
   <li>Replica waits for <script type="math/tex">f + 1</script> responses (and primary), applies log and
 begins normal processing</li>
@@ -299,20 +299,20 @@ refers to a node that is currently changing configurations. The
 reconfiguration is started similarly to other operations by sending the
 operation to the leader, however included in this operation is the new
 configuration (list of participating machines). The primary will then
-send the <code>StartEpoch</code> message and wait for <script type="math/tex">f</script> responses.</p>
+send the <code class="highlighter-rouge">StartEpoch</code> message and wait for <script type="math/tex">f</script> responses.</p>
 
 <p>Any new replicas will be brought up to date before the epoch change (by
 sending them a list of operations or a snapshot + diff). Once a new
-replica is up to date it will send an <code>EpochStarted</code> message to old
+replica is up to date it will send an <code class="highlighter-rouge">EpochStarted</code> message to old
 replicas. Thus, once an old replica (that is not in the new
-configuration) has received <script type="math/tex">f + 1</script> <code>EpochStarted</code> messages, it is
+configuration) has received <script type="math/tex">f + 1</script> <code class="highlighter-rouge">EpochStarted</code> messages, it is
 free to shut down. Note that one particular optimization is to bring new
 machines up to date (e.g. warm-up) before performing the reconfiguration
 to minimize the down time during transition as nodes will not respond to
 messages for earlier epochs or while transitioning.</p>
 
 <p>The administrator can determine status of old replicas by sending out
-<code>CheckEpoch</code> messages and then know when it is safe to shut down old
+<code class="highlighter-rouge">CheckEpoch</code> messages and then know when it is safe to shut down old
 machine(s).</p>
 
 <p>One issue for this system is rendezvous, however the solution provided

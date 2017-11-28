@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/12/16/sinfonia/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -159,7 +159,7 @@ systems.</p>
 <p>At a high level, Sinfonia provides multiple independent linear address
 spaces that live on <em>memory nodes</em>. No structure is imposed on these
 address spaces, and they can contain arbitrary bytes of data. Data in
-Sinfonia is referenced using a pair: <code>(memory-node-id, offset)</code>.
+Sinfonia is referenced using a pair: <code class="highlighter-rouge">(memory-node-id, offset)</code>.
 Sinfonia does not perform automatic load balancing, and data placement
 is left to the application.</p>
 
@@ -167,8 +167,8 @@ is left to the application.</p>
 
 <p>Operations on data take the form of <em>mini-transactions</em>, which are
 basically distributed compare and swap/read operations. A
-mini-transaction consists of a triple <code>(compare-set, write-set,
-read-set)</code>. Elements in the compare-set are tuples: <code>(memory-node-id,
+mini-transaction consists of a triple <code class="highlighter-rouge">(compare-set, write-set,
+read-set)</code>. Elements in the compare-set are tuples: <code class="highlighter-rouge">(memory-node-id,
 offset, length, data)</code> where the first three fields describe the
 location and size of the data to compare, and the last field is the
 value expected at that location. The write-set is the same, except that
@@ -236,7 +236,7 @@ system.</p>
 triggered when a transaction has not been committed or aborted after
 some timeout. The recovery coordinator asks each participant how it
 voted on that transaction, and the participant replies with its original
-vote if it had already voted or <code>ABORT</code> if it had not (remembering that
+vote if it had already voted or <code class="highlighter-rouge">ABORT</code> if it had not (remembering that
 it must abort this transaction in the future if the original coordinator
 reappears).</p>
 

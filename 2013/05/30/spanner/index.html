@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/05/30/spanner/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -160,7 +160,7 @@ between servers. It also shards an application’s data to provide
 fine-grained load distribution.</p>
 
 <p>Spanner uses the <em>TrueTime API</em> (TT) to synchronize time between
-servers. A call to <code>TT.now()</code> gives a range guaranteed to contain the
+servers. A call to <code class="highlighter-rouge">TT.now()</code> gives a range guaranteed to contain the
 actual time.</p>
 
 <p>Spanner has two kind of reads.  The first reads the most recent value of
@@ -177,8 +177,8 @@ either before or after the schema change.</p>
 
 <h2 id="subtleties">Subtleties</h2>
 
-<p>Since Spanner commits only when <code>TT.now.after(timestamp)</code> is true, we
-are guaranteed that from now on <code>TT.now.latest()</code> will always be larger
+<p>Since Spanner commits only when <code class="highlighter-rouge">TT.now.after(timestamp)</code> is true, we
+are guaranteed that from now on <code class="highlighter-rouge">TT.now.latest()</code> will always be larger
 than the committed timestamp on all servers.</p>
 
 <p>Spanner very carefully chooses timestamps for RW transactions to ensure

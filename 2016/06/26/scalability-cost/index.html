@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2016/06/26/scalability-cost/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -220,7 +220,7 @@ a distributed system (which has to pay network communication cost
 despite keeping all the data in memory).</p>
 
 <p>The results also follow from Amdahl’s law. The law states that, given
-<code>s</code> compute resources, and <code>p</code> as the fraction of the computation that
+<code class="highlighter-rouge">s</code> compute resources, and <code class="highlighter-rouge">p</code> as the fraction of the computation that
 is parallelizeable, the expected system speedup is:</p>
 
 <p><script type="math/tex">S_\text{latency}(s) = \frac{1}{(1 - p) + \frac{p}{s}}</script> <!-- __$_ --></p>
@@ -231,7 +231,7 @@ of the program that is parallelizeable. However, there are two ways of
 doing this. You can either <em>change</em> the program such that more of it is
 parallelizeable, or you can <em>slow down</em> or blow up the amount of
 parallelizeable code, so that it accounts for a larger fraction. This
-latter technique would “improve” the correlation between <code>s</code> and
+latter technique would “improve” the correlation between <code class="highlighter-rouge">s</code> and
 speed-up, but does not actually make the program any faster than the
 original.</p>
 
@@ -248,7 +248,7 @@ compute resources as Google does.</p>
 
 <p>Unfortunately, the systems that then followed all compared themselves to
 PageRank on M/R, <em>even for smaller problems</em>. The Twitter graph, or the
-<code>uk-2007-05</code> graph referred to in the paper, which have been used to
+<code class="highlighter-rouge">uk-2007-05</code> graph referred to in the paper, which have been used to
 evaluate countless graph processing systems, simply do not require
 distribution anywhere near the scale of the web graph. By sacrificing
 scalability (i.e., distribution), <em>better algorithms</em> can be used,

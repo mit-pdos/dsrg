@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="http://dsrg.pdos.csail.mit.edu/2013/06/06/pacifica/">
   <link rel="alternate" type="application/rss+xml" title="Distributed Systems Reading Group" href="http://dsrg.pdos.csail.mit.edu/feed.xml" />
-  <link href='/stylesheets/all-2488fcdfe55841680be5624d2de99a44.css' media='all' rel='stylesheet' type='text/css'>
+  <link href='/stylesheets/all-914b39f5d1524602be2383e90332e921.css' media='all' rel='stylesheet' type='text/css'>
   <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </head>
 
@@ -183,8 +183,8 @@ separate Paxos cluster in their implementation).</p>
 <p>The server designated as the current primary is responsible for
 interacting with clients. It handles all reads (from its committed
 state) and writes. When a write is requested, the primary assigns a
-sequence number to the operation and sends a <code>prepare</code> message to all
-replicas. When a replica receives a <code>prepare</code> message, it adds the
+sequence number to the operation and sends a <code class="highlighter-rouge">prepare</code> message to all
+replicas. When a replica receives a <code class="highlighter-rouge">prepare</code> message, it adds the
 operation to its log and acknowledges the primary. When the primary
 receives an acknowledgement from all replicas, it commits the operation
 and responds to the client. The commit point on the replicas is advanced
@@ -228,7 +228,7 @@ of the replicas will request to be the new primary.</p>
 for a short period of time during our discussion we were convinced that
 this scheme could result in a situation where two servers believed they
 were the primary and could serve (possibly stale) reads, violating the
-strong consistency guarantee. The scenario involved a heartbeat <code>ACK</code>
+strong consistency guarantee. The scenario involved a heartbeat <code class="highlighter-rouge">ACK</code>
 that was delayed by the network, extending the primary’s lease but not
 the replica’s grace period. It turns out we were wrong. A careful
 reading of the paper specifies that the lease period is measured from
